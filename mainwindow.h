@@ -18,7 +18,6 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
-    void initial();
     ~MainWindow();
 private:
     QDir dir;
@@ -30,12 +29,11 @@ private:
     QSqlDatabase db;
     void updateTypes();
 private slots:
-    void on_pushButton_clicked();
-    void on_pushButton_2_clicked();
-    void on_pushButton_3_clicked();
-    void on_pushButton_4_clicked();
-    void on_pushButton_5_clicked();
-
+    void on_pushButtonNext_clicked();
+    void on_pushButtonStart_clicked();
+    void on_pushButtonAdd_clicked();
+    void on_pushButtonFinish_clicked();
+    void on_pushButtonLast_clicked();
     void on_buttonAddType_clicked();
 
 private:

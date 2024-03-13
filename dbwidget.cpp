@@ -5,6 +5,20 @@
 #include <QSqlError>
 #include <QSettings>
 
+dbWidget* dbWidget::_instance = 0;
+
+dbWidget* dbWidget::Instance(QWidget *parent, QList<Item *> *itemList, QString name, QString password){
+    if(_instance == 0){
+        _instance = new dbWidget(parent,itemList,name,password);
+    }else{
+        if(_instance != nullptr || _instance != 0){
+            delete _instance;
+        }
+        _instance = new dbWidget(parent,itemList,name,password);
+    }
+    return _instance;
+}
+
 dbWidget::dbWidget(QWidget *parent, QList<Item *> *itemList, QString name, QString password) :
     QWidget(parent),
     ui(new Ui::dbWidget)
@@ -20,14 +34,13 @@ dbWidget::dbWidget(QWidget *parent, QList<Item *> *itemList, QString name, QStri
     if(!db.open()){
         //qDebug()<<"Database Connect Failed";
         QMessageBox::critical(this, "ERROR", "Database Connection Failed");
-        delete this;
     }else{
         //qDebug()<<"database connected";
         typeList.clear();
         this->itemList=itemList;
         updateTable2();
         this->show();
-        ui->status->setText("开始更新分类列表");
+        ui->statusBar->setText("开始更新分类列表");
         QString sql = "SELECT * FROM types";
         QSqlQuery query(db);
         query.prepare(sql);
@@ -36,7 +49,7 @@ dbWidget::dbWidget(QWidget *parent, QList<Item *> *itemList, QString name, QStri
             QString type=query.value("typename").toString();
             typeList.push_back(type);
         }
-        ui->status->setText("分类列表更新完成");
+        ui->statusBar->setText("分类列表更新完成");
     }
 }
 
@@ -80,15 +93,15 @@ dbWidget::~dbWidget()
     delete ui;
 }
 
-void dbWidget::on_searchButton_clicked()
+void dbWidget::on_pushButtonSearch_clicked()
 {
     updateTable1();
 }
 
 
-void dbWidget::on_addallButton_clicked()
+void dbWidget::on_pushButtonCommitAll_clicked()
 {
-    ui->status->setText("正在添加");
+    ui->statusBar->setText("正在添加");
     QSqlQuery query(db);
     query.prepare("INSERT INTO pictures (date,href,description,type) VALUES (:date,:href,:description,:type)");
     for(Item* item : *(this->itemList)){
@@ -101,13 +114,13 @@ void dbWidget::on_addallButton_clicked()
     }
     itemList->clear();
     ui->tableWidget_2->clearContents();
-    ui->status->setText("添加完成");
+    ui->statusBar->setText("添加完成");
 }
 
 
-void dbWidget::on_addButton_2_clicked()
+void dbWidget::on_pushButtonCommit_clicked()
 {
-    ui->status->setText("正在添加");
+    ui->statusBar->setText("正在添加");
     int i=ui->tableWidget_2->currentRow();
     QSqlQuery query(db);
     query.prepare("INSERT INTO pictures (date,href,description,type) VALUES (:date,:href,:description,:type)");
@@ -120,26 +133,26 @@ void dbWidget::on_addButton_2_clicked()
     itemList->removeAt(i);
     updateTable2();
     updateTable1();
-    ui->status->setText("添加完成");
+    ui->statusBar->setText("添加完成");
 }
 
 
-void dbWidget::on_deleteButton_clicked()
+void dbWidget::on_pushButtonDelete_clicked()
 {
-    ui->status->setText("正在删除");
+    ui->statusBar->setText("正在删除");
     int i=ui->tableWidget->currentRow();
     QSqlQuery query(db);
     query.prepare("delete from pictures where href=:href");
     query.bindValue(":href",ui->tableWidget->item(i,1)->text());
     query.exec();
     updateTable1();
-    ui->status->setText("删除完成");
+    ui->statusBar->setText("删除完成");
 }
 
 
-void dbWidget::on_buildButton_clicked()
+void dbWidget::on_pushButtonBuild_clicked()
 {
-    ui->status->setText("正在构建");
+    ui->statusBar->setText("正在构建");
     QFile file("图片索引.htm");
     if(file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
@@ -165,11 +178,11 @@ void dbWidget::on_buildButton_clicked()
         file.write(text.toLocal8Bit().data());
         file.close();
     }
-    ui->status->setText("构建完成");
+    ui->statusBar->setText("构建完成");
 }
 
 
-void dbWidget::on_pushButton_clicked()
+void dbWidget::on_pushButtonSendSQL_clicked()
 {
     QString sql = ui->sqlEdit->text();
     QString warning="";

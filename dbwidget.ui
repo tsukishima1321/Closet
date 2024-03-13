@@ -23,7 +23,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="searchButton">
+  <widget class="QPushButton" name="pushButtonSearch">
    <property name="geometry">
     <rect>
      <x>640</x>
@@ -96,7 +96,7 @@
     </property>
    </column>
   </widget>
-  <widget class="QPushButton" name="addallButton">
+  <widget class="QPushButton" name="pushButtonCommitAll">
    <property name="geometry">
     <rect>
      <x>60</x>
@@ -109,7 +109,7 @@
     <string>Commit All</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="addButton_2">
+  <widget class="QPushButton" name="pushButtonCommit">
    <property name="geometry">
     <rect>
      <x>190</x>
@@ -122,7 +122,7 @@
     <string>Commit</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="deleteButton">
+  <widget class="QPushButton" name="pushButtonDelete">
    <property name="geometry">
     <rect>
      <x>780</x>
@@ -135,7 +135,7 @@
     <string>Remove</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="buildButton">
+  <widget class="QPushButton" name="pushButtonBuild">
    <property name="geometry">
     <rect>
      <x>770</x>
@@ -148,7 +148,7 @@
     <string>Bulid htm</string>
    </property>
   </widget>
-  <widget class="QLabel" name="status">
+  <widget class="QLabel" name="statusBar">
    <property name="geometry">
     <rect>
      <x>70</x>
@@ -171,7 +171,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="pushButtonSendSQL">
    <property name="geometry">
     <rect>
      <x>780</x>

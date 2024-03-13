@@ -1,5 +1,3 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include <QImage>
 #include <QPixmap>
 #include <QFile>
@@ -10,6 +8,8 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include "login.h"
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::updateTypes(){
     //更新分类列表
-    ui->comboBox->clear();
+    ui->comboBoxType->clear();
     db = QSqlDatabase::addDatabase("QMYSQL");
     db.setHostName("127.0.0.1");
     db.setDatabaseName("diary");
@@ -42,14 +42,44 @@ void MainWindow::updateTypes(){
         query.exec();
         while (query.next()) {
             QString type=query.value("typename").toString();
-            ui->comboBox->addItem(type);
+            ui->comboBoxType->addItem(type);
             qDebug()<<type;
         }
     }
 }
 
-void MainWindow::initial(){
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
 
+void MainWindow::on_pushButtonNext_clicked(){//NEXT
+    flag++;
+    if (flag<ImageCount){
+        QString ImageName  = imagePath+dir[flag];
+        QImage image(ImageName);
+        ui->label->setPixmap(QPixmap::fromImage(image).scaled(ui->label->size(),Qt::KeepAspectRatio));
+        ui->labelName->setText(dir[flag]);
+    }else{
+        flag=ImageCount-1;
+    }
+}
+
+void MainWindow::on_pushButtonLast_clicked()//LAST
+{
+    flag--;
+    if (flag>=0){
+        QString ImageName  = imagePath+dir[flag];
+        QImage image(ImageName);
+        ui->label->setPixmap(QPixmap::fromImage(image).scaled(ui->label->size(),Qt::KeepAspectRatio));
+        ui->labelName->setText(dir[flag]);
+    }else{
+        flag=0;
+    }
+}
+
+void MainWindow::on_pushButtonStart_clicked()
+{
     imagePath = ui->lineEdit_1->text();//文件夹路径
     if(imagePath.back()!='/'){
         imagePath+='/';
@@ -63,59 +93,24 @@ void MainWindow::initial(){
     QString ImageName  = imagePath+dir[0];
     QImage image=QImage(ImageName);
     ui->label->setPixmap(QPixmap::fromImage(image).scaled(ui->label->size(),Qt::KeepAspectRatio));
-    ui->label_name->setText(dir[0]);
+    ui->labelName->setText(dir[0]);
     flag=0;
 }
 
-MainWindow::~MainWindow()
+void MainWindow::on_pushButtonAdd_clicked()//ADD
 {
-    delete ui;
-}
-
-void MainWindow::on_pushButton_clicked(){//NEXT
-    flag++;
-    if (flag<ImageCount){
-        QString ImageName  = imagePath+dir[flag];
-        QImage image(ImageName);
-        ui->label->setPixmap(QPixmap::fromImage(image).scaled(ui->label->size(),Qt::KeepAspectRatio));
-        ui->label_name->setText(dir[flag]);
-    }else{
-        flag=ImageCount-1;
-    }
-}
-
-void MainWindow::on_pushButton_5_clicked()//LAST
-{
-    flag--;
-    if (flag>=0){
-        QString ImageName  = imagePath+dir[flag];
-        QImage image(ImageName);
-        ui->label->setPixmap(QPixmap::fromImage(image).scaled(ui->label->size(),Qt::KeepAspectRatio));
-        ui->label_name->setText(dir[flag]);
-    }else{
-        flag=0;
-    }
-}
-
-void MainWindow::on_pushButton_2_clicked()
-{
-    initial();
-}
-
-void MainWindow::on_pushButton_3_clicked()//ADD
-{
-    QString date=ui->lineEdit_2->text();
-    QString name=ui->label_name->text();
-    QString des=ui->lineEdit_dis->text();
+    QString date=ui->lineEditDate->text();
+    QString name=ui->labelName->text();
+    QString des=ui->lineEditDes->text();
     QString out="		<A href=\""+name+"\">"+des+"</A>&nbsp;——"+date+"<BR>"+"\n";
-    list[ui->comboBox->currentIndex()]+=out;
+    list[ui->comboBoxType->currentIndex()]+=out;
     QString output="";
     for(int i=0;i<list.length();i++){
         output+=list[i];
         output+="\n";
     }
     ui->plainTextEdit->setPlainText(output);
-    itemList.push_back(new Item(date,name,des,ui->comboBox->currentText()));
+    itemList.push_back(new Item(date,name,des,ui->comboBoxType->currentText()));
     ui->tableWidget->clearContents();
     ui->tableWidget->setRowCount(itemList.length());
     int i=0;
@@ -128,7 +123,7 @@ void MainWindow::on_pushButton_3_clicked()//ADD
     }
 }
 
-void MainWindow::on_pushButton_4_clicked()//FINISH
+void MainWindow::on_pushButtonFinish_clicked()//FINISH
 {
     QFile file(imagePath+"imglist.txt");
     if(file.open(QIODevice::WriteOnly | QIODevice::Text|QIODevice::Append))
@@ -164,4 +159,3 @@ void MainWindow::on_buttonAddType_clicked()
     }
 
 }
-

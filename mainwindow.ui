@@ -27,7 +27,7 @@
      <string/>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="pushButtonNext">
     <property name="geometry">
      <rect>
       <x>1030</x>
@@ -58,7 +58,7 @@
      <string>D:/Z/</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_2">
+   <widget class="QLineEdit" name="lineEditDate">
     <property name="geometry">
      <rect>
       <x>880</x>
@@ -104,7 +104,7 @@
      <string>Date:</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="pushButtonStart">
     <property name="geometry">
      <rect>
       <x>1040</x>
@@ -122,7 +122,7 @@
      <string>START</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_dis">
+   <widget class="QLineEdit" name="lineEditDes">
     <property name="geometry">
      <rect>
       <x>850</x>
@@ -173,7 +173,7 @@
      <string>Name：</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_name">
+   <widget class="QLabel" name="labelName">
     <property name="geometry">
      <rect>
       <x>850</x>
@@ -191,7 +191,7 @@
      <string>TextLabel</string>
     </property>
    </widget>
-   <widget class="QComboBox" name="comboBox">
+   <widget class="QComboBox" name="comboBoxType">
     <property name="geometry">
      <rect>
       <x>850</x>
@@ -224,7 +224,7 @@
      <string>Type:</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="pushButtonAdd">
     <property name="geometry">
      <rect>
       <x>850</x>
@@ -262,7 +262,7 @@
 </string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_4">
+   <widget class="QPushButton" name="pushButtonFinish">
     <property name="geometry">
      <rect>
       <x>1070</x>
@@ -280,7 +280,7 @@
      <string>FINISH</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_5">
+   <widget class="QPushButton" name="pushButtonLast">
     <property name="geometry">
      <rect>
       <x>880</x>

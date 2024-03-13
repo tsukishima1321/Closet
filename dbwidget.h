@@ -18,25 +18,22 @@ class dbWidget : public QWidget
     Q_OBJECT
 
 public:
+    static dbWidget* Instance(QWidget *parent,QList<Item*>* itemList,QString name,QString password);
+protected:
     explicit dbWidget(QWidget *parent,QList<Item*>* itemList,QString name,QString password);
+private:
+    static dbWidget* _instance;
     QList<Item*>* itemList;
     QList<QString> typeList;
     QSqlDatabase db;
     ~dbWidget();
-
 private slots:
-    void on_searchButton_clicked();
-
-    void on_addallButton_clicked();
-
-    void on_addButton_2_clicked();
-
-    void on_deleteButton_clicked();
-
-    void on_buildButton_clicked();
-
-    void on_pushButton_clicked();
-
+    void on_pushButtonSearch_clicked();
+    void on_pushButtonCommitAll_clicked();
+    void on_pushButtonCommit_clicked();
+    void on_pushButtonDelete_clicked();
+    void on_pushButtonBuild_clicked();
+    void on_pushButtonSendSQL_clicked();
 private:
     void updateTable1();
     void updateTable2();

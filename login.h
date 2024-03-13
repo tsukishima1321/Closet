@@ -22,6 +22,8 @@ public:
 private slots:
     void on_pushButton_clicked();
 
+    void on_lineEditName_returnPressed();
+
 private:
     Ui::login *ui;
 };

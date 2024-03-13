@@ -8,6 +8,7 @@ login::login(QWidget *parent, QList<Item *> *itemList) :
 {
     this->itemList=itemList;
     ui->setupUi(this);
+    connect(ui->lineEditPwd, &QLineEdit::returnPressed, ui->pushButton, &QAbstractButton::click, Qt::UniqueConnection);
 }
 
 login::~login()
@@ -17,7 +18,14 @@ login::~login()
 
 void login::on_pushButton_clicked()
 {
-    dbWidget* dbw=new dbWidget(nullptr,itemList,ui->lineEdit->text(),ui->lineEdit_2->text());
+    dbWidget::Instance(nullptr,itemList,ui->lineEditName->text(),ui->lineEditPwd->text());
+    this->hide();
     delete this;
+}
+
+
+void login::on_lineEditName_returnPressed()
+{
+    this->focusPreviousChild();
 }
 
