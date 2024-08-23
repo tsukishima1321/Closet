@@ -1,11 +1,12 @@
 #include "login.h"
 #include "ui_login.h"
-#include "dbwidget.h"
+#include "labelcommit.h"
 
-login::login(QWidget *parent, QList<Item *> *itemList) :
+login::login(QWidget *parent, QList<Item> *itemList) :
     QWidget(parent),
     ui(new Ui::login)
 {
+    this->setAttribute(Qt::WA_DeleteOnClose, true);
     this->itemList=itemList;
     ui->setupUi(this);
     connect(ui->lineEditPwd, &QLineEdit::returnPressed, ui->pushButton, &QAbstractButton::click, Qt::UniqueConnection);
@@ -18,7 +19,7 @@ login::~login()
 
 void login::on_pushButton_clicked()
 {
-    dbWidget::Instance(nullptr,itemList,ui->lineEditName->text(),ui->lineEditPwd->text());
+    auto dbWindow = new labelCommit(nullptr,itemList,ui->lineEditName->text(),ui->lineEditPwd->text());
     this->hide();
     delete this;
 }

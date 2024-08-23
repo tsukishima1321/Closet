@@ -15,8 +15,8 @@ class login : public QWidget
     Q_OBJECT
 
 public:
-    explicit login(QWidget *parent, QList<Item *> *itemList);
-    QList<Item*>* itemList;
+    explicit login(QWidget *parent, QList<Item> *itemList);
+    QList<Item>* itemList;
     ~login();
 
 private slots:

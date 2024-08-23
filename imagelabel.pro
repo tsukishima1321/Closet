@@ -25,19 +25,41 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-        dbwidget.cpp \
+        dbinstance.cpp \
+        detailview.cpp \
+        imageviewwidget.cpp \
         item.cpp \
+        labelcommit.cpp \
+        labeling.cpp \
         login.cpp \
         main.cpp \
-        mainwindow.cpp
+        ocrmenu.cpp \
+        search.cpp \
+        typeeditmenu.cpp \
+        welcome.cpp
 
 HEADERS += \
-        dbwidget.h \
+        dbinstance.h \
+        detailview.h \
+        imageviewwidget.h \
         item.h \
+        labelcommit.h \
+        labeling.h \
         login.h \
-        mainwindow.h
+        ocrmenu.h \
+        search.h \
+        typeeditmenu.h \
+        welcome.h
 
 FORMS += \
-        dbwidget.ui \
+        detailview.ui \
+        labelcommit.ui \
+        labeling.ui \
         login.ui \
-        mainwindow.ui
+        ocrmenu.ui \
+        search.ui \
+        typeeditmenu.ui \
+        welcome.ui
+
+RESOURCES += \
+    resource.qrc

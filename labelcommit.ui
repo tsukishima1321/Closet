@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>dbWidget</class>
- <widget class="QWidget" name="dbWidget">
+ <class>labelCommit</class>
+ <widget class="QWidget" name="labelCommit">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Database</string>
+   <string>提交录入</string>
   </property>
   <widget class="QLineEdit" name="dateEdit">
    <property name="geometry">
@@ -182,6 +182,32 @@
    </property>
    <property name="text">
     <string>Send SQL</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="imageBaseEdit">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>630</y>
+     <width>211</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>D:/Z/Pictures/</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>610</y>
+     <width>91</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Image Base:</string>
    </property>
   </widget>
  </widget>

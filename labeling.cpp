@@ -8,23 +8,31 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include "login.h"
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "labeling.h"
+#include "imageViewWidget.h"
+#include "ui_labeling.h"
 
-MainWindow::MainWindow(QWidget *parent) :
+LabelWindow::LabelWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::LabelWindow)
 {
+    this->setAttribute(Qt::WA_DeleteOnClose, true);
     itemList.clear();
     ui->setupUi(this);
-    list<<""<<""<<""<<""<<""<<""<<"";
+    //链接来自gui的信号
+    connect(ui->pushButtonAdd,&QPushButton::clicked,this,&LabelWindow::pushButtonAdd_clicked);
+    connect(ui->pushButtonNext,&QPushButton::clicked,this,&LabelWindow::pushButtonNext_clicked);
+    connect(ui->pushButtonLast,&QPushButton::clicked,this,&LabelWindow::pushButtonLast_clicked);
+    connect(ui->pushButtonStart,&QPushButton::clicked,this,&LabelWindow::pushButtonStart_clicked);
+    connect(ui->pushButtonFinish,&QPushButton::clicked,this,&LabelWindow::pushButtonFinish_clicked);
+    connect(ui->pushButtonAddType,&QPushButton::clicked,this,&LabelWindow::pushButtonAddType_clicked);
     updateTypes();
 }
 
-void MainWindow::updateTypes(){
+void LabelWindow::updateTypes(){
     //更新分类列表
     ui->comboBoxType->clear();
-    db = QSqlDatabase::addDatabase("QMYSQL");
+    db = QSqlDatabase::addDatabase("QMYSQL","typeEdit");
     db.setHostName("127.0.0.1");
     db.setDatabaseName("diary");
     db.setUserName("visitor");
@@ -48,37 +56,37 @@ void MainWindow::updateTypes(){
     }
 }
 
-MainWindow::~MainWindow()
+LabelWindow::~LabelWindow()
 {
     delete ui;
 }
 
-void MainWindow::on_pushButtonNext_clicked(){//NEXT
+void LabelWindow::pushButtonNext_clicked(){//NEXT
     flag++;
     if (flag<ImageCount){
         QString ImageName  = imagePath+dir[flag];
-        QImage image(ImageName);
-        ui->label->setPixmap(QPixmap::fromImage(image).scaled(ui->label->size(),Qt::KeepAspectRatio));
+        ui->imageView->loadImage(ImageName);
+        ui->imageView->update();
         ui->labelName->setText(dir[flag]);
     }else{
         flag=ImageCount-1;
     }
 }
 
-void MainWindow::on_pushButtonLast_clicked()//LAST
+void LabelWindow::pushButtonLast_clicked()//LAST
 {
     flag--;
     if (flag>=0){
         QString ImageName  = imagePath+dir[flag];
-        QImage image(ImageName);
-        ui->label->setPixmap(QPixmap::fromImage(image).scaled(ui->label->size(),Qt::KeepAspectRatio));
+        ui->imageView->loadImage(ImageName);
+        ui->imageView->update();
         ui->labelName->setText(dir[flag]);
     }else{
         flag=0;
     }
 }
 
-void MainWindow::on_pushButtonStart_clicked()
+void LabelWindow::pushButtonStart_clicked()
 {
     imagePath = ui->lineEdit_1->text();//文件夹路径
     if(imagePath.back()!='/'){
@@ -89,41 +97,35 @@ void MainWindow::on_pushButtonStart_clicked()
     ImageList << "*.bmp" << "*.jpg" << "*.png";//向字符串列表添加图片类型
     dir.setNameFilters(ImageList);//获得文件夹下图片的名字
     ImageCount = dir.count();//获得dir里名字的个数，也表示文件夹下图片的个数
-    ui->label->installEventFilter(this);
-    QString ImageName  = imagePath+dir[0];
-    QImage image=QImage(ImageName);
-    ui->label->setPixmap(QPixmap::fromImage(image).scaled(ui->label->size(),Qt::KeepAspectRatio));
+    QString ImageName = imagePath+dir[0];
+    ui->imageView->loadImage(ImageName);
+    ui->imageView->update();
     ui->labelName->setText(dir[0]);
     flag=0;
 }
 
-void MainWindow::on_pushButtonAdd_clicked()//ADD
+void LabelWindow::pushButtonAdd_clicked()//ADD
 {
     QString date=ui->lineEditDate->text();
     QString name=ui->labelName->text();
     QString des=ui->lineEditDes->text();
     QString out="		<A href=\""+name+"\">"+des+"</A>&nbsp;——"+date+"<BR>"+"\n";
-    list[ui->comboBoxType->currentIndex()]+=out;
     QString output="";
-    for(int i=0;i<list.length();i++){
-        output+=list[i];
-        output+="\n";
-    }
     ui->plainTextEdit->setPlainText(output);
-    itemList.push_back(new Item(date,name,des,ui->comboBoxType->currentText()));
+    itemList.push_back(Item(date,name,des,ui->comboBoxType->currentText()));
     ui->tableWidget->clearContents();
     ui->tableWidget->setRowCount(itemList.length());
     int i=0;
-    for(Item* item : itemList){
-        ui->tableWidget->setItem(i,0,new QTableWidgetItem(item->date));
-        ui->tableWidget->setItem(i,1,new QTableWidgetItem(item->href));
-        ui->tableWidget->setItem(i,2,new QTableWidgetItem(item->description));
-        ui->tableWidget->setItem(i,3,new QTableWidgetItem(item->type));
+    for(const Item& item : itemList){
+        ui->tableWidget->setItem(i,0,new QTableWidgetItem(item.date));
+        ui->tableWidget->setItem(i,1,new QTableWidgetItem(item.href));
+        ui->tableWidget->setItem(i,2,new QTableWidgetItem(item.description));
+        ui->tableWidget->setItem(i,3,new QTableWidgetItem(item.type));
         i++;
     }
 }
 
-void MainWindow::on_pushButtonFinish_clicked()//FINISH
+void LabelWindow::pushButtonFinish_clicked()//FINISH
 {
     QFile file(imagePath+"imglist.txt");
     if(file.open(QIODevice::WriteOnly | QIODevice::Text|QIODevice::Append))
@@ -137,7 +139,7 @@ void MainWindow::on_pushButtonFinish_clicked()//FINISH
 }
 
 
-void MainWindow::on_buttonAddType_clicked()
+void LabelWindow::pushButtonAddType_clicked()
 {
     bool qRed = false;
     QString newType = QInputDialog::getText(this, "新建分类","新分类名称：", QLineEdit::Normal, "", &qRed);
