@@ -1,25 +1,25 @@
 #ifndef DBINSTANCE_H
 #define DBINSTANCE_H
 
+#include <QSqlQuery>
 #include <QString>
 #include <QtSql/QSqlDatabase>
-#include <QSqlQuery>
 
-class dbInstance
-{
+class dbInstance {
 public:
-    static dbInstance* getInstance(QString name,QString password);
+    static dbInstance *getInstance(QString name, QString password);
+    static dbInstance *getInstanceByName(QString name);
     QSqlDatabase db;
     bool isOpen;
+
 protected:
-    static dbInstance* instance;
-    explicit dbInstance(QString name,QString password);
+    static dbInstance *instance;
+    explicit dbInstance(QString name, QString password);
     ~dbInstance();
-    class dbGarbo
-    {
+    class dbGarbo {
     public:
-        ~dbGarbo(){
-            if(dbInstance::instance){
+        ~dbGarbo() {
+            if (dbInstance::instance) {
                 delete dbInstance::instance;
             }
         }

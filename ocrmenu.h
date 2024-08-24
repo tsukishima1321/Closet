@@ -4,11 +4,10 @@
 #include <QWidget>
 
 namespace Ui {
-class ocrMenu;
+    class ocrMenu;
 }
 
-class ocrMenu : public QWidget
-{
+class ocrMenu : public QWidget {
     Q_OBJECT
 
 public:

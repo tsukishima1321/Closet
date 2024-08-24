@@ -1,31 +1,28 @@
 #ifndef LABELCOMMIT_H
 #define LABELCOMMIT_H
 
-#include <QWidget>
-#include "imageviewwidget.h"
 #include "item.h"
-#include <QList>
-#include <QtSql/QSqlDatabase>
-#include <QSqlQuery>
 #include <QDebug>
+#include <QList>
+#include <QSqlQuery>
 #include <QString>
+#include <QWidget>
+#include <QtSql/QSqlDatabase>
 
 namespace Ui {
-class labelCommit;
+    class labelCommit;
 }
 
-class labelCommit : public QWidget
-{
+class labelCommit : public QWidget {
     Q_OBJECT
 
 public:
-    labelCommit(QWidget *parent,QList<Item>* itemList,QString name,QString password);
+    labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &db);
+
 private:
-    static labelCommit* _instance;
-    ImageViewWidget* imageView;
-    QList<Item>* itemList;
+    QList<Item> *itemList;
     QList<QString> typeList;
-    QSqlDatabase& db;
+    QSqlDatabase &db;
     ~labelCommit();
 private slots:
     void pushButtonSearch_clicked();
@@ -34,8 +31,9 @@ private slots:
     void pushButtonDelete_clicked();
     void pushButtonBuild_clicked();
     void pushButtonSendSQL_clicked();
-    void table1CellDoubleClicked(int,int);
-    void table2CellDoubleClicked(int,int);
+    void table1CellDoubleClicked(int, int);
+    void table2CellDoubleClicked(int, int);
+
 private:
     void updateTable1();
     void updateTable2();

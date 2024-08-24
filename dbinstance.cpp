@@ -1,44 +1,49 @@
 #include "dbinstance.h"
 #include <QMessageBox>
 
-dbInstance* dbInstance::instance = nullptr;
+dbInstance *dbInstance::instance = nullptr;
 
-dbInstance::dbInstance(QString name,QString password)
-{
+dbInstance::dbInstance(QString name, QString password) {
     db = QSqlDatabase::addDatabase("QMYSQL");
     db.setHostName("127.0.0.1");
     db.setDatabaseName("diary");
     db.setUserName(name);
     db.setPassword(password);
     db.setPort(3306);
-    if(!db.open()){
+    if (!db.open()) {
         //qDebug()<<"Database Connect Failed";
         isOpen = false;
         QMessageBox::critical(nullptr, "ERROR", "Database Connection Failed");
-    }else{
+    } else {
         isOpen = true;
     }
 }
 
-dbInstance* dbInstance::getInstance(QString name,QString password){
-    if(instance == nullptr)
-    {
-        instance = new dbInstance(name,password);
-    }
-    else if(instance->db.userName()!=name)
-    {
+dbInstance *dbInstance::getInstance(QString name, QString password) {
+    if (instance == nullptr) {
+        instance = new dbInstance(name, password);
+    } else if (instance->db.userName() != name || (instance->db.userName() == name && !instance->isOpen)) {
         instance->isOpen = false;
         instance->db.close();
         instance->db.setUserName(name);
         instance->db.setPassword(password);
-        if(!instance->db.open()){
+        if (!instance->db.open()) {
             //qDebug()<<"Database Connect Failed";
             QMessageBox::critical(nullptr, "ERROR", "Database Connection Failed");
-            instance->isOpen = false;
-        }else
-        {
+        } else {
             instance->isOpen = true;
         }
     }
+    //instance->db.userName()==name && instance->isOpen
     return instance;
+}
+
+dbInstance *dbInstance::getInstanceByName(QString name) {
+    if (instance == nullptr) {
+        return nullptr;
+    }
+    if (instance->db.userName() == name && instance->isOpen) {
+        return instance;
+    }
+    return nullptr;
 }

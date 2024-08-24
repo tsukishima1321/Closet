@@ -28,7 +28,6 @@ SOURCES += \
         dbinstance.cpp \
         detailview.cpp \
         imageviewwidget.cpp \
-        item.cpp \
         labelcommit.cpp \
         labeling.cpp \
         login.cpp \

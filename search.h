@@ -4,11 +4,10 @@
 #include <QMainWindow>
 
 namespace Ui {
-class Search;
+    class Search;
 }
 
-class Search : public QMainWindow
-{
+class Search : public QMainWindow {
     Q_OBJECT
 
 public:

@@ -184,32 +184,6 @@
     <string>Send SQL</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="imageBaseEdit">
-   <property name="geometry">
-    <rect>
-     <x>530</x>
-     <y>630</y>
-     <width>211</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>D:/Z/Pictures/</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>530</x>
-     <y>610</y>
-     <width>91</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Image Base:</string>
-   </property>
-  </widget>
  </widget>
  <resources/>
  <connections/>

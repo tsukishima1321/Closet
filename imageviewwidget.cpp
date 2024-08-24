@@ -1,22 +1,21 @@
 #include "ImageViewWidget.h"
-#include <QMenu>
 #include <QContextMenuEvent>
-#include <QStyleOption>
-#include <QPainter>
 #include <QFileDialog>
+#include <QMenu>
+#include <QPainter>
+#include <QStyleOption>
 
 ImageViewWidget::ImageViewWidget(QWidget *parent) :
-    QWidget(parent)
-{
+        QWidget(parent) {
     //新建了5个Action
-    QAction* actionLoad = new QAction(tr("Load"), this);
-    connect(actionLoad,&QAction::triggered,this,&ImageViewWidget::onLoadImage);
-    QAction* actionZoomIn = new QAction(tr("Zoom In"), this);
-    connect(actionZoomIn,&QAction::triggered,this,&ImageViewWidget::onZoomInImage);
-    QAction* actionZoomOut = new QAction(tr("Zoom Out"), this);
-    connect(actionZoomOut,&QAction::triggered,this,&ImageViewWidget::onZoomOutImage);
-    QAction* actionReset = new QAction(tr("Reset"), this);
-    connect(actionReset,&QAction::triggered,this,&ImageViewWidget::onPresetImage);
+    QAction *actionLoad = new QAction(tr("Load"), this);
+    connect(actionLoad, &QAction::triggered, this, &ImageViewWidget::onLoadImage);
+    QAction *actionZoomIn = new QAction(tr("Zoom In"), this);
+    connect(actionZoomIn, &QAction::triggered, this, &ImageViewWidget::onZoomInImage);
+    QAction *actionZoomOut = new QAction(tr("Zoom Out"), this);
+    connect(actionZoomOut, &QAction::triggered, this, &ImageViewWidget::onZoomOutImage);
+    QAction *actionReset = new QAction(tr("Reset"), this);
+    connect(actionReset, &QAction::triggered, this, &ImageViewWidget::onPresetImage);
 
     //开始添加Action
     addAction(actionLoad);
@@ -28,13 +27,10 @@ ImageViewWidget::ImageViewWidget(QWidget *parent) :
     setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
-ImageViewWidget::~ImageViewWidget()
-{
-
+ImageViewWidget::~ImageViewWidget() {
 }
 
-void ImageViewWidget::contextMenuEvent(QContextMenuEvent *event)
-{
+void ImageViewWidget::contextMenuEvent(QContextMenuEvent *event) {
     QPoint pos = event->pos();
     pos = this->mapToGlobal(pos);
     QMenu *menu = new QMenu(this);
@@ -59,8 +55,7 @@ void ImageViewWidget::contextMenuEvent(QContextMenuEvent *event)
     menu->exec(pos);
 }
 
-void ImageViewWidget::paintEvent(QPaintEvent *event)
-{
+void ImageViewWidget::paintEvent(QPaintEvent *event) {
     // 绘制样式
     QStyleOption opt;
     opt.initFrom(this);
@@ -87,8 +82,7 @@ void ImageViewWidget::paintEvent(QPaintEvent *event)
     painter.drawImage(picRect, m_Image);
 }
 
-void ImageViewWidget::wheelEvent(QWheelEvent *event)
-{
+void ImageViewWidget::wheelEvent(QWheelEvent *event) {
     int value = event->angleDelta().y();
     if (value > 0)
         onZoomInImage();
@@ -98,14 +92,12 @@ void ImageViewWidget::wheelEvent(QWheelEvent *event)
     this->update();
 }
 
-void ImageViewWidget::mousePressEvent(QMouseEvent *event)
-{
+void ImageViewWidget::mousePressEvent(QMouseEvent *event) {
     m_OldPos = event->pos();
     m_Pressed = true;
 }
 
-void ImageViewWidget::mouseMoveEvent(QMouseEvent *event)
-{
+void ImageViewWidget::mouseMoveEvent(QMouseEvent *event) {
     if (!m_Pressed)
         return QWidget::mouseMoveEvent(event);
 
@@ -121,21 +113,19 @@ void ImageViewWidget::mouseMoveEvent(QMouseEvent *event)
     this->update();
 }
 
-void ImageViewWidget::mouseReleaseEvent(QMouseEvent *event)
-{
+void ImageViewWidget::mouseReleaseEvent(QMouseEvent *event) {
     m_Pressed = false;
     this->setCursor(Qt::ArrowCursor);
 }
 
-void ImageViewWidget::loadImage(QString name){
+void ImageViewWidget::loadImage(QString name) {
     QFile file(name);
     if (!file.exists())
         return;
     m_Image.load(name);
 }
 
-void ImageViewWidget::onLoadImage(void)
-{
+void ImageViewWidget::onLoadImage(void) {
     QString imageFile = QFileDialog::getOpenFileName(this, "Open Image", "./", tr("Images (*.png *.xpm *.jpg)"));
 
     QFile file(imageFile);
@@ -148,17 +138,14 @@ void ImageViewWidget::onLoadImage(void)
     this->update();
 }
 
-void ImageViewWidget::onZoomInImage(void)
-{
+void ImageViewWidget::onZoomInImage(void) {
     m_ZoomValue += 0.2;
     this->update();
 }
 
-void ImageViewWidget::onZoomOutImage(void)
-{
+void ImageViewWidget::onZoomOutImage(void) {
     m_ZoomValue -= 0.2;
-    if (m_ZoomValue <= 0)
-    {
+    if (m_ZoomValue <= 0) {
         m_ZoomValue += 0.2;
         return;
     }
@@ -166,11 +153,9 @@ void ImageViewWidget::onZoomOutImage(void)
     this->update();
 }
 
-void ImageViewWidget::onPresetImage(void)
-{
+void ImageViewWidget::onPresetImage(void) {
     m_ZoomValue = 1.0;
     m_XPtInterval = 0;
     m_YPtInterval = 0;
     this->update();
 }
-

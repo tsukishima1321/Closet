@@ -20,7 +20,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QPushButton" name="zoomInButton">
+         <widget class="QToolButton" name="zoomInButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -45,7 +45,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="zoomOutButton">
+         <widget class="QToolButton" name="zoomOutButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -75,7 +75,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="zoomResetButton">
+         <widget class="QToolButton" name="zoomResetButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>

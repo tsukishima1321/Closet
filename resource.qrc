@@ -1,5 +1,9 @@
 <RCC>
     <qresource prefix="/pic">
         <file>back.jpg</file>
+        <file>zoomIn.png</file>
+        <file>refresh.png</file>
+        <file>zoomOut.png</file>
+        <file>reset.png</file>
     </qresource>
 </RCC>

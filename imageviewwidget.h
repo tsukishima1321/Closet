@@ -3,8 +3,7 @@
 
 #include <QWidget>
 
-class ImageViewWidget : public QWidget
-{
+class ImageViewWidget : public QWidget {
     Q_OBJECT
 public:
     ImageViewWidget(QWidget *parent = nullptr);

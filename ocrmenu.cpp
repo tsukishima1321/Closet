@@ -1,14 +1,11 @@
 #include "ocrmenu.h"
 #include "ui_ocrmenu.h"
 
-ocrMenu::ocrMenu(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::ocrMenu)
-{
+ocrMenu::ocrMenu(QWidget *parent) : QWidget(parent),
+                                    ui(new Ui::ocrMenu) {
     ui->setupUi(this);
 }
 
-ocrMenu::~ocrMenu()
-{
+ocrMenu::~ocrMenu() {
     delete ui;
 }

@@ -4,11 +4,10 @@
 #include <QMainWindow>
 
 namespace Ui {
-class Welcome;
+    class Welcome;
 }
 
-class Welcome : public QMainWindow
-{
+class Welcome : public QMainWindow {
     Q_OBJECT
 
 public:
@@ -18,6 +17,8 @@ public:
 private slots:
     void labelingButton_clicked();
     void searchButton_clicked();
+    void typeEditButton_clicked();
+    void lineEditUpdate();
 
 private:
     Ui::Welcome *ui;
