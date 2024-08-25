@@ -4,16 +4,20 @@
 #include <QSqlQuery>
 #include <QString>
 #include <QtSql/QSqlDatabase>
+#include <optional>
 
 class dbInstance {
 public:
-    static dbInstance *getInstance(QString name, QString password);
-    static dbInstance *getInstanceByName(QString name);
+    static std::optional<dbInstance *> getInstance(QString name, QString password);
+    static std::optional<dbInstance *> getInstanceByName(QString name);
+    static std::optional<dbInstance *> getInstance();
     QSqlDatabase db;
-    bool isOpen;
+    void close();
+    bool isOpen() const;
 
 protected:
     static dbInstance *instance;
+    bool open;
     explicit dbInstance(QString name, QString password);
     ~dbInstance();
     class dbGarbo {

@@ -5,5 +5,9 @@
         <file>refresh.png</file>
         <file>zoomOut.png</file>
         <file>reset.png</file>
+        <file>square-x.png</file>
+        <file>logInBack.jpg</file>
+        <file>step-back.png</file>
+        <file>step-forward.png</file>
     </qresource>
 </RCC>

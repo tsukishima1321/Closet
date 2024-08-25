@@ -12,18 +12,28 @@ dbInstance::dbInstance(QString name, QString password) {
     db.setPort(3306);
     if (!db.open()) {
         //qDebug()<<"Database Connect Failed";
-        isOpen = false;
+        open = false;
         QMessageBox::critical(nullptr, "ERROR", "Database Connection Failed");
     } else {
-        isOpen = true;
+        open = true;
     }
 }
 
-dbInstance *dbInstance::getInstance(QString name, QString password) {
+std::optional<dbInstance *> dbInstance::getInstance() {
+    if (instance == nullptr) {
+        return std::nullopt;
+    }
+    if (instance->open) {
+        return instance;
+    }
+    return std::nullopt;
+}
+
+std::optional<dbInstance *> dbInstance::getInstance(QString name, QString password) {
     if (instance == nullptr) {
         instance = new dbInstance(name, password);
-    } else if (instance->db.userName() != name || (instance->db.userName() == name && !instance->isOpen)) {
-        instance->isOpen = false;
+    } else if (instance->db.userName() != name || (instance->db.userName() == name && !instance->open)) {
+        instance->open = false;
         instance->db.close();
         instance->db.setUserName(name);
         instance->db.setPassword(password);
@@ -31,19 +41,28 @@ dbInstance *dbInstance::getInstance(QString name, QString password) {
             //qDebug()<<"Database Connect Failed";
             QMessageBox::critical(nullptr, "ERROR", "Database Connection Failed");
         } else {
-            instance->isOpen = true;
+            instance->open = true;
         }
     }
     //instance->db.userName()==name && instance->isOpen
     return instance;
 }
 
-dbInstance *dbInstance::getInstanceByName(QString name) {
+std::optional<dbInstance *> dbInstance::getInstanceByName(QString name) {
     if (instance == nullptr) {
-        return nullptr;
+        return std::nullopt;
     }
-    if (instance->db.userName() == name && instance->isOpen) {
+    if (instance->db.userName() == name && instance->open) {
         return instance;
     }
-    return nullptr;
+    return std::nullopt;
+}
+
+bool dbInstance::isOpen() const {
+    return open;
+}
+
+void dbInstance::close() {
+    db.close();
+    open = false;
 }

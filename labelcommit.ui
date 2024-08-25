@@ -13,177 +13,121 @@
   <property name="windowTitle">
    <string>提交录入</string>
   </property>
-  <widget class="QLineEdit" name="dateEdit">
-   <property name="geometry">
-    <rect>
-     <x>510</x>
-     <y>280</y>
-     <width>121</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButtonSearch">
-   <property name="geometry">
-    <rect>
-     <x>640</x>
-     <y>270</y>
-     <width>121</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Search Date</string>
-   </property>
-  </widget>
-  <widget class="QTableWidget" name="tableWidget">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>380</y>
-     <width>831</width>
-     <height>201</height>
-    </rect>
-   </property>
-   <column>
-    <property name="text">
-     <string>date</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>href</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>description</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>type</string>
-    </property>
-   </column>
-  </widget>
-  <widget class="QTableWidget" name="tableWidget_2">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>40</y>
-     <width>831</width>
-     <height>201</height>
-    </rect>
-   </property>
-   <column>
-    <property name="text">
-     <string>date</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>herf</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>description</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>type</string>
-    </property>
-   </column>
-  </widget>
-  <widget class="QPushButton" name="pushButtonCommitAll">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>270</y>
-     <width>111</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Commit All</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButtonCommit">
-   <property name="geometry">
-    <rect>
-     <x>190</x>
-     <y>270</y>
-     <width>111</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Commit</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButtonDelete">
-   <property name="geometry">
-    <rect>
-     <x>780</x>
-     <y>270</y>
-     <width>111</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Remove</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButtonBuild">
-   <property name="geometry">
-    <rect>
-     <x>770</x>
-     <y>610</y>
-     <width>181</width>
-     <height>61</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Bulid htm</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="statusBar">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>620</y>
-     <width>291</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>就绪</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="sqlEdit">
-   <property name="geometry">
-    <rect>
-     <x>210</x>
-     <y>340</y>
-     <width>561</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButtonSendSQL">
-   <property name="geometry">
-    <rect>
-     <x>780</x>
-     <y>330</y>
-     <width>111</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Send SQL</string>
-   </property>
-  </widget>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTableWidget" name="tableWidget">
+     <column>
+      <property name="text">
+       <string>date</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>herf</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>description</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>type</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="pushButtonDelete">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>移除选中</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonCommit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>提交选中</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonCommitAll">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>提交所有</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

@@ -1,16 +1,23 @@
 #include "login.h"
 #include "dbinstance.h"
 #include "ui_login.h"
+#include <QIcon>
 
-login::login(QWidget *parent) : QDialog(parent),
-                                ui(new Ui::login) {
+login::login(QWidget *parent) :
+        QDialog(parent),
+        ui(new Ui::login) {
     this->setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(this);
+    ui->toolButton->setIcon(QIcon(":/pic/square-x.png"));
+    ui->lineEditName->setFocus();
+    setWindowFlags(Qt::FramelessWindowHint | windowFlags());
+    setAttribute(Qt::WA_TranslucentBackground);
     ui->pushButton->setAutoDefault(false);
     ui->pushButton->setDefault(false);
     connect(ui->lineEditPwd, &QLineEdit::returnPressed, this, &login::pushButton_clicked);
     connect(ui->lineEditName, &QLineEdit::returnPressed, this, &login::lineEditName_returnPressed);
     connect(ui->pushButton, &QPushButton::clicked, this, &login::pushButton_clicked);
+    connect(ui->toolButton, &QPushButton::clicked, this, [this]() { this->done(QDialog::Rejected); });
 }
 
 login::~login() {
@@ -18,24 +25,23 @@ login::~login() {
 }
 
 void login::pushButton_clicked() {
-    dbInstance *instance = dbInstance::getInstance(ui->lineEditName->text(), ui->lineEditPwd->text());
-    if (!instance->isOpen) {
+    std::optional<dbInstance *> instance = dbInstance::getInstance(ui->lineEditName->text(), ui->lineEditPwd->text());
+    if (!(*instance)->isOpen()) {
         return;
     }
-    submit(instance->db);
+    submit((*instance)->db);
 }
 
 void login::lineEditName_returnPressed() {
-    dbInstance *instance = dbInstance::getInstanceByName(ui->lineEditName->text());
-    if (instance == nullptr) {
-        this->focusPreviousChild();
+    this->focusNextChild();
+    std::optional<dbInstance *> instance = dbInstance::getInstanceByName(ui->lineEditName->text());
+    if (instance == std::nullopt) {
         return;
     }
-    if (!instance->isOpen) {
-        this->focusPreviousChild();
+    if (!(*instance)->isOpen()) {
         return;
     }
-    submit(instance->db);
+    submit((*instance)->db);
 }
 
 void login::submit(QSqlDatabase &db) {

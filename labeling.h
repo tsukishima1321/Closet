@@ -22,10 +22,10 @@ public:
 private:
     QDir dir;
     int ImageCount;
-    int flag;
+    int currentImgIndex;
     QString imagePath;
     QList<Item> itemList;
-    QSqlDatabase db;
+    QSqlDatabase dbVisitor;
     void updateTypes();
 private slots:
     void pushButtonNext_clicked();
@@ -33,12 +33,14 @@ private slots:
     void pushButtonAdd_clicked();
     void pushButtonFinish_clicked();
     void pushButtonLast_clicked();
+    void pushButtonDelete_clicked();
     void pushButtonAddType_clicked();
     void freshButton_clicked();
 
 private:
     Ui::LabelWindow *ui;
     bool isLogedIn;
+    void updateTable();
 };
 
 #endif // LABELING_H

@@ -18,6 +18,7 @@ class labelCommit : public QWidget {
 
 public:
     labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &db);
+    void tabClicked(int i);
 
 private:
     QList<Item> *itemList;
@@ -25,18 +26,14 @@ private:
     QSqlDatabase &db;
     ~labelCommit();
 private slots:
-    void pushButtonSearch_clicked();
     void pushButtonCommitAll_clicked();
     void pushButtonCommit_clicked();
     void pushButtonDelete_clicked();
-    void pushButtonBuild_clicked();
-    void pushButtonSendSQL_clicked();
-    void table1CellDoubleClicked(int, int);
-    void table2CellDoubleClicked(int, int);
+    void tableCellDoubleClicked(int, int);
 
 private:
-    void updateTable1();
-    void updateTable2();
+    //void updateTable1();
+    void updateTable();
     Ui::labelCommit *ui;
 };
 

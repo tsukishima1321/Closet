@@ -13,15 +13,16 @@ labelCommit::labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &d
         ui(new Ui::labelCommit) {
     this->setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(this);
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     //连接来自gui的信号
-    connect(ui->pushButtonBuild, &QPushButton::clicked, this, &labelCommit::pushButtonBuild_clicked);
+    //connect(ui->pushButtonBuild, &QPushButton::clicked, this, &labelCommit::pushButtonBuild_clicked);
     connect(ui->pushButtonCommit, &QPushButton::clicked, this, &labelCommit::pushButtonCommit_clicked);
     connect(ui->pushButtonCommitAll, &QPushButton::clicked, this, &labelCommit::pushButtonCommitAll_clicked);
     connect(ui->pushButtonDelete, &QPushButton::clicked, this, &labelCommit::pushButtonDelete_clicked);
-    connect(ui->pushButtonSendSQL, &QPushButton::clicked, this, &labelCommit::pushButtonSendSQL_clicked);
-    connect(ui->pushButtonSearch, &QPushButton::clicked, this, &labelCommit::pushButtonSearch_clicked);
-    connect(ui->tableWidget, &QTableWidget::cellDoubleClicked, this, &labelCommit::table1CellDoubleClicked);
-    connect(ui->tableWidget_2, &QTableWidget::cellDoubleClicked, this, &labelCommit::table2CellDoubleClicked);
+    //connect(ui->pushButtonSendSQL, &QPushButton::clicked, this, &labelCommit::pushButtonSendSQL_clicked);
+    //connect(ui->pushButtonSearch, &QPushButton::clicked, this, &labelCommit::pushButtonSearch_clicked);
+    connect(ui->tableWidget, &QTableWidget::cellDoubleClicked, this, &labelCommit::tableCellDoubleClicked);
+    //connect(ui->tableWidget_2, &QTableWidget::cellDoubleClicked, this, &labelCommit::table2CellDoubleClicked);
     qDebug() << QSqlDatabase::drivers();
     if (!db.isOpen()) {
         //qDebug()<<"Database Connect Failed";
@@ -31,9 +32,8 @@ labelCommit::labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &d
         //qDebug()<<"database connected";
         typeList.clear();
         this->itemList = itemList;
-        updateTable2();
+        updateTable();
         this->show();
-        ui->statusBar->setText("开始更新分类列表");
         QString sql = "SELECT * FROM types";
         QSqlQuery query(db);
         query.prepare(sql);
@@ -42,11 +42,10 @@ labelCommit::labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &d
             QString type = query.value("typename").toString();
             typeList.push_back(type);
         }
-        ui->statusBar->setText("分类列表更新完成");
     }
 }
 
-void labelCommit::updateTable1() {
+/*void labelCommit::updateTable1() {
     QString date = ui->dateEdit->text();
     QString sql = "SELECT * FROM pictures WHERE date='" + date + "'";
     QSqlQuery query(db);
@@ -66,18 +65,24 @@ void labelCommit::updateTable1() {
         ui->tableWidget->setItem(i, 3, new QTableWidgetItem(item->type));
         i++;
     }
+}*/
+
+void labelCommit::updateTable() {
+    int i = 0;
+    ui->tableWidget->clearContents();
+    ui->tableWidget->setRowCount(itemList->length());
+    for (const Item &item : *(this->itemList)) {
+        ui->tableWidget->setItem(i, 0, new QTableWidgetItem(item.date));
+        ui->tableWidget->setItem(i, 1, new QTableWidgetItem(item.href));
+        ui->tableWidget->setItem(i, 2, new QTableWidgetItem(item.description));
+        ui->tableWidget->setItem(i, 3, new QTableWidgetItem(item.type));
+        i++;
+    }
 }
 
-void labelCommit::updateTable2() {
-    int i = 0;
-    ui->tableWidget_2->clearContents();
-    ui->tableWidget_2->setRowCount(itemList->length());
-    for (const Item &item : *(this->itemList)) {
-        ui->tableWidget_2->setItem(i, 0, new QTableWidgetItem(item.date));
-        ui->tableWidget_2->setItem(i, 1, new QTableWidgetItem(item.href));
-        ui->tableWidget_2->setItem(i, 2, new QTableWidgetItem(item.description));
-        ui->tableWidget_2->setItem(i, 3, new QTableWidgetItem(item.type));
-        i++;
+void labelCommit::tabClicked(int i) {
+    if (i == 2) {
+        updateTable();
     }
 }
 
@@ -85,12 +90,7 @@ labelCommit::~labelCommit() {
     delete ui;
 }
 
-void labelCommit::pushButtonSearch_clicked() {
-    updateTable1();
-}
-
 void labelCommit::pushButtonCommitAll_clicked() {
-    ui->statusBar->setText("正在添加");
     QSqlQuery query(db);
     query.prepare("INSERT INTO pictures (date,href,description,type) VALUES (:date,:href,:description,:type)");
     for (const Item &item : *(this->itemList)) {
@@ -102,16 +102,14 @@ void labelCommit::pushButtonCommitAll_clicked() {
         query.exec();
     }
     itemList->clear();
-    ui->tableWidget_2->clearContents();
-    ui->statusBar->setText("添加完成");
+    ui->tableWidget->clearContents();
 }
 
 void labelCommit::pushButtonCommit_clicked() {
-    if (ui->tableWidget_2->rowCount() == 0) {
+    if (ui->tableWidget->rowCount() == 0) {
         return;
     }
-    ui->statusBar->setText("正在添加");
-    int i = ui->tableWidget_2->currentRow();
+    int i = ui->tableWidget->currentRow();
     QSqlQuery query(db);
     query.prepare("INSERT INTO pictures (date,href,description,type) VALUES (:date,:href,:description,:type)");
     const Item &item = (*itemList)[i];
@@ -121,55 +119,19 @@ void labelCommit::pushButtonCommit_clicked() {
     query.bindValue(":type", item.type);
     query.exec();
     itemList->removeAt(i);
-    updateTable2();
-    updateTable1();
-    ui->statusBar->setText("添加完成");
+    updateTable();
 }
 
 void labelCommit::pushButtonDelete_clicked() {
     if (ui->tableWidget->rowCount() == 0) {
         return;
     }
-    ui->statusBar->setText("正在删除");
     int i = ui->tableWidget->currentRow();
-    QSqlQuery query(db);
-    query.prepare("delete from pictures where href=:href");
-    query.bindValue(":href", ui->tableWidget->item(i, 1)->text());
-    query.exec();
-    updateTable1();
-    ui->statusBar->setText("删除完成");
+    itemList->remove(i);
+    updateTable();
 }
 
-void labelCommit::pushButtonBuild_clicked() {
-    ui->statusBar->setText("正在构建");
-    QFile file("图片索引.htm");
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QString text = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<head>\n<title>图片索引</title>\n<meta name=\"GENERATOR\" content=\"WinCHM\">\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=gb2312\">\n<style>\nhtml,body { \n	font-family: Arial, Helvetica, sans-serif;\n	font-size: 11pt;\n}\n</style>\n</head>\n<body>\n";
-        file.write(text.toLocal8Bit().data());
-        //QString sql = "SELECT * FROM pictures WHERE type=:type ORDER BY date ASC,description ASC";
-        QString sql = "SELECT * FROM pictures WHERE type=:type ORDER BY date ASC";
-        QSqlQuery query(db);
-        query.prepare(sql);
-        for (const QString &type : typeList) {
-            text = "<P>\n<FONT size=3><STRONG>" + type + "</STRONG></FONT>\n</P>\n<P>\n";
-            file.write(text.toLocal8Bit().data());
-            query.bindValue(":type", type);
-            query.exec();
-            while (query.next()) {
-                text = "<A href=\"" + query.value("href").toString() + "\">" + query.value("description").toString() + "</A>&nbsp;——" + query.value("date").toString() + "<BR>" + "\n";
-                file.write(text.toLocal8Bit().data());
-            }
-            text = "</P>\n";
-            file.write(text.toLocal8Bit().data());
-        }
-        text = "</body>\n</html>";
-        file.write(text.toLocal8Bit().data());
-        file.close();
-    }
-    ui->statusBar->setText("构建完成");
-}
-
-void labelCommit::pushButtonSendSQL_clicked() {
+/*void labelCommit::pushButtonSendSQL_clicked() {
     QString sql = ui->sqlEdit->text();
     QString warning = "";
     if (sql.contains("insert")) {
@@ -214,17 +176,9 @@ void labelCommit::pushButtonSendSQL_clicked() {
         ui->tableWidget->setItem(i, 3, new QTableWidgetItem(item.type));
         i++;
     }
-}
+}*/
 
-void labelCommit::table1CellDoubleClicked(int row, int column) {
-    (void)column;
-    QString name = ui->tableWidget->item(row, 1)->text();
-    auto newWindow = new DetailView(nullptr, db);
-    newWindow->OpenImg(name);
-    newWindow->show();
-}
-
-void labelCommit::table2CellDoubleClicked(int row, int column) {
+void labelCommit::tableCellDoubleClicked(int row, int column) {
     (void)column;
     QString name = ui->tableWidget->item(row, 1)->text();
     auto newWindow = new DetailView(nullptr, db);
