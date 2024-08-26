@@ -1,5 +1,4 @@
 #include "labelcommit.h"
-#include "detailview.h"
 #include "ui_labelcommit.h"
 #include <QDebug>
 #include <QFile>
@@ -7,23 +6,42 @@
 #include <QSettings>
 #include <QSqlError>
 
-labelCommit::labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &db) :
+extern QString imgBase;
+
+bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist) {
+    toDir.replace("\\", "/");
+    if (sourceDir == toDir) {
+        return true;
+    }
+    if (!QFile::exists(sourceDir)) {
+        return false;
+    }
+    QDir *createfile = new QDir;
+    bool exist = createfile->exists(toDir);
+    if (exist) {
+        if (coverFileIfExist) {
+            createfile->remove(toDir);
+        }
+    } //end if
+
+    if (!QFile::copy(sourceDir, toDir)) {
+        return false;
+    }
+    return true;
+}
+
+labelCommit::labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &db, QString fromDir) :
         QWidget(parent),
         db(db),
+        fromDir(fromDir),
         ui(new Ui::labelCommit) {
     this->setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(this);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    //连接来自gui的信号
-    //connect(ui->pushButtonBuild, &QPushButton::clicked, this, &labelCommit::pushButtonBuild_clicked);
     connect(ui->pushButtonCommit, &QPushButton::clicked, this, &labelCommit::pushButtonCommit_clicked);
     connect(ui->pushButtonCommitAll, &QPushButton::clicked, this, &labelCommit::pushButtonCommitAll_clicked);
     connect(ui->pushButtonDelete, &QPushButton::clicked, this, &labelCommit::pushButtonDelete_clicked);
-    //connect(ui->pushButtonSendSQL, &QPushButton::clicked, this, &labelCommit::pushButtonSendSQL_clicked);
-    //connect(ui->pushButtonSearch, &QPushButton::clicked, this, &labelCommit::pushButtonSearch_clicked);
-    connect(ui->tableWidget, &QTableWidget::cellDoubleClicked, this, &labelCommit::tableCellDoubleClicked);
-    //connect(ui->tableWidget_2, &QTableWidget::cellDoubleClicked, this, &labelCommit::table2CellDoubleClicked);
-    qDebug() << QSqlDatabase::drivers();
+    //qDebug() << QSqlDatabase::drivers();
     if (!db.isOpen()) {
         //qDebug()<<"Database Connect Failed";
         this->hide();
@@ -44,28 +62,6 @@ labelCommit::labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &d
         }
     }
 }
-
-/*void labelCommit::updateTable1() {
-    QString date = ui->dateEdit->text();
-    QString sql = "SELECT * FROM pictures WHERE date='" + date + "'";
-    QSqlQuery query(db);
-    query.exec(sql);
-    QList<Item *> items;
-    items.clear();
-    while (query.next()) {
-        items.push_back(new Item(query.value("date").toString(), query.value("href").toString(), query.value("description").toString(), query.value("type").toString()));
-    }
-    ui->tableWidget->clearContents();
-    ui->tableWidget->setRowCount(items.length());
-    int i = 0;
-    for (Item *item : items) {
-        ui->tableWidget->setItem(i, 0, new QTableWidgetItem(item->date));
-        ui->tableWidget->setItem(i, 1, new QTableWidgetItem(item->href));
-        ui->tableWidget->setItem(i, 2, new QTableWidgetItem(item->description));
-        ui->tableWidget->setItem(i, 3, new QTableWidgetItem(item->type));
-        i++;
-    }
-}*/
 
 void labelCommit::updateTable() {
     int i = 0;
@@ -100,6 +96,7 @@ void labelCommit::pushButtonCommitAll_clicked() {
         query.bindValue(":description", item.description);
         query.bindValue(":type", item.type);
         query.exec();
+        copyFileToPath(fromDir + item.href, imgBase, false);
     }
     itemList->clear();
     ui->tableWidget->clearContents();
@@ -118,6 +115,7 @@ void labelCommit::pushButtonCommit_clicked() {
     query.bindValue(":description", item.description);
     query.bindValue(":type", item.type);
     query.exec();
+    copyFileToPath(fromDir + item.href, imgBase, false);
     itemList->removeAt(i);
     updateTable();
 }
@@ -131,57 +129,4 @@ void labelCommit::pushButtonDelete_clicked() {
     updateTable();
 }
 
-/*void labelCommit::pushButtonSendSQL_clicked() {
-    QString sql = ui->sqlEdit->text();
-    QString warning = "";
-    if (sql.contains("insert")) {
-        warning += "insert ";
-    }
-    if (sql.contains("delete")) {
-        warning += "delete ";
-    }
-    if (warning != "") {
-        QMessageBox message(QMessageBox::Warning, "警告", "含有危险操作:" + warning + "\n是否继续？", QMessageBox::Yes | QMessageBox::No, NULL);
-        if (message.exec() != QMessageBox::Yes) {
-            return;
-        }
-    }
-    if (sql.contains("delete") && !sql.contains("where")) {
-        QMessageBox::critical(this, "错误", "操作不被允许");
-        return;
-    }
-    QSqlQuery query(db);
-    if (!query.exec(sql)) {
-        QSqlError sqlerror = query.lastError();
-        qDebug() << sqlerror.nativeErrorCode();
-        QString errortext = sqlerror.text();
-        qDebug() << errortext;
-        if (errortext == "") {
-            errortext = "empty query";
-        }
-        QMessageBox::critical(this, "错误", errortext);
-    }
-    QList<Item> items;
-    items.clear();
-    while (query.next()) {
-        items.push_back(Item(query.value("date").toString(), query.value("href").toString(), query.value("description").toString(), query.value("type").toString()));
-    }
-    ui->tableWidget->clearContents();
-    ui->tableWidget->setRowCount(items.length());
-    int i = 0;
-    for (const Item &item : items) {
-        ui->tableWidget->setItem(i, 0, new QTableWidgetItem(item.date));
-        ui->tableWidget->setItem(i, 1, new QTableWidgetItem(item.href));
-        ui->tableWidget->setItem(i, 2, new QTableWidgetItem(item.description));
-        ui->tableWidget->setItem(i, 3, new QTableWidgetItem(item.type));
-        i++;
-    }
-}*/
-
-void labelCommit::tableCellDoubleClicked(int row, int column) {
-    (void)column;
-    QString name = ui->tableWidget->item(row, 1)->text();
-    auto newWindow = new DetailView(nullptr, db);
-    newWindow->OpenImg(name);
-    newWindow->show();
-}
+/**/

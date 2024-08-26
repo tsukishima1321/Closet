@@ -18,9 +18,13 @@ public:
     void OpenImg(QString href);
     ~DetailView();
 
+private slots:
+    void ocrMenuButton_clicked();
+
 private:
     Ui::DetailView *ui;
     QSqlDatabase &db;
+    QString current;
     void commitChange();
     void cancelChange();
     void typeMenu();

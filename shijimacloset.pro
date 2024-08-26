@@ -9,7 +9,7 @@ QT       += sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = imagelabel
+TARGET = ShijimaCloset
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -27,12 +27,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         dbinstance.cpp \
         detailview.cpp \
+        flowlayout.cpp \
+        imagepreviewform.cpp \
         imageviewwidget.cpp \
         labelcommit.cpp \
         labeling.cpp \
         login.cpp \
         main.cpp \
         ocrmenu.cpp \
+        pagenavigator.cpp \
         search.cpp \
         typeeditmenu.cpp \
         welcome.cpp
@@ -40,25 +43,37 @@ SOURCES += \
 HEADERS += \
         dbinstance.h \
         detailview.h \
+        flowlayout.h \
+        imagepreviewform.h \
         imageviewwidget.h \
         item.h \
         labelcommit.h \
         labeling.h \
         login.h \
         ocrmenu.h \
+        pagenavigator.h \
         search.h \
         typeeditmenu.h \
         welcome.h
 
 FORMS += \
         detailview.ui \
+        imagepreviewform.ui \
         labelcommit.ui \
         labeling.ui \
         login.ui \
         ocrmenu.ui \
+        pagenavigator.ui \
         search.ui \
         typeeditmenu.ui \
         welcome.ui
 
 RESOURCES += \
     resource.qrc
+
+RC_FILE += logo.rc
+
+
+DISTFILES += \
+    icon.ico \
+    logo.rc

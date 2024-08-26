@@ -9,5 +9,6 @@
         <file>logInBack.jpg</file>
         <file>step-back.png</file>
         <file>step-forward.png</file>
+        <file>trash.png</file>
     </qresource>
 </RCC>

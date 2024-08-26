@@ -152,12 +152,15 @@ border: 2px solid black;
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="dateText">
+       <widget class="QDateEdit" name="dateEdit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="calendarPopup">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

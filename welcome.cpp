@@ -39,8 +39,21 @@ void Welcome::labelingButton_clicked() {
 }
 
 void Welcome::searchButton_clicked() {
-    auto newWindow = new Search;
-    newWindow->show();
+    std::optional<dbInstance *> instance = dbInstance::getInstanceByName("root");
+    if (instance == std::nullopt) {
+        auto loginWindow = new login(this);
+        Search *newWindow = nullptr;
+        connect(loginWindow, &login::loginRes, this, [&newWindow](QSqlDatabase &db) {
+            newWindow = new Search(nullptr, db);
+        });
+        auto res = loginWindow->exec();
+        if (res == QDialog::Accepted) {
+            newWindow->show();
+        }
+    } else {
+        auto newWindow = new Search(nullptr, (*instance)->db);
+        newWindow->show();
+    }
 }
 
 void Welcome::typeEditButton_clicked() {
@@ -67,7 +80,7 @@ void Welcome::buildHtmButton_clicked() {
         connect(loginWindow, &login::loginRes, this, [this](QSqlDatabase &db) {
             buildHtm(db);
         });
-        auto res = loginWindow->exec();
+        loginWindow->exec();
     } else {
         buildHtm((*instance)->db);
     }

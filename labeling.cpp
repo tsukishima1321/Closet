@@ -166,7 +166,7 @@ void LabelWindow::pushButtonFinish_clicked() {
     if (instance == std::nullopt) {
         auto loginWindow = new login(this);
         labelCommit *newWindow = nullptr;
-        connect(loginWindow, &login::loginRes, this, [&newWindow, this](QSqlDatabase &db) { newWindow = new labelCommit(nullptr, &itemList, db); });
+        connect(loginWindow, &login::loginRes, this, [&newWindow, this](QSqlDatabase &db) { newWindow = new labelCommit(nullptr, &itemList, db, ui->lineEditPath->text()); });
         auto res = loginWindow->exec();
         if (res == QDialog::Accepted) {
             isLogedIn = true;
@@ -178,7 +178,7 @@ void LabelWindow::pushButtonFinish_clicked() {
     } else {
         labelCommit *newWindow = nullptr;
         isLogedIn = true;
-        newWindow = new labelCommit(nullptr, &itemList, (*instance)->db);
+        newWindow = new labelCommit(nullptr, &itemList, (*instance)->db, ui->lineEditPath->text());
         connect(ui->tabWidget, &QTabWidget::tabBarClicked, newWindow, &labelCommit::tabClicked);
         ui->tabWidget->removeTab(2);
         ui->tabWidget->addTab(newWindow, "记录提交");

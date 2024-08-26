@@ -18,22 +18,22 @@
     <widget class="QTableWidget" name="tableWidget">
      <column>
       <property name="text">
-       <string>date</string>
+       <string>日期</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>herf</string>
+       <string>文件名</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>description</string>
+       <string>描述</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>type</string>
+       <string>分类</string>
       </property>
      </column>
     </widget>

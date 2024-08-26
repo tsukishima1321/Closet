@@ -3,6 +3,7 @@
 
 #include "item.h"
 #include <QDebug>
+#include <QDir>
 #include <QList>
 #include <QSqlQuery>
 #include <QString>
@@ -13,23 +14,25 @@ namespace Ui {
     class labelCommit;
 }
 
+bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist);
+
 class labelCommit : public QWidget {
     Q_OBJECT
 
 public:
-    labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &db);
+    labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &db, QString fromDir);
     void tabClicked(int i);
 
 private:
     QList<Item> *itemList;
     QList<QString> typeList;
     QSqlDatabase &db;
+    QString fromDir;
     ~labelCommit();
 private slots:
     void pushButtonCommitAll_clicked();
     void pushButtonCommit_clicked();
     void pushButtonDelete_clicked();
-    void tableCellDoubleClicked(int, int);
 
 private:
     //void updateTable1();
