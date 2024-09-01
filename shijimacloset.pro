@@ -27,7 +27,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         dbinstance.cpp \
         detailview.cpp \
-        flowlayout.cpp \
         imagepreviewform.cpp \
         imageviewwidget.cpp \
         labelcommit.cpp \
@@ -43,7 +42,6 @@ SOURCES += \
 HEADERS += \
         dbinstance.h \
         detailview.h \
-        flowlayout.h \
         imagepreviewform.h \
         imageviewwidget.h \
         item.h \

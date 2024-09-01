@@ -1,6 +1,5 @@
 #include "search.h"
 #include "detailview.h"
-#include "flowlayout.h"
 #include "imagepreviewform.h"
 #include "qimagereader.h"
 #include "qsqlerror.h"
@@ -16,6 +15,7 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
         QMainWindow(parent),
         ui(new Ui::Search),
         currentPage(1),
+        currentColumnCount(3),
         db(db) {
     ui->setupUi(this);
     ui->deleteButton->setIcon(QIcon(":/pic/trash.png"));
@@ -23,8 +23,15 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
     ui->checkBoxAsc->setChecked(true);
     ui->dateEditFrom->setDate(QDate::currentDate());
     ui->dateEditTo->setDate(QDate::currentDate());
-    flowLayout = new FlowLayout;
-    ui->scrollAreaWidgetContents->setLayout(flowLayout);
+    //flowLayout = new FlowLayout;
+    hBoxLayout = new QHBoxLayout;
+    for (int i = 0; i < currentColumnCount; i++) {
+        QVBoxLayout *column = new QVBoxLayout;
+        column->setAlignment(Qt::AlignTop);
+        hBoxLayout->addLayout(column);
+        vBoxLayouts.append(column);
+    }
+    ui->scrollAreaWidgetContents->setLayout(hBoxLayout);
     this->setAttribute(Qt::WA_DeleteOnClose, true);
     ui->comboBoxType->clear();
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
@@ -44,6 +51,12 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
         // qDebug()<<type;
     }
     currentPage = ui->pageNavigate->getCurrentPage();
+    for (int i = 0; i < pageSize; i++) {
+        imagePreviewForm *form = new imagePreviewForm;
+        preViewList.append(form);
+        //flowLayout->addWidget(form);
+        connect(form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
+    }
     connect(ui->pageNavigate, &PageNavigator::currentPageChanged, this, [this](int p) {
         if (p != currentPage) {
             currentPage = p;
@@ -51,20 +64,6 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
         }
         currentPage = p;
     });
-    /*connect(ui->checkBoxTitle, &QCheckBox::stateChanged, this, [this](int stat) {
-        if (stat == Qt::CheckState::Checked) {
-            ui->checkBoxText->blockSignals(true);
-            ui->checkBoxText->setCheckState(Qt::CheckState::Unchecked);
-            ui->checkBoxText->blockSignals(false);
-        }
-    });
-    connect(ui->checkBoxText, &QCheckBox::stateChanged, this, [this](int stat) {
-        if (stat == Qt::CheckState::Checked) {
-            ui->checkBoxTitle->blockSignals(true);
-            ui->checkBoxTitle->setCheckState(Qt::CheckState::Unchecked);
-            ui->checkBoxTitle->blockSignals(false);
-        }
-    });*/
     connect(ui->checkBoxAsc, &QCheckBox::stateChanged, this, [this](int stat) {
         if (stat == Qt::CheckState::Checked) {
             ui->checkBoxDesc->blockSignals(true);
@@ -129,9 +128,9 @@ void Search::searchButton_clicked() {
         if (ui->checkBoxTitle->isChecked() && !ui->checkBoxText->isChecked()) {
             conditions.append("match(description) against('" + ui->lineEdit->text() + "')");
         } else if (ui->checkBoxTitle->isChecked() && ui->checkBoxText->isChecked()) {
-            conditions.append("match(description) against('" + ui->lineEdit->text() + "') or match(ocr_result) against('" + ui->lineEdit->text() + "')");
+            conditions.append("match(description) against('" + ui->lineEdit->text() + "') or match(ocr_result) against('" + ui->lineEdit->text() + "'in boolean mode)");
         } else if (!ui->checkBoxTitle->isChecked() && ui->checkBoxText->isChecked()) {
-            conditions.append("match(ocr_result) against('" + ui->lineEdit->text() + "')");
+            conditions.append("match(ocr_result) against('" + ui->lineEdit->text() + "'in boolean mode)");
         }
     }
 
@@ -180,11 +179,6 @@ void Search::searchButton_clicked() {
 
 void Search::updateSearch() {
     if (ui->stackedWidget->currentIndex() == 0) {
-        while (QLayoutItem *item = flowLayout->takeAt(0)) {
-            if (QWidget *widget = item->widget())
-                widget->deleteLater();
-            delete item;
-        }
         QString sql = currentConditon;
         switch (ui->comboBoxOrder->currentIndex()) {
         case 0:
@@ -223,23 +217,10 @@ void Search::updateSearch() {
             }
             QMessageBox::critical(this, "错误", errortext);
         } else {
-            while (query.next()) {
-                addImgItem(query.value("href").toString(), query.value("description").toString());
-            }
+            updateImgView(query);
         }
     } else if (ui->stackedWidget->currentIndex() == 1) {
-        ui->tableWidget->clear();
-        QStringList headers;
-        headers << "文件名"
-                << "日期"
-                << "描述"
-                << "分类";
-        ui->tableWidget->setHorizontalHeaderLabels(headers);
-        while (QLayoutItem *item = flowLayout->takeAt(0)) {
-            if (QWidget *widget = item->widget())
-                widget->deleteLater();
-            delete item;
-        }
+
         QString sql = currentConditon;
         sql += "limit " + QString::number((currentPage - 1) * pageSizeTable) + "," + QString::number((currentPage)*pageSizeTable) + " ";
         QSqlQuery query(db);
@@ -259,18 +240,66 @@ void Search::updateSearch() {
             }
             QMessageBox::critical(this, "错误", errortext);
         } else {
-            int i = 0;
-            ui->tableWidget->clearContents();
-            while (query.next()) {
-                auto check = new QTableWidgetItem(query.value("href").toString());
-                check->setCheckState(Qt::CheckState::Unchecked);
-                ui->tableWidget->setItem(i, 0, check);
-                ui->tableWidget->setItem(i, 1, new QTableWidgetItem(query.value("date").toString()));
-                ui->tableWidget->setItem(i, 2, new QTableWidgetItem(query.value("description").toString()));
-                ui->tableWidget->setItem(i, 3, new QTableWidgetItem(query.value("type").toString()));
-                i++;
+            updateTableView(query);
+        }
+    }
+}
+
+void Search::updateImgView(QSqlQuery &query) {
+    for (QVBoxLayout *column : vBoxLayouts) {
+        for (int i = column->count() - 1; i >= 0; i--) {
+            column->removeItem(column->itemAt(i));
+        }
+    }
+    for (auto &&form : preViewList) {
+        form->~imagePreviewForm();
+        new (form) imagePreviewForm;
+        connect(form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
+    }
+    while (query.next()) {
+        addImgItem(query.value("href").toString(), query.value("description").toString());
+    }
+    relocateImg();
+}
+
+void Search::relocateImg() {
+    for (imagePreviewForm *form : preViewList) {
+        QVBoxLayout *columnMinHeight;
+        int minHeight = 999999;
+        for (QVBoxLayout *column : vBoxLayouts) {
+            int height = 0;
+            for (int i = column->count() - 1; i >= 0; i--) {
+                imagePreviewForm *form = dynamic_cast<imagePreviewForm *>(column->itemAt(i)->widget());
+                height += form->getHeight();
+            }
+            if (height < minHeight) {
+                //qDebug() << height;
+                columnMinHeight = column;
+                minHeight = height;
             }
         }
+        columnMinHeight->addWidget(form);
+    }
+}
+
+void Search::updateTableView(QSqlQuery &query) {
+    ui->tableWidget->clear();
+    QStringList headers;
+    headers << "文件名"
+            << "日期"
+            << "描述"
+            << "分类";
+    ui->tableWidget->setHorizontalHeaderLabels(headers);
+    int i = 0;
+    ui->tableWidget->clearContents();
+    while (query.next()) {
+        auto check = new QTableWidgetItem(query.value("href").toString());
+        check->setCheckState(Qt::CheckState::Unchecked);
+        ui->tableWidget->setItem(i, 0, check);
+        ui->tableWidget->setItem(i, 1, new QTableWidgetItem(query.value("date").toString()));
+        ui->tableWidget->setItem(i, 2, new QTableWidgetItem(query.value("description").toString()));
+        ui->tableWidget->setItem(i, 3, new QTableWidgetItem(query.value("type").toString()));
+        i++;
     }
 }
 
@@ -304,13 +333,11 @@ void Search::deleteButton_clicked() {
     }
 }
 
-void Search::addImgItem(QString href, QString des) {
-    imagePreviewForm *form = new imagePreviewForm(ui->scrollArea);
-    flowLayout->addWidget(form);
+imagePreviewForm *Search::addImgItem(QString href, QString des) {
     QString filename(imgBase + href);
     QImageReader reader(filename.simplified());
     reader.setDecideFormatFromContent(true);
-    QSize size = reader.size();
+    /*QSize size = reader.size();
     if (size.width() > 4000) {
         size.setWidth(size.width() / 8);
         size.setHeight(size.height() / 8);
@@ -318,12 +345,12 @@ void Search::addImgItem(QString href, QString des) {
         size.setWidth(size.width() / 4);
         size.setHeight(size.height() / 4);
     }
-    reader.setScaledSize(size);
+    reader.setScaledSize(size);*/
     std::shared_ptr<QImage> img(new QImage(reader.read()));
     if (img->isNull()) {
         QFile file(filename);
         if (!file.open(QIODevice::ReadOnly)) {
-            qDebug() << file.errorString();
+            //qDebug() << file.errorString();
             QMessageBox::warning(this, QString("提示"), QString("打开图片文件失败！%1").arg(filename));
         }
         img->loadFromData(file.readAll());
@@ -333,8 +360,15 @@ void Search::addImgItem(QString href, QString des) {
                                      tr("打开图像失败") + href);
         }
     }
-    form->setImg(href, img, des);
-    connect(form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
+    imagePreviewForm *form;
+    for (int i = 0; i < pageSize; i++) {
+        form = preViewList[i];
+        if (form->isAvailable()) {
+            form->setImg(href, img, des);
+            break;
+        }
+    }
+    return form;
 }
 
 void Search::openDetailMenu(QString href) {
@@ -394,6 +428,32 @@ void Search::sendSQL() {
         ui->tableWidget_2->setItem(i, 3, new QTableWidgetItem(query.value("type").toString()));
         i++;
     }
+}
+
+void Search::resizeEvent(QResizeEvent *event) {
+    int width = ui->stackedWidget->width();
+    currentColumnCount = width / 300;
+    if (width == 622) {
+        currentColumnCount = 3;
+    }
+    for (QVBoxLayout *column : vBoxLayouts) {
+        for (int i = column->count() - 1; i >= 0; i--) {
+            column->removeItem(column->itemAt(i));
+        }
+    }
+    QLayoutItem *column;
+    while ((column = hBoxLayout->itemAt(0))) {
+        hBoxLayout->removeItem(column);
+        delete column;
+    }
+    vBoxLayouts.clear();
+    for (int i = 0; i < currentColumnCount; i++) {
+        QVBoxLayout *column = new QVBoxLayout;
+        column->setAlignment(Qt::AlignTop);
+        hBoxLayout->addLayout(column);
+        vBoxLayouts.append(column);
+    }
+    relocateImg();
 }
 
 Search::~Search() {

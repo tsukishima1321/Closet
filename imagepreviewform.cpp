@@ -6,10 +6,12 @@ extern QString imgBase;
 imagePreviewForm::imagePreviewForm(QWidget *parent) :
         QWidget(parent),
         ui(new Ui::imagePreviewForm),
-        img(nullptr) {
+        img(nullptr),
+        available(true) {
     ui->setupUi(this);
     this->setMinimumHeight(300);
     this->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+    this->hideElements();
 }
 
 void imagePreviewForm::setImg(QString href, std::shared_ptr<QImage> img, QString des) {
@@ -24,6 +26,27 @@ void imagePreviewForm::setImg(QString href, std::shared_ptr<QImage> img, QString
         //ui->labelImg->setScaledContents(true);
         ui->labelImg->setPixmap(pixmap);
     }
+    ui->labelImg->show();
+    ui->labelText->show();
+    available = false;
+}
+
+int imagePreviewForm::getHeight() {
+    if (img) {
+        return this->img->height();
+    } else {
+        return 0;
+    }
+}
+
+void imagePreviewForm::hideElements() {
+    ui->labelImg->hide();
+    ui->labelText->hide();
+    available = true;
+}
+
+bool imagePreviewForm::isAvailable() const {
+    return available;
 }
 
 void imagePreviewForm::mouseDoubleClickEvent(QMouseEvent *event) {

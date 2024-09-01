@@ -17,9 +17,9 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
     ui->zoomInButton->setIcon(QIcon(":/pic/zoomIn.png"));
     ui->zoomOutButton->setIcon(QIcon(":/pic/zoomOut.png"));
     ui->zoomResetButton->setIcon(QIcon(":/pic/reset.png"));
-    //connect(ui->zoomInButton, &QPushButton::clicked, ui->imgWidget, &ImageViewWidget::onZoomInImage);
-    //connect(ui->zoomOutButton, &QPushButton::clicked, ui->imgWidget, &ImageViewWidget::onZoomOutImage);
-    //connect(ui->zoomResetButton, &QPushButton::clicked, ui->imgWidget, &ImageViewWidget::onPresetImage);
+    connect(ui->zoomInButton, &QPushButton::clicked, ui->imgWidget, &ImageViewWidget::onZoomInImage);
+    connect(ui->zoomOutButton, &QPushButton::clicked, ui->imgWidget, &ImageViewWidget::onZoomOutImage);
+    connect(ui->zoomResetButton, &QPushButton::clicked, ui->imgWidget, &ImageViewWidget::onPresetImage);
     connect(ui->commitButton, &QPushButton::clicked, this, &DetailView::commitChange);
     connect(ui->cancelButton, &QPushButton::clicked, this, &DetailView::cancelChange);
     connect(ui->typeMenuButton, &QPushButton::clicked, this, &DetailView::typeMenu);

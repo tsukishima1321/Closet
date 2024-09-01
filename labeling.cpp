@@ -83,6 +83,7 @@ LabelWindow::~LabelWindow() { delete ui; }
 
 void LabelWindow::pushButtonNext_clicked() {
     currentImgIndex++;
+    ui->imageView->onPresetImage();
     if (currentImgIndex < ImageCount) {
         QString ImageName = imagePath + dir[currentImgIndex];
         ui->imageView->loadImage(ImageName);
@@ -95,6 +96,7 @@ void LabelWindow::pushButtonNext_clicked() {
 
 void LabelWindow::pushButtonLast_clicked() {
     currentImgIndex--;
+    ui->imageView->onPresetImage();
     if (currentImgIndex >= 0) {
         QString ImageName = imagePath + dir[currentImgIndex];
         ui->imageView->loadImage(ImageName);
@@ -118,6 +120,7 @@ void LabelWindow::pushButtonStart_clicked() {
     dir.setNameFilters(ImageList); //获得文件夹下图片的名字
     ImageCount = dir.count();      //获得dir里名字的个数，也表示文件夹下图片的个数
     if (ImageCount > 0) {
+        ui->imageView->onPresetImage();
         QString ImageName = imagePath + dir[0];
         ui->imageView->loadImage(ImageName);
         ui->imageView->update();
