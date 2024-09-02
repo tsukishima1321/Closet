@@ -373,8 +373,8 @@ imagePreviewForm *Search::addImgItem(QString href, QString des) {
 
 void Search::openDetailMenu(QString href) {
     auto newWindow = new DetailView(nullptr, db);
-    newWindow->OpenImg(href);
     newWindow->show();
+    newWindow->OpenImg(href);
 }
 
 void Search::sendSQL() {

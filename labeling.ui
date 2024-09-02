@@ -474,7 +474,7 @@
                      </property>
                      <property name="dateTime">
                       <datetime>
-                       <hour>16</hour>
+                       <hour>8</hour>
                        <minute>0</minute>
                        <second>0</second>
                        <year>2023</year>
@@ -563,22 +563,6 @@
             </item>
             <item>
              <layout class="QGridLayout" name="gridLayoutImageView">
-              <item row="0" column="0">
-               <widget class="ImageViewWidget" name="imageView" native="true">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">*{
-border: 2px solid black;
-background: white;
-}</string>
-                </property>
-               </widget>
-              </item>
               <item row="1" column="0">
                <layout class="QHBoxLayout" name="horizontalLayout_4">
                 <item>
@@ -634,6 +618,9 @@ background: white;
                  </widget>
                 </item>
                </layout>
+              </item>
+              <item row="0" column="0">
+               <widget class="imageView" name="imageViewPort"/>
               </item>
              </layout>
             </item>
@@ -785,10 +772,9 @@ background: white;
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>ImageViewWidget</class>
-   <extends>QWidget</extends>
-   <header>imageviewwidget.h</header>
-   <container>1</container>
+   <class>imageView</class>
+   <extends>QGraphicsView</extends>
+   <header>imageview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

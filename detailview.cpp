@@ -1,8 +1,8 @@
 #include "detailview.h"
-#include "imageviewwidget.h"
 #include "ocrmenu.h"
 #include "typeeditmenu.h"
 #include "ui_detailview.h"
+#include <QGraphicsItem>
 #include <QIcon>
 #include <QMessageBox>
 #include <QSqlError>
@@ -17,9 +17,9 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
     ui->zoomInButton->setIcon(QIcon(":/pic/zoomIn.png"));
     ui->zoomOutButton->setIcon(QIcon(":/pic/zoomOut.png"));
     ui->zoomResetButton->setIcon(QIcon(":/pic/reset.png"));
-    connect(ui->zoomInButton, &QPushButton::clicked, ui->imgWidget, &ImageViewWidget::onZoomInImage);
-    connect(ui->zoomOutButton, &QPushButton::clicked, ui->imgWidget, &ImageViewWidget::onZoomOutImage);
-    connect(ui->zoomResetButton, &QPushButton::clicked, ui->imgWidget, &ImageViewWidget::onPresetImage);
+    connect(ui->zoomInButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_zoomIn);
+    connect(ui->zoomOutButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_zoomOut);
+    connect(ui->zoomResetButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_reset);
     connect(ui->commitButton, &QPushButton::clicked, this, &DetailView::commitChange);
     connect(ui->cancelButton, &QPushButton::clicked, this, &DetailView::cancelChange);
     connect(ui->typeMenuButton, &QPushButton::clicked, this, &DetailView::typeMenu);
@@ -30,7 +30,7 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
 
 void DetailView::OpenImg(QString href) {
     current = href;
-    ui->imgWidget->loadImage(imgBase + href);
+    ui->graphicsView->loadImage(imgBase + href);
     QSqlQuery query(db);
     query.prepare("select * from pictures where href=:href");
     query.bindValue(":href", href);

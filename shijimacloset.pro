@@ -28,7 +28,7 @@ SOURCES += \
         dbinstance.cpp \
         detailview.cpp \
         imagepreviewform.cpp \
-        imageviewwidget.cpp \
+        imageview.cpp \
         labelcommit.cpp \
         labeling.cpp \
         login.cpp \
@@ -43,7 +43,7 @@ HEADERS += \
         dbinstance.h \
         detailview.h \
         imagepreviewform.h \
-        imageviewwidget.h \
+        imageview.h \
         item.h \
         labelcommit.h \
         labeling.h \
