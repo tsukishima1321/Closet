@@ -7,9 +7,15 @@
 
 class imageView : public QGraphicsView {
     Q_OBJECT
+
 public:
+    enum WheelMode {
+        Scroll,
+        Scale
+    };
     imageView(QWidget *parent = nullptr);
     void loadImage(QString href);
+    void setWheelMode(WheelMode mode);
 
 public slots:
     void slot_zoomIn() { scale(1.2, 1.2); }
@@ -19,6 +25,7 @@ public slots:
 private:
     double zoom;
     QPoint lastMousePos;
+    WheelMode wheelMode;
     bool mousePressed;
     void wheelEvent(QWheelEvent *event) override;
     void MyScale(double step);

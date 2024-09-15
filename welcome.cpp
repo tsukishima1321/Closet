@@ -19,7 +19,8 @@ Welcome::Welcome(QWidget *parent) :
     pixmap->scaled(ui->label->size(), Qt::KeepAspectRatio);
     ui->label->setScaledContents(true);
     ui->label->setPixmap(*pixmap);
-    ui->lineEdit->setText(imgBase);
+    //ui->lineEdit->setText(imgBase);
+    //ui->lineEdit->hide();
     connect(ui->labelingButton, &QPushButton::clicked, this, &Welcome::labelingButton_clicked);
     connect(ui->searchButton, &QPushButton::clicked, this, &Welcome::searchButton_clicked);
     connect(ui->typeEditButton, &QPushButton::clicked, this, &Welcome::typeEditButton_clicked);
@@ -128,6 +129,7 @@ void Welcome::buildHtm(QSqlDatabase &db) {
 
 void Welcome::logInButton_clicked() {
     auto logInWindow = new login(this);
+    ui->lineEdit->setText(imgBase);
     logInWindow->exec();
 }
 

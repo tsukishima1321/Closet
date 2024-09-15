@@ -20,10 +20,9 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
     ui->setupUi(this);
     ui->deleteButton->setIcon(QIcon(":/pic/trash.png"));
     ui->checkBoxTitle->setChecked(true);
-    ui->checkBoxAsc->setChecked(true);
+    ui->radioButtonAsc->setChecked(true);
     ui->dateEditFrom->setDate(QDate::currentDate());
     ui->dateEditTo->setDate(QDate::currentDate());
-    //flowLayout = new FlowLayout;
     hBoxLayout = new QHBoxLayout;
     for (int i = 0; i < currentColumnCount; i++) {
         QVBoxLayout *column = new QVBoxLayout;
@@ -54,7 +53,6 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
     for (int i = 0; i < pageSize; i++) {
         imagePreviewForm *form = new imagePreviewForm;
         preViewList.append(form);
-        //flowLayout->addWidget(form);
         connect(form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
     }
     connect(ui->pageNavigate, &PageNavigator::currentPageChanged, this, [this](int p) {
@@ -64,20 +62,10 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
         }
         currentPage = p;
     });
-    connect(ui->checkBoxAsc, &QCheckBox::stateChanged, this, [this](int stat) {
-        if (stat == Qt::CheckState::Checked) {
-            ui->checkBoxDesc->blockSignals(true);
-            ui->checkBoxDesc->setCheckState(Qt::CheckState::Unchecked);
-            ui->checkBoxDesc->blockSignals(false);
-        }
+    connect(ui->radioButtonAsc, &QRadioButton::clicked, this, [this](int stat) {
         updateSearch();
     });
-    connect(ui->checkBoxDesc, &QCheckBox::stateChanged, this, [this](int stat) {
-        if (stat == Qt::CheckState::Checked) {
-            ui->checkBoxAsc->blockSignals(true);
-            ui->checkBoxAsc->setCheckState(Qt::CheckState::Unchecked);
-            ui->checkBoxAsc->blockSignals(false);
-        }
+    connect(ui->radioButtonDesc, &QRadioButton::clicked, this, [this](int stat) {
         updateSearch();
     });
     connect(ui->checkBoxType, &QCheckBox::stateChanged, this, [this](int stat) {
@@ -126,9 +114,9 @@ void Search::searchButton_clicked() {
     if (ui->lineEdit->text() == "") {
     } else {
         if (ui->checkBoxTitle->isChecked() && !ui->checkBoxText->isChecked()) {
-            conditions.append("match(description) against('" + ui->lineEdit->text() + "')");
+            conditions.append("match(description) against('" + ui->lineEdit->text() + +"'in boolean mode)");
         } else if (ui->checkBoxTitle->isChecked() && ui->checkBoxText->isChecked()) {
-            conditions.append("match(description) against('" + ui->lineEdit->text() + "') or match(ocr_result) against('" + ui->lineEdit->text() + "'in boolean mode)");
+            conditions.append("match(description) against('" + ui->lineEdit->text() + "'in boolean mode) or match(ocr_result) against('" + ui->lineEdit->text() + "'in boolean mode)");
         } else if (!ui->checkBoxTitle->isChecked() && ui->checkBoxText->isChecked()) {
             conditions.append("match(ocr_result) against('" + ui->lineEdit->text() + "'in boolean mode)");
         }
@@ -194,7 +182,7 @@ void Search::updateSearch() {
             sql += "order by pictures.href ";
             break;
         }
-        if (ui->checkBoxAsc->checkState() == Qt::Checked) {
+        if (ui->radioButtonAsc->isChecked()) {
             sql += "asc ";
         } else {
             sql += "desc ";
@@ -307,9 +295,7 @@ void Search::tableCellDoubleClicked(int row, int column) {
     (void)column;
     QString name = ui->tableWidget->item(row, 0)->text();
     if (name != "") {
-        auto newWindow = new DetailView(nullptr, db);
-        newWindow->OpenImg(name);
-        newWindow->show();
+        openDetailMenu(name);
     }
 }
 

@@ -272,14 +272,14 @@
            </spacer>
           </item>
           <item>
-           <widget class="QCheckBox" name="checkBoxAsc">
+           <widget class="QRadioButton" name="radioButtonAsc">
             <property name="text">
              <string>升序</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="checkBoxDesc">
+           <widget class="QRadioButton" name="radioButtonDesc">
             <property name="text">
              <string>降序</string>
             </property>

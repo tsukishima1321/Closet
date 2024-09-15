@@ -29,6 +29,7 @@ private:
     void cancelChange();
     void typeMenu();
     void updateTypes();
+    void enableEdit();
 };
 
 #endif // DETAILVIEW_H

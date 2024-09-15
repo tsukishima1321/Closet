@@ -36,6 +36,7 @@ private slots:
     void pushButtonDelete_clicked();
     void pushButtonAddType_clicked();
     void freshButton_clicked();
+    void freshDateButton_clicked();
 
 private:
     Ui::LabelWindow *ui;

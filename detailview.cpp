@@ -17,6 +17,9 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
     ui->zoomInButton->setIcon(QIcon(":/pic/zoomIn.png"));
     ui->zoomOutButton->setIcon(QIcon(":/pic/zoomOut.png"));
     ui->zoomResetButton->setIcon(QIcon(":/pic/reset.png"));
+    ui->dateEdit->setReadOnly(true);
+    ui->desText->setReadOnly(true);
+    ui->typeSelect->setEnabled(false);
     connect(ui->zoomInButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_zoomIn);
     connect(ui->zoomOutButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_zoomOut);
     connect(ui->zoomResetButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_reset);
@@ -24,6 +27,9 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
     connect(ui->cancelButton, &QPushButton::clicked, this, &DetailView::cancelChange);
     connect(ui->typeMenuButton, &QPushButton::clicked, this, &DetailView::typeMenu);
     connect(ui->ocrMenuButton, &QPushButton::clicked, this, &DetailView::ocrMenuButton_clicked);
+    connect(ui->editEnableButton, &QPushButton::clicked, this, &DetailView::enableEdit);
+    connect(ui->radioButtonScale, &QRadioButton::clicked, this, [this]() { ui->graphicsView->setWheelMode(imageView::WheelMode::Scale); });
+    connect(ui->radioButtonScroll, &QRadioButton::clicked, this, [this]() { ui->graphicsView->setWheelMode(imageView::WheelMode::Scroll); });
     this->setAttribute(Qt::WA_DeleteOnClose, true);
     updateTypes();
 }
@@ -49,6 +55,13 @@ void DetailView::OpenImg(QString href) {
         ui->desText->setText(query.value("description").toString());
         ui->typeSelect->setCurrentText(query.value("type").toString());
     }
+}
+
+void DetailView::enableEdit() {
+    ui->dateEdit->setReadOnly(false);
+    ui->desText->setReadOnly(false);
+    ui->typeSelect->setEnabled(true);
+    ui->stackedWidget->setCurrentIndex(0);
 }
 
 void DetailView::commitChange() {
@@ -92,6 +105,10 @@ void DetailView::cancelChange() {
         ui->desText->setText(query.value("description").toString());
         ui->typeSelect->setCurrentText(query.value("type").toString());
     }
+    ui->dateEdit->setReadOnly(true);
+    ui->desText->setReadOnly(true);
+    ui->typeSelect->setEnabled(false);
+    ui->stackedWidget->setCurrentIndex(1);
 }
 
 void DetailView::typeMenu() {

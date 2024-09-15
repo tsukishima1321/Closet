@@ -96,7 +96,7 @@ void labelCommit::pushButtonCommitAll_clicked() {
         query.bindValue(":description", item.description);
         query.bindValue(":type", item.type);
         query.exec();
-        copyFileToPath(fromDir + item.href, imgBase, false);
+        copyFileToPath(fromDir + "/" + item.href, imgBase + item.href, false);
     }
     itemList->clear();
     ui->tableWidget->clearContents();

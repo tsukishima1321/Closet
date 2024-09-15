@@ -3,12 +3,13 @@
 #include <QWheelEvent>
 
 imageView::imageView(QWidget *parent) :
-        QGraphicsView(parent) {
+        QGraphicsView(parent),
+        zoom(1),
+        mousePressed(false) {
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     setResizeAnchor(QGraphicsView::AnchorUnderMouse);
     setDragMode(QGraphicsView::DragMode::ScrollHandDrag);
-    zoom = 1;
-    mousePressed = false;
+    wheelMode = WheelMode::Scroll;
 }
 
 void imageView::loadImage(QString href) {
@@ -19,6 +20,10 @@ void imageView::loadImage(QString href) {
     this->slot_reset();
 }
 
+void imageView::setWheelMode(WheelMode mode) {
+    this->wheelMode = mode;
+}
+
 void imageView::slot_reset() {
     double ratio = this->size().width() / this->scene()->items()[0]->boundingRect().width();
     resetTransform();
@@ -27,7 +32,11 @@ void imageView::slot_reset() {
 }
 
 void imageView::wheelEvent(QWheelEvent *event) {
-    this->MyScale(event->angleDelta().y() / 2);
+    if (wheelMode == WheelMode::Scale) {
+        this->MyScale(event->angleDelta().y() / 2);
+    } else if (wheelMode == WheelMode::Scroll) {
+        QGraphicsView::wheelEvent(event);
+    }
 }
 
 void imageView::MyScale(double step) {

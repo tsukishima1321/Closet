@@ -27,11 +27,18 @@ LabelWindow::LabelWindow(QWidget *parent) :
     ui->tabWidget->setTabText(0, "录入记录");
     ui->tabWidget->setTabText(1, "记录预览");
     ui->tabWidget->setTabText(2, "记录提交");
+    ui->zoomInButton->setIcon(QIcon(":/pic/zoomIn.png"));
+    ui->zoomOutButton->setIcon(QIcon(":/pic/zoomOut.png"));
+    ui->zoomResetButton->setIcon(QIcon(":/pic/reset.png"));
     ui->freshTypeButton->setIcon(QIcon(":/pic/refresh.png"));
+    ui->freshDateButton->setIcon(QIcon(":/pic/refresh.png"));
     ui->toolButtonNext->setIcon(QIcon(":/pic/step-forward.png"));
     ui->toolButtonLast->setIcon(QIcon(":/pic/step-back.png"));
     ui->dateEdit->setDate(QDate::currentDate());
     //链接来自gui的信号
+    connect(ui->zoomInButton, &QPushButton::clicked, ui->imageViewPort, &imageView::slot_zoomIn);
+    connect(ui->zoomOutButton, &QPushButton::clicked, ui->imageViewPort, &imageView::slot_zoomOut);
+    connect(ui->zoomResetButton, &QPushButton::clicked, ui->imageViewPort, &imageView::slot_reset);
     connect(ui->pushButtonAdd, &QPushButton::clicked, this, &LabelWindow::pushButtonAdd_clicked);
     connect(ui->toolButtonNext, &QPushButton::clicked, this, &::LabelWindow::pushButtonNext_clicked);
     connect(ui->toolButtonLast, &QPushButton::clicked, this, &::LabelWindow::pushButtonLast_clicked);
@@ -40,7 +47,10 @@ LabelWindow::LabelWindow(QWidget *parent) :
     connect(ui->pushButtonFinish_2, &QPushButton::clicked, this, &LabelWindow::pushButtonFinish_clicked);
     connect(ui->pushButtonAddType, &QPushButton::clicked, this, &LabelWindow::pushButtonAddType_clicked);
     connect(ui->freshTypeButton, &QPushButton::clicked, this, &LabelWindow::freshButton_clicked);
+    connect(ui->freshDateButton, &QPushButton::clicked, this, &LabelWindow::freshDateButton_clicked);
     connect(ui->pushButtonDelete, &QPushButton::clicked, this, &LabelWindow::pushButtonDelete_clicked);
+    connect(ui->radioButtonScale, &QRadioButton::clicked, this, [this]() { ui->imageViewPort->setWheelMode(imageView::WheelMode::Scale); });
+    connect(ui->radioButtonScroll, &QRadioButton::clicked, this, [this]() { ui->imageViewPort->setWheelMode(imageView::WheelMode::Scroll); });
     connect(ui->tabWidget, &QTabWidget::tabBarClicked, this, [this](int i) {
         if (i == 2) {
             pushButtonFinish_clicked();
@@ -144,6 +154,10 @@ void LabelWindow::pushButtonAdd_clicked() {
 }
 
 void LabelWindow::freshButton_clicked() { updateTypes(); }
+
+void LabelWindow::freshDateButton_clicked() {
+    ui->dateEdit->setDate(QDate::currentDate());
+}
 
 void LabelWindow::pushButtonDelete_clicked() {
     if (ui->tableWidget->rowCount() == 0) {
