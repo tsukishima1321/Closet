@@ -4,6 +4,7 @@
 #include <QLayout>
 #include <QList>
 #include <QMainWindow>
+#include <QRunnable>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <imagepreviewform.h>
@@ -42,10 +43,23 @@ private:
     void openDetailMenu(QString href);
     void updateImgView(QSqlQuery &query);
     void updateTableView(QSqlQuery &query);
-    void relocateImg();
+    void locateImg();
     void tableCellDoubleClicked(int, int);
     void deleteButton_clicked();
     void sendSQL();
+};
+
+class imgLoader : public QObject, public QRunnable {
+    Q_OBJECT
+public:
+    imgLoader(imagePreviewForm *target, QImageReader *reader, QString href, QString des);
+    imagePreviewForm *target;
+    QImageReader *reader;
+    QString href;
+    QString des;
+    void run() override;
+signals:
+    void loadReady();
 };
 
 #endif // SEARCH_H

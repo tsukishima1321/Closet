@@ -46,9 +46,3 @@ void imageView::MyScale(double step) {
         return;
     this->scale(factor, factor);
 }
-
-void imageView::MyMove(QPointF delta) {
-    delta *= this->transform().m11();
-    this->centerOn(this->mapToScene(QPoint(this->viewport()->rect().width() / 2 - delta.x(),
-                                           this->viewport()->rect().height() / 2 - delta.y())));
-}

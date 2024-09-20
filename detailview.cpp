@@ -2,6 +2,7 @@
 #include "ocrmenu.h"
 #include "typeeditmenu.h"
 #include "ui_detailview.h"
+#include <QFileDialog>
 #include <QGraphicsItem>
 #include <QIcon>
 #include <QMessageBox>
@@ -17,17 +18,16 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
     ui->zoomInButton->setIcon(QIcon(":/pic/zoomIn.png"));
     ui->zoomOutButton->setIcon(QIcon(":/pic/zoomOut.png"));
     ui->zoomResetButton->setIcon(QIcon(":/pic/reset.png"));
-    ui->dateEdit->setReadOnly(true);
-    ui->desText->setReadOnly(true);
-    ui->typeSelect->setEnabled(false);
+    disableEdit();
     connect(ui->zoomInButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_zoomIn);
     connect(ui->zoomOutButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_zoomOut);
     connect(ui->zoomResetButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_reset);
     connect(ui->commitButton, &QPushButton::clicked, this, &DetailView::commitChange);
     connect(ui->cancelButton, &QPushButton::clicked, this, &DetailView::cancelChange);
-    connect(ui->typeMenuButton, &QPushButton::clicked, this, &DetailView::typeMenu);
-    connect(ui->ocrMenuButton, &QPushButton::clicked, this, &DetailView::ocrMenuButton_clicked);
+    connect(ui->typeMenuButton, &QPushButton::clicked, this, &DetailView::typeMenuOpen);
+    connect(ui->ocrMenuButton, &QPushButton::clicked, this, &DetailView::ocrMenuOpen);
     connect(ui->editEnableButton, &QPushButton::clicked, this, &DetailView::enableEdit);
+    connect(ui->picSaveButton, &QPushButton::clicked, this, &DetailView::savePic);
     connect(ui->radioButtonScale, &QRadioButton::clicked, this, [this]() { ui->graphicsView->setWheelMode(imageView::WheelMode::Scale); });
     connect(ui->radioButtonScroll, &QRadioButton::clicked, this, [this]() { ui->graphicsView->setWheelMode(imageView::WheelMode::Scroll); });
     this->setAttribute(Qt::WA_DeleteOnClose, true);
@@ -62,6 +62,15 @@ void DetailView::enableEdit() {
     ui->desText->setReadOnly(false);
     ui->typeSelect->setEnabled(true);
     ui->stackedWidget->setCurrentIndex(0);
+    ui->typeMenuButton->show();
+}
+
+void DetailView::disableEdit() {
+    ui->dateEdit->setReadOnly(true);
+    ui->desText->setReadOnly(true);
+    ui->typeSelect->setEnabled(false);
+    ui->stackedWidget->setCurrentIndex(1);
+    ui->typeMenuButton->hide();
 }
 
 void DetailView::commitChange() {
@@ -92,6 +101,7 @@ void DetailView::commitChange() {
     } else {
         QMessageBox::information(this, "成功", "修改成功");
     }
+    disableEdit();
 }
 
 void DetailView::cancelChange() {
@@ -105,13 +115,10 @@ void DetailView::cancelChange() {
         ui->desText->setText(query.value("description").toString());
         ui->typeSelect->setCurrentText(query.value("type").toString());
     }
-    ui->dateEdit->setReadOnly(true);
-    ui->desText->setReadOnly(true);
-    ui->typeSelect->setEnabled(false);
-    ui->stackedWidget->setCurrentIndex(1);
+    disableEdit();
 }
 
-void DetailView::typeMenu() {
+void DetailView::typeMenuOpen() {
     auto newWindow = new typeEditMenu(nullptr, db);
     connect(newWindow, &QWidget::destroyed, this, &DetailView::updateTypes);
     newWindow->show();
@@ -128,11 +135,21 @@ void DetailView::updateTypes() {
     }
 }
 
+void DetailView::savePic() {
+    QString targetDirPath = QFileDialog::getExistingDirectory(this, "选择保存的路径", "/");
+    targetDirPath += "/";
+    if (QFile::copy(imgBase + current, targetDirPath + current)) {
+        QMessageBox::information(this, "导出", targetDirPath + current + "导出完成");
+    } else {
+        QMessageBox::warning(this, "导出", targetDirPath + current + "导出失败：文件已存在");
+    }
+}
+
 DetailView::~DetailView() {
     delete ui;
 }
 
-void DetailView::ocrMenuButton_clicked() {
+void DetailView::ocrMenuOpen() {
     auto newWindow = new ocrMenu(nullptr, db, current);
     newWindow->show();
 }

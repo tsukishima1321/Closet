@@ -7,6 +7,7 @@
 #include "search.h"
 #include "typeeditmenu.h"
 #include "ui_welcome.h"
+#include <QSettings>
 #include <QString>
 
 QString imgBase = "D:/Z/Pictures/";

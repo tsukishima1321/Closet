@@ -232,7 +232,7 @@
            </size>
           </property>
           <property name="text">
-           <string>编辑分类</string>
+           <string>管理分类</string>
           </property>
          </widget>
         </item>
@@ -301,6 +301,13 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="picSaveButton">
+        <property name="text">
+         <string>导出图片&gt;&gt;</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QStackedWidget" name="stackedWidget">

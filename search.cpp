@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QRegularExpression>
+#include <QThreadPool>
 
 extern QString imgBase;
 
@@ -106,6 +107,7 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
 }
 
 void Search::searchButton_clicked() {
+    /*构造查询的条件，预先查询结果的总数来更新页码，最后调用updateSearch()*/
     ui->statusbar->showMessage("正在搜索...");
     QString sql = "";
 
@@ -166,99 +168,91 @@ void Search::searchButton_clicked() {
 }
 
 void Search::updateSearch() {
+    /*接受查询条件，在此之上构造排序和分页条件，进行实际查询，根据radioButtn状态调用updateImgView()或updateTableView()
+      除了被searchButtonClicked调用外，不改变查询条件，只改变排序和分类的操作最后也会调用此函数来显示结果*/
+    QString sql = currentConditon;
+    switch (ui->comboBoxOrder->currentIndex()) {
+    case 0:
+        sql += "order by pictures.href ";
+        break;
+    case 1:
+        sql += "order by pictures.date ";
+        break;
+    case 2:
+        sql += "order by pictures.description ";
+        break;
+    default:
+        sql += "order by pictures.href ";
+        break;
+    }
+    if (ui->radioButtonAsc->isChecked()) {
+        sql += "asc ";
+    } else {
+        sql += "desc ";
+    }
     if (ui->stackedWidget->currentIndex() == 0) {
-        QString sql = currentConditon;
-        switch (ui->comboBoxOrder->currentIndex()) {
-        case 0:
-            sql += "order by pictures.href ";
-            break;
-        case 1:
-            sql += "order by pictures.date ";
-            break;
-        case 2:
-            sql += "order by pictures.description ";
-            break;
-        default:
-            sql += "order by pictures.href ";
-            break;
-        }
-        if (ui->radioButtonAsc->isChecked()) {
-            sql += "asc ";
-        } else {
-            sql += "desc ";
-        }
         sql += "limit " + QString::number((currentPage - 1) * pageSize) + "," + QString::number((currentPage)*pageSize) + " ";
-        QSqlQuery query(db);
-        if (ui->checkBoxText->isChecked()) {
-            query.prepare("select * from pictures_ocr join pictures on pictures.href=pictures_ocr.href " + sql);
-        } else {
-            query.prepare("select * from pictures " + sql);
-        }
-
-        if (!query.exec()) {
-            QSqlError sqlerror = query.lastError();
-            qDebug() << sqlerror.nativeErrorCode();
-            QString errortext = sqlerror.text();
-            qDebug() << errortext;
-            if (errortext == "") {
-                errortext = "empty query";
-            }
-            QMessageBox::critical(this, "错误", errortext);
-        } else {
-            updateImgView(query);
-        }
     } else if (ui->stackedWidget->currentIndex() == 1) {
-
-        QString sql = currentConditon;
         sql += "limit " + QString::number((currentPage - 1) * pageSizeTable) + "," + QString::number((currentPage)*pageSizeTable) + " ";
-        QSqlQuery query(db);
-        if (ui->checkBoxText->isChecked()) {
-            query.prepare("select * from pictures_ocr join pictures on pictures.href=pictures_ocr.href " + sql);
-        } else {
-            query.prepare("select * from pictures " + sql);
-        }
+    }
+    QSqlQuery query(db);
+    if (ui->checkBoxText->isChecked()) {
+        query.prepare("select * from pictures_ocr join pictures on pictures.href=pictures_ocr.href " + sql);
+    } else {
+        query.prepare("select * from pictures " + sql);
+    }
 
-        if (!query.exec()) {
-            QSqlError sqlerror = query.lastError();
-            qDebug() << sqlerror.nativeErrorCode();
-            QString errortext = sqlerror.text();
-            qDebug() << errortext;
-            if (errortext == "") {
-                errortext = "empty query";
-            }
-            QMessageBox::critical(this, "错误", errortext);
-        } else {
+    if (!query.exec()) {
+        QSqlError sqlerror = query.lastError();
+        qDebug() << sqlerror.nativeErrorCode();
+        QString errortext = sqlerror.text();
+        qDebug() << errortext;
+        if (errortext == "") {
+            errortext = "empty query";
+        }
+        QMessageBox::critical(this, "错误", errortext);
+    } else {
+        if (ui->stackedWidget->currentIndex() == 0) {
+            updateImgView(query);
+        } else if (ui->stackedWidget->currentIndex() == 1) {
             updateTableView(query);
         }
     }
 }
 
 void Search::updateImgView(QSqlQuery &query) {
-    for (QVBoxLayout *column : vBoxLayouts) {
-        for (int i = column->count() - 1; i >= 0; i--) {
-            column->removeItem(column->itemAt(i));
-        }
-    }
+    //重置preViewList中所有Form到可用状态
     for (auto &&form : preViewList) {
         form->~imagePreviewForm();
         new (form) imagePreviewForm;
         connect(form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
     }
+    //执行查询，将结果存入preViewList
+    //图片大小和文字信息全部同步设置完毕，实际图片读取放入Thread中
     while (query.next()) {
         addImgItem(query.value("href").toString(), query.value("description").toString());
     }
-    relocateImg();
+    //清空子布局
+    for (QVBoxLayout *column : vBoxLayouts) {
+        for (int i = column->count() - 1; i >= 0; i--) {
+            column->removeItem(column->itemAt(i));
+        }
+    }
+    //将preViewList中的窗口排入布局
+    locateImg();
 }
 
-void Search::relocateImg() {
+void Search::locateImg() {
+    /*读取preViewList中的所有窗口，根据他们的高度将他们排入布局
+    调用该函数前所有子布局应该已被创建好且是空的
+    要显示的图片发生改变，或者窗口大小发生改变时会调用此函数*/
     for (imagePreviewForm *form : preViewList) {
-        QVBoxLayout *columnMinHeight;
+        QVBoxLayout *columnMinHeight = nullptr;
         int minHeight = 999999;
         for (QVBoxLayout *column : vBoxLayouts) {
             int height = 0;
             for (int i = column->count() - 1; i >= 0; i--) {
-                imagePreviewForm *form = dynamic_cast<imagePreviewForm *>(column->itemAt(i)->widget());
-                height += form->getHeight();
+                height += dynamic_cast<imagePreviewForm *>(column->itemAt(i)->widget())->getHeight();
             }
             if (height < minHeight) {
                 //qDebug() << height;
@@ -266,7 +260,9 @@ void Search::relocateImg() {
                 minHeight = height;
             }
         }
-        columnMinHeight->addWidget(form);
+        if (columnMinHeight) {
+            columnMinHeight->addWidget(form);
+        }
     }
 }
 
@@ -319,11 +315,27 @@ void Search::deleteButton_clicked() {
     }
 }
 
+imgLoader::imgLoader(imagePreviewForm *target, QImageReader *reader, QString href, QString des) :
+        target(target), reader(reader), href(href), des(des) {}
+
+void imgLoader::run() {
+    std::shared_ptr<QImage> img(new QImage(reader->read()));
+    if (img->isNull()) {
+        QMessageBox::information(nullptr,
+                                 tr("打开图像失败"),
+                                 tr("打开图像失败") + reader->fileName());
+    }
+    target->setImg(href, img, des);
+    emit loadReady();
+    delete reader;
+}
+
 imagePreviewForm *Search::addImgItem(QString href, QString des) {
+    /*根据图片信息设置寻找preViewList中可用的imagePreviewForm放入，大小和文字同步设置，实际图片读取放入Thread中*/
     QString filename(imgBase + href);
-    QImageReader reader(filename.simplified());
-    reader.setDecideFormatFromContent(true);
-    /*QSize size = reader.size();
+    QImageReader *reader = new QImageReader(filename.simplified());
+    reader->setDecideFormatFromContent(true);
+    QSize size = reader->size();
     if (size.width() > 4000) {
         size.setWidth(size.width() / 8);
         size.setHeight(size.height() / 8);
@@ -331,26 +343,17 @@ imagePreviewForm *Search::addImgItem(QString href, QString des) {
         size.setWidth(size.width() / 4);
         size.setHeight(size.height() / 4);
     }
-    reader.setScaledSize(size);*/
-    std::shared_ptr<QImage> img(new QImage(reader.read()));
-    if (img->isNull()) {
-        QFile file(filename);
-        if (!file.open(QIODevice::ReadOnly)) {
-            //qDebug() << file.errorString();
-            QMessageBox::warning(this, QString("提示"), QString("打开图片文件失败！%1").arg(filename));
-        }
-        img->loadFromData(file.readAll());
-        if (img->isNull()) {
-            QMessageBox::information(this,
-                                     tr("打开图像失败"),
-                                     tr("打开图像失败") + href);
-        }
-    }
+    reader->setScaledSize(size);
+    std::shared_ptr<QImage> img(new QImage(reader->scaledSize().width(), reader->scaledSize().height(), QImage::Format_RGB888));
+    img->fill(QColor(Qt::white));
     imagePreviewForm *form;
     for (int i = 0; i < pageSize; i++) {
         form = preViewList[i];
         if (form->isAvailable()) {
             form->setImg(href, img, des);
+            imgLoader *loader = new imgLoader(form, reader, href, des);
+            connect(loader, &imgLoader::loadReady, this, [this]() { update(); });
+            QThreadPool::globalInstance()->start(loader);
             break;
         }
     }
@@ -439,7 +442,7 @@ void Search::resizeEvent(QResizeEvent *event) {
         hBoxLayout->addLayout(column);
         vBoxLayouts.append(column);
     }
-    relocateImg();
+    locateImg();
 }
 
 Search::~Search() {

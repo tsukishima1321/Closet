@@ -29,7 +29,6 @@ private:
     bool mousePressed;
     void wheelEvent(QWheelEvent *event) override;
     void MyScale(double step);
-    void MyMove(QPointF delta);
 };
 
 #endif // IMAGEVIEW_H
