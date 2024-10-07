@@ -52,7 +52,8 @@ HEADERS += \
         pagenavigator.h \
         search.h \
         typeeditmenu.h \
-        welcome.h
+        welcome.h \
+        window.h
 
 FORMS += \
         detailview.ui \

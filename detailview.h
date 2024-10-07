@@ -5,12 +5,13 @@
 #include <QSqlQuery>
 #include <QString>
 #include <QtSql/QSqlDatabase>
+#include <window.h>
 
 namespace Ui {
     class DetailView;
 }
 
-class DetailView : public QMainWindow {
+class DetailView : public Window {
     Q_OBJECT
 
 public:

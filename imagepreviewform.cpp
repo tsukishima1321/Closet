@@ -14,7 +14,10 @@ imagePreviewForm::imagePreviewForm(QWidget *parent) :
     this->hideElements();
 }
 
-void imagePreviewForm::setImg(QString href, std::shared_ptr<QImage> img, QString des) {
+void imagePreviewForm::setImg(QString href, QImage *img, QString des) {
+    if (this->img) {
+        delete this->img;
+    }
     this->href = href;
     this->img = img;
     if (img->isNull()) {
@@ -25,6 +28,7 @@ void imagePreviewForm::setImg(QString href, std::shared_ptr<QImage> img, QString
         pixmap = pixmap.scaled(ui->labelImg->size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
         //ui->labelImg->setScaledContents(true);
         ui->labelImg->setPixmap(pixmap);
+        ui->labelImg->adjustSize();
     }
     ui->labelImg->show();
     ui->labelText->show();
@@ -33,13 +37,16 @@ void imagePreviewForm::setImg(QString href, std::shared_ptr<QImage> img, QString
 
 int imagePreviewForm::getHeight() {
     if (img) {
-        return this->img->height();
-    } else {
-        return 0;
+        if (!img->isNull()) {
+            return this->img->height();
+        }
     }
+    return 0;
 }
 
 void imagePreviewForm::hideElements() {
+    ui->labelImg->clear();
+    ui->labelImg->adjustSize();
     ui->labelImg->hide();
     ui->labelText->hide();
     available = true;
@@ -50,9 +57,13 @@ bool imagePreviewForm::isAvailable() const {
 }
 
 void imagePreviewForm::mouseDoubleClickEvent(QMouseEvent *event) {
+    (void)event;
     emit isClicked(href);
 }
 
 imagePreviewForm::~imagePreviewForm() {
+    if (img) {
+        delete img;
+    }
     delete ui;
 }

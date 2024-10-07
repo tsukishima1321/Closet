@@ -7,12 +7,13 @@
 #include <QMainWindow>
 #include <QString>
 #include <QtSql/QSqlDatabase>
+#include <window.h>
 
 namespace Ui {
     class LabelWindow;
 }
 
-class LabelWindow : public QMainWindow {
+class LabelWindow : public Window {
     Q_OBJECT
 
 public:

@@ -8,6 +8,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <imagepreviewform.h>
+#include <window.h>
 
 constexpr int pageSize = 20;
 constexpr int pageSizeTable = 100;
@@ -16,7 +17,7 @@ namespace Ui {
     class Search;
 }
 
-class Search : public QMainWindow {
+class Search : public Window {
     Q_OBJECT
 
 public:
@@ -36,7 +37,7 @@ private:
     QSqlDatabase &db;
     QString currentConditon;
     QStringList hrefList;
-    QList<imagePreviewForm *> preViewList;
+    imagePreviewForm *preViewList;
     void searchButton_clicked();
     void updateSearch();
     imagePreviewForm *addImgItem(QString href, QString des);

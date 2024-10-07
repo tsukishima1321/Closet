@@ -17,14 +17,14 @@ public:
     QString href;
     explicit imagePreviewForm(QWidget *parent = nullptr);
     virtual ~imagePreviewForm() override;
-    void setImg(QString href, std::shared_ptr<QImage> img, QString des);
+    void setImg(QString href, QImage *img, QString des);
     void hideElements();
     bool isAvailable() const;
     int getHeight();
 
 private:
     Ui::imagePreviewForm *ui;
-    std::shared_ptr<QImage> img;
+    QImage *img;
     bool available;
 
 protected:

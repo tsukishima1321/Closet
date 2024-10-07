@@ -11,14 +11,15 @@
 extern QString imgBase;
 
 DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
-        QMainWindow(parent),
+        Window(parent),
         ui(new Ui::DetailView),
         db(db) {
     ui->setupUi(this);
+    this->setAttribute(Qt::WA_DeleteOnClose, true);
     ui->zoomInButton->setIcon(QIcon(":/pic/zoomIn.png"));
     ui->zoomOutButton->setIcon(QIcon(":/pic/zoomOut.png"));
     ui->zoomResetButton->setIcon(QIcon(":/pic/reset.png"));
-    disableEdit();
+
     connect(ui->zoomInButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_zoomIn);
     connect(ui->zoomOutButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_zoomOut);
     connect(ui->zoomResetButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_reset);
@@ -30,8 +31,35 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
     connect(ui->picSaveButton, &QPushButton::clicked, this, &DetailView::savePic);
     connect(ui->radioButtonScale, &QRadioButton::clicked, this, [this]() { ui->graphicsView->setWheelMode(imageView::WheelMode::Scale); });
     connect(ui->radioButtonScroll, &QRadioButton::clicked, this, [this]() { ui->graphicsView->setWheelMode(imageView::WheelMode::Scroll); });
-    this->setAttribute(Qt::WA_DeleteOnClose, true);
+
+    QAction *zoomInAction = new QAction("放大", ui->graphicsView);
+    QAction *zoomOutAction = new QAction("缩小", ui->graphicsView);
+    QAction *zoomResetAction = new QAction("重置", ui->graphicsView);
+    QAction *separator = new QAction();
+    separator->setSeparator(true);
+    QAction *setScrollAction = new QAction("滚动模式", ui->graphicsView);
+    QAction *setScaleAction = new QAction("缩放模式", ui->graphicsView);
+    QAction *separator_2 = new QAction();
+    separator_2->setSeparator(true);
+    QAction *savePicAction = new QAction("图片另存为", ui->graphicsView);
+    ui->graphicsView->addAction(zoomInAction);
+    ui->graphicsView->addAction(zoomOutAction);
+    ui->graphicsView->addAction(zoomResetAction);
+    ui->graphicsView->addAction(separator);
+    ui->graphicsView->addAction(setScrollAction);
+    ui->graphicsView->addAction(setScaleAction);
+    ui->graphicsView->addAction(separator_2);
+    ui->graphicsView->addAction(savePicAction);
+    ui->graphicsView->setContextMenuPolicy(Qt::ActionsContextMenu);
+    connect(zoomInAction, &QAction::triggered, ui->graphicsView, &imageView::slot_zoomIn);
+    connect(zoomOutAction, &QAction::triggered, ui->graphicsView, &imageView::slot_zoomOut);
+    connect(zoomResetAction, &QAction::triggered, ui->graphicsView, &imageView::slot_reset);
+    connect(setScrollAction, &QAction::triggered, ui->radioButtonScroll, &QRadioButton::click);
+    connect(setScaleAction, &QAction::triggered, ui->radioButtonScale, &QRadioButton::click);
+    connect(savePicAction, &QAction::triggered, this, &DetailView::savePic);
+
     updateTypes();
+    disableEdit();
 }
 
 void DetailView::OpenImg(QString href) {

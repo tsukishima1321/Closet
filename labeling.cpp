@@ -17,7 +17,7 @@
 #include "ui_labeling.h"
 
 LabelWindow::LabelWindow(QWidget *parent) :
-        QMainWindow(parent),
+        Window(parent),
         ui(new Ui::LabelWindow),
         isLogedIn(false) {
     this->setAttribute(Qt::WA_DeleteOnClose, true);

@@ -20,6 +20,15 @@ Welcome::Welcome(QWidget *parent) :
     pixmap->scaled(ui->label->size(), Qt::KeepAspectRatio);
     ui->label->setScaledContents(true);
     ui->label->setPixmap(*pixmap);
+    if (!QFileInfo("config.ini").isFile()) {
+        QFile file("config.ini");
+        file.open(QIODevice::Append);
+        file.close();
+        QSettings setting("config.ini", QSettings::IniFormat);
+        setting.setValue("resource/imgBase", imgBase);
+    }
+    QSettings setting("config.ini", QSettings::IniFormat);
+    imgBase = setting.value("resource/imgBase").toString();
     //ui->lineEdit->setText(imgBase);
     //ui->lineEdit->hide();
     connect(ui->labelingButton, &QPushButton::clicked, this, &Welcome::labelingButton_clicked);
@@ -44,14 +53,11 @@ void Welcome::searchButton_clicked() {
     std::optional<dbInstance *> instance = dbInstance::getInstanceByName("root");
     if (instance == std::nullopt) {
         auto loginWindow = new login(this);
-        Search *newWindow = nullptr;
-        connect(loginWindow, &login::loginRes, this, [&newWindow](QSqlDatabase &db) {
-            newWindow = new Search(nullptr, db);
-        });
-        auto res = loginWindow->exec();
-        if (res == QDialog::Accepted) {
+        connect(loginWindow, &login::loginRes, this, [this](QSqlDatabase &db) {
+            Search *newWindow = new Search(this, db);
             newWindow->show();
-        }
+        });
+        loginWindow->exec();
     } else {
         auto newWindow = new Search(nullptr, (*instance)->db);
         newWindow->show();
@@ -62,13 +68,14 @@ void Welcome::typeEditButton_clicked() {
     std::optional<dbInstance *> instance = dbInstance::getInstanceByName("root");
     if (instance == std::nullopt) {
         auto loginWindow = new login(this);
-        typeEditMenu *newWindow = nullptr;
-        connect(loginWindow, &login::loginRes, this, [&newWindow](QSqlDatabase &db) { newWindow = new typeEditMenu(nullptr, db); });
-        auto res = loginWindow->exec();
-        //exec阻塞，保证lambda被触发时newWindow未出作用域
-        if (res == QDialog::Accepted) {
-            newWindow->show();
-        }
+        connect(loginWindow, &login::loginRes, this, [this](QSqlDatabase &db) {
+            typeEditMenu *newWindow = new typeEditMenu(this, db);
+            QMainWindow *window = new QMainWindow(this);
+            window->setCentralWidget(newWindow);
+            window->setWindowTitle("编辑分类");
+            window->show();
+        });
+        loginWindow->exec();
     } else {
         auto newWindow = new typeEditMenu(nullptr, (*instance)->db);
         newWindow->show();
@@ -130,8 +137,10 @@ void Welcome::buildHtm(QSqlDatabase &db) {
 
 void Welcome::logInButton_clicked() {
     auto logInWindow = new login(this);
-    ui->lineEdit->setText(imgBase);
-    logInWindow->exec();
+    auto res = logInWindow->exec();
+    if (res == QDialog::Accepted) {
+        ui->lineEdit->setText(imgBase);
+    }
 }
 
 void Welcome::logOutButton_clicked() {
@@ -145,5 +154,13 @@ void Welcome::logOutButton_clicked() {
 }
 
 void Welcome::lineEditUpdate() {
-    imgBase = ui->lineEdit->text();
+    std::optional<dbInstance *> instance = dbInstance::getInstance();
+    if (instance == std::nullopt) {
+        QMessageBox::warning(this, "拒绝访问", "请先登录");
+    } else {
+        imgBase = ui->lineEdit->text();
+        QSettings setting("config.ini", QSettings::IniFormat);
+        setting.setValue("resource/imgBase", imgBase);
+        QMessageBox::information(this, "修改", "已将图片库地址修改为：" + imgBase);
+    }
 }

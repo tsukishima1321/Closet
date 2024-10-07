@@ -13,7 +13,7 @@
 extern QString imgBase;
 
 Search::Search(QWidget *parent, QSqlDatabase &db) :
-        QMainWindow(parent),
+        Window(parent),
         ui(new Ui::Search),
         currentPage(1),
         currentColumnCount(3),
@@ -51,9 +51,9 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
         // qDebug()<<type;
     }
     currentPage = ui->pageNavigate->getCurrentPage();
+    preViewList = new imagePreviewForm[pageSize];
     for (int i = 0; i < pageSize; i++) {
-        imagePreviewForm *form = new imagePreviewForm;
-        preViewList.append(form);
+        imagePreviewForm *form = &preViewList[i];
         connect(form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
     }
     connect(ui->pageNavigate, &PageNavigator::currentPageChanged, this, [this](int p) {
@@ -63,10 +63,10 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
         }
         currentPage = p;
     });
-    connect(ui->radioButtonAsc, &QRadioButton::clicked, this, [this](int stat) {
+    connect(ui->radioButtonAsc, &QRadioButton::clicked, this, [this]() {
         updateSearch();
     });
-    connect(ui->radioButtonDesc, &QRadioButton::clicked, this, [this](int stat) {
+    connect(ui->radioButtonDesc, &QRadioButton::clicked, this, [this]() {
         updateSearch();
     });
     connect(ui->checkBoxType, &QCheckBox::stateChanged, this, [this](int stat) {
@@ -191,9 +191,9 @@ void Search::updateSearch() {
         sql += "desc ";
     }
     if (ui->stackedWidget->currentIndex() == 0) {
-        sql += "limit " + QString::number((currentPage - 1) * pageSize) + "," + QString::number((currentPage)*pageSize) + " ";
+        sql += "limit " + QString::number((currentPage - 1) * pageSize) + "," + QString::number(pageSize) + " ";
     } else if (ui->stackedWidget->currentIndex() == 1) {
-        sql += "limit " + QString::number((currentPage - 1) * pageSizeTable) + "," + QString::number((currentPage)*pageSizeTable) + " ";
+        sql += "limit " + QString::number((currentPage - 1) * pageSizeTable) + "," + QString::number(pageSize) + " ";
     }
     QSqlQuery query(db);
     if (ui->checkBoxText->isChecked()) {
@@ -222,10 +222,12 @@ void Search::updateSearch() {
 
 void Search::updateImgView(QSqlQuery &query) {
     //重置preViewList中所有Form到可用状态
-    for (auto &&form : preViewList) {
-        form->~imagePreviewForm();
-        new (form) imagePreviewForm;
-        connect(form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
+    for (int i = 0; i < pageSize; i++) {
+        imagePreviewForm *form = &preViewList[i];
+        //form->~imagePreviewForm();
+        //new (form) imagePreviewForm;
+        //connect(form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
+        form->hideElements();
     }
     //执行查询，将结果存入preViewList
     //图片大小和文字信息全部同步设置完毕，实际图片读取放入Thread中
@@ -246,7 +248,8 @@ void Search::locateImg() {
     /*读取preViewList中的所有窗口，根据他们的高度将他们排入布局
     调用该函数前所有子布局应该已被创建好且是空的
     要显示的图片发生改变，或者窗口大小发生改变时会调用此函数*/
-    for (imagePreviewForm *form : preViewList) {
+    for (int i = 0; i < pageSize; i++) {
+        imagePreviewForm *form = &preViewList[i];
         QVBoxLayout *columnMinHeight = nullptr;
         int minHeight = 999999;
         for (QVBoxLayout *column : vBoxLayouts) {
@@ -289,9 +292,12 @@ void Search::updateTableView(QSqlQuery &query) {
 
 void Search::tableCellDoubleClicked(int row, int column) {
     (void)column;
-    QString name = ui->tableWidget->item(row, 0)->text();
-    if (name != "") {
-        openDetailMenu(name);
+    auto item = ui->tableWidget->item(row, 0);
+    if (item) {
+        QString name = item->text();
+        if (name != "") {
+            openDetailMenu(name);
+        }
     }
 }
 
@@ -319,11 +325,11 @@ imgLoader::imgLoader(imagePreviewForm *target, QImageReader *reader, QString hre
         target(target), reader(reader), href(href), des(des) {}
 
 void imgLoader::run() {
-    std::shared_ptr<QImage> img(new QImage(reader->read()));
+    QImage *img = new QImage(reader->read());
     if (img->isNull()) {
         QMessageBox::information(nullptr,
-                                 tr("打开图像失败"),
-                                 tr("打开图像失败") + reader->fileName());
+                                 "打开图像失败",
+                                 "打开图像失败" + reader->fileName());
     }
     target->setImg(href, img, des);
     emit loadReady();
@@ -333,7 +339,7 @@ void imgLoader::run() {
 imagePreviewForm *Search::addImgItem(QString href, QString des) {
     /*根据图片信息设置寻找preViewList中可用的imagePreviewForm放入，大小和文字同步设置，实际图片读取放入Thread中*/
     QString filename(imgBase + href);
-    QImageReader *reader = new QImageReader(filename.simplified());
+    QImageReader *reader = new QImageReader(filename.simplified()); //该指针由imgLoader::run释放内存
     reader->setDecideFormatFromContent(true);
     QSize size = reader->size();
     if (size.width() > 4000) {
@@ -344,14 +350,14 @@ imagePreviewForm *Search::addImgItem(QString href, QString des) {
         size.setHeight(size.height() / 4);
     }
     reader->setScaledSize(size);
-    std::shared_ptr<QImage> img(new QImage(reader->scaledSize().width(), reader->scaledSize().height(), QImage::Format_RGB888));
+    QImage *img = new QImage(reader->scaledSize().width(), reader->scaledSize().height(), QImage::Format_RGB888); //该指针由form->setImg传入对象内，由~imagePreViewForm释放内存
     img->fill(QColor(Qt::white));
-    imagePreviewForm *form;
+    imagePreviewForm *form = nullptr;
     for (int i = 0; i < pageSize; i++) {
-        form = preViewList[i];
+        imagePreviewForm *form = &preViewList[i];
         if (form->isAvailable()) {
             form->setImg(href, img, des);
-            imgLoader *loader = new imgLoader(form, reader, href, des);
+            imgLoader *loader = new imgLoader(form, reader, href, des); //该指针由QThreadPool释放内存
             connect(loader, &imgLoader::loadReady, this, [this]() { update(); });
             QThreadPool::globalInstance()->start(loader);
             break;
@@ -420,6 +426,7 @@ void Search::sendSQL() {
 }
 
 void Search::resizeEvent(QResizeEvent *event) {
+    (void)event;
     int width = ui->stackedWidget->width();
     currentColumnCount = width / 300;
     if (width == 622) {
@@ -446,5 +453,9 @@ void Search::resizeEvent(QResizeEvent *event) {
 }
 
 Search::~Search() {
+    delete[] preViewList;
+    if (hBoxLayout) {
+        delete hBoxLayout;
+    }
     delete ui;
 }

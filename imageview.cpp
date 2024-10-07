@@ -25,10 +25,12 @@ void imageView::setWheelMode(WheelMode mode) {
 }
 
 void imageView::slot_reset() {
-    double ratio = this->size().width() / this->scene()->items()[0]->boundingRect().width();
-    resetTransform();
-    scale(ratio, ratio);
-    centerOn(0, 0);
+    if (this->scene()) {
+        double ratio = this->size().width() / this->scene()->items()[0]->boundingRect().width();
+        resetTransform();
+        scale(ratio, ratio);
+        centerOn(0, 0);
+    }
 }
 
 void imageView::wheelEvent(QWheelEvent *event) {
