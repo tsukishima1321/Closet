@@ -161,7 +161,11 @@ void Search::searchButton_clicked() {
         QMessageBox::critical(this, "错误", errortext);
     } else {
         query.next();
-        ui->pageNavigate->setMaxPage(query.value("count(*)").toInt() / pageSize + 1);
+        if (ui->comboBoxShow->currentIndex() == 0) {
+            ui->pageNavigate->setMaxPage(query.value("count(*)").toInt() / pageSize + 1);
+        } else {
+            ui->pageNavigate->setMaxPage(query.value("count(*)").toInt() / pageSizeTable + 1);
+        }
     }
     currentConditon = sql;
     updateSearch();
@@ -193,7 +197,7 @@ void Search::updateSearch() {
     if (ui->stackedWidget->currentIndex() == 0) {
         sql += "limit " + QString::number((currentPage - 1) * pageSize) + "," + QString::number(pageSize) + " ";
     } else if (ui->stackedWidget->currentIndex() == 1) {
-        sql += "limit " + QString::number((currentPage - 1) * pageSizeTable) + "," + QString::number(pageSize) + " ";
+        sql += "limit " + QString::number((currentPage - 1) * pageSizeTable) + "," + QString::number(pageSizeTable) + " ";
     }
     QSqlQuery query(db);
     if (ui->checkBoxText->isChecked()) {
@@ -224,10 +228,10 @@ void Search::updateImgView(QSqlQuery &query) {
     //重置preViewList中所有Form到可用状态
     for (int i = 0; i < pageSize; i++) {
         imagePreviewForm *form = &preViewList[i];
-        //form->~imagePreviewForm();
-        //new (form) imagePreviewForm;
-        //connect(form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
-        form->hideElements();
+        form->~imagePreviewForm();
+        new (form) imagePreviewForm;
+        connect(form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
+        //form->hideElements();
     }
     //执行查询，将结果存入preViewList
     //图片大小和文字信息全部同步设置完毕，实际图片读取放入Thread中
@@ -353,6 +357,7 @@ imagePreviewForm *Search::addImgItem(QString href, QString des) {
     QImage *img = new QImage(reader->scaledSize().width(), reader->scaledSize().height(), QImage::Format_RGB888); //该指针由form->setImg传入对象内，由~imagePreViewForm释放内存
     img->fill(QColor(Qt::white));
     imagePreviewForm *form = nullptr;
+    bool flag = false;
     for (int i = 0; i < pageSize; i++) {
         imagePreviewForm *form = &preViewList[i];
         if (form->isAvailable()) {
@@ -360,8 +365,13 @@ imagePreviewForm *Search::addImgItem(QString href, QString des) {
             imgLoader *loader = new imgLoader(form, reader, href, des); //该指针由QThreadPool释放内存
             connect(loader, &imgLoader::loadReady, this, [this]() { update(); });
             QThreadPool::globalInstance()->start(loader);
+            flag = true;
             break;
         }
+    }
+    if (!flag) {
+        qDebug() << "why?";
+        throw;
     }
     return form;
 }
