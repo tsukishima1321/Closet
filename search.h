@@ -11,7 +11,7 @@
 #include <window.h>
 
 constexpr int pageSize = 20;
-constexpr int pageSizeTable = 100;
+//constexpr int pageSizeTable = 100;
 
 namespace Ui {
     class Search;
@@ -31,6 +31,7 @@ private:
     Ui::Search *ui;
     int currentPage;
     int currentColumnCount;
+    int pageSizeTable;
     QHBoxLayout *hBoxLayout;
     QList<QVBoxLayout *> vBoxLayouts;
 
@@ -47,7 +48,8 @@ private:
     void locateImg();
     void tableCellDoubleClicked(int, int);
     void deleteButton_clicked();
-    void sendSQL();
+    void exportButton_clicked();
+    void sendSQL(QString text);
 };
 
 class imgLoader : public QObject, public QRunnable {

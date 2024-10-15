@@ -153,6 +153,14 @@ void LabelWindow::pushButtonAdd_clicked() {
     itemList.push_back(Item(date, name, des, ui->comboBoxType->currentText()));
 }
 
+void LabelWindow::keyPressEvent(QKeyEvent *event) {
+    if (event->matches(QKeySequence::Save)) {
+        this->pushButtonAdd_clicked();
+        this->pushButtonNext_clicked();
+    }
+    Window::keyPressEvent(event);
+}
+
 void LabelWindow::freshButton_clicked() { updateTypes(); }
 
 void LabelWindow::freshDateButton_clicked() {

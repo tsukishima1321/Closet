@@ -87,18 +87,24 @@ labelCommit::~labelCommit() {
 }
 
 void labelCommit::pushButtonCommitAll_clicked() {
+    ui->progressBar->setValue(0);
+    int n = itemList->length();
+    int done = 0;
     QSqlQuery query(db);
     query.prepare("INSERT INTO pictures (date,href,description,type) VALUES (:date,:href,:description,:type)");
     for (const Item &item : *(this->itemList)) {
-        qDebug() << "23456543";
         query.bindValue(":date", item.date);
         query.bindValue(":href", item.href);
         query.bindValue(":description", item.description);
         query.bindValue(":type", item.type);
         query.exec();
         copyFileToPath(fromDir + "/" + item.href, imgBase + item.href, false);
+        done++;
+        ui->progressBar->setValue(static_cast<int>(100.0 * done / n));
+        this->update();
     }
     itemList->clear();
+    ui->progressBar->setValue(100);
     ui->tableWidget->clearContents();
 }
 

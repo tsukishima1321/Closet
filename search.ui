@@ -259,6 +259,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="exportButton">
+            <property name="text">
+             <string>e</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_4">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -336,12 +343,12 @@
             </property>
             <item>
              <property name="text">
-              <string>大图标</string>
+              <string>预览图</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>详细信息</string>
+              <string>列表</string>
              </property>
             </item>
            </widget>
@@ -363,6 +370,9 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5"/>
         </item>
         <item>
          <widget class="QStackedWidget" name="stackedWidget">
@@ -403,7 +413,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>958</width>
-                 <height>411</height>
+                 <height>409</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -441,7 +451,12 @@
              <number>0</number>
             </property>
             <item row="0" column="0">
-             <widget class="QTableWidget" name="tableWidget">
+             <widget class="TableWidget" name="tableWidget">
+              <column>
+               <property name="text">
+                <string>序号</string>
+               </property>
+              </column>
               <column>
                <property name="text">
                 <string>文件名</string>
@@ -506,7 +521,12 @@
          </layout>
         </item>
         <item>
-         <widget class="QTableWidget" name="tableWidget_2">
+         <widget class="TableWidget" name="tableWidget_2">
+          <column>
+           <property name="text">
+            <string>序号</string>
+           </property>
+          </column>
           <column>
            <property name="text">
             <string>文件名</string>
@@ -543,6 +563,11 @@
    <extends>QWidget</extends>
    <header>pagenavigator.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>tablewidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

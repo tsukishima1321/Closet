@@ -36,6 +36,7 @@ SOURCES += \
         ocrmenu.cpp \
         pagenavigator.cpp \
         search.cpp \
+        tablewidget.cpp \
         typeeditmenu.cpp \
         welcome.cpp
 
@@ -51,6 +52,7 @@ HEADERS += \
         ocrmenu.h \
         pagenavigator.h \
         search.h \
+        tablewidget.h \
         typeeditmenu.h \
         welcome.h \
         window.h

@@ -1,6 +1,7 @@
 #include "search.h"
 #include "detailview.h"
 #include "imagepreviewform.h"
+#include "qfiledialog.h"
 #include "qimagereader.h"
 #include "qsqlerror.h"
 #include "qsqlquery.h"
@@ -17,13 +18,16 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
         ui(new Ui::Search),
         currentPage(1),
         currentColumnCount(3),
+        pageSizeTable(TableWidget::getPageSize()),
         db(db) {
     ui->setupUi(this);
     ui->deleteButton->setIcon(QIcon(":/pic/trash.png"));
+    ui->exportButton->setIcon(QIcon(":/pic/download.png"));
     ui->checkBoxTitle->setChecked(true);
     ui->radioButtonAsc->setChecked(true);
     ui->dateEditFrom->setDate(QDate::currentDate());
     ui->dateEditTo->setDate(QDate::currentDate());
+    ui->tableWidget->resetHeader();
     hBoxLayout = new QHBoxLayout;
     for (int i = 0; i < currentColumnCount; i++) {
         QVBoxLayout *column = new QVBoxLayout;
@@ -34,12 +38,6 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
     ui->scrollAreaWidgetContents->setLayout(hBoxLayout);
     this->setAttribute(Qt::WA_DeleteOnClose, true);
     ui->comboBoxType->clear();
-    ui->tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
-    ui->tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    ui->tableWidget->setRowCount(pageSizeTable);
-    ui->tableWidget_2->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
-    ui->tableWidget_2->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    ui->tableWidget_2->setRowCount(100);
     // qDebug()<<"database connected";
     QString sql = "SELECT * FROM types";
     QSqlQuery query(db);
@@ -95,7 +93,7 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
             ui->stackedWidget->setCurrentIndex(1);
             ui->pageNavigate->setCurrentPage(1);
         }
-        updateSearch();
+        searchButton_clicked();
     });
     connect(ui->comboBoxOrder, &QComboBox::currentIndexChanged, this, [this](int i) {
         (void)i;
@@ -103,12 +101,13 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
     });
     connect(ui->tableWidget, &QTableWidget::cellDoubleClicked, this, &Search::tableCellDoubleClicked);
     connect(ui->deleteButton, &QPushButton::clicked, this, &Search::deleteButton_clicked);
-    connect(ui->sendSQLButton, &QPushButton::clicked, this, &Search::sendSQL);
+    connect(ui->exportButton, &QPushButton::clicked, this, &Search::exportButton_clicked);
+    connect(ui->sendSQLButton, &QPushButton::clicked, this, [this]() { this->sendSQL(ui->lineEdit_2->text()); });
 }
 
 void Search::searchButton_clicked() {
     /*构造查询的条件，预先查询结果的总数来更新页码，最后调用updateSearch()*/
-    ui->statusbar->showMessage("正在搜索...");
+    //ui->statusbar->showMessage("正在搜索...");
     QString sql = "";
 
     QStringList conditions;
@@ -135,7 +134,7 @@ void Search::searchButton_clicked() {
     if (!conditions.empty()) {
         sql += "where";
         for (auto &&c : conditions) {
-            sql += " " + c + " and";
+            sql += " (" + c + ") and";
         }
         if (sql.right(3) == "and")
             sql = sql.remove(sql.length() - 3, 3);
@@ -163,8 +162,12 @@ void Search::searchButton_clicked() {
         query.next();
         if (ui->comboBoxShow->currentIndex() == 0) {
             ui->pageNavigate->setMaxPage(query.value("count(*)").toInt() / pageSize + 1);
+            ui->pageNavigate->setCurrentPage(1, true);
+            currentPage = 1;
         } else {
             ui->pageNavigate->setMaxPage(query.value("count(*)").toInt() / pageSizeTable + 1);
+            ui->pageNavigate->setCurrentPage(1, true);
+            currentPage = 1;
         }
     }
     currentConditon = sql;
@@ -205,7 +208,7 @@ void Search::updateSearch() {
     } else {
         query.prepare("select * from pictures " + sql);
     }
-
+    qDebug() << sql;
     if (!query.exec()) {
         QSqlError sqlerror = query.lastError();
         qDebug() << sqlerror.nativeErrorCode();
@@ -274,29 +277,12 @@ void Search::locateImg() {
 }
 
 void Search::updateTableView(QSqlQuery &query) {
-    ui->tableWidget->clear();
-    QStringList headers;
-    headers << "文件名"
-            << "日期"
-            << "描述"
-            << "分类";
-    ui->tableWidget->setHorizontalHeaderLabels(headers);
-    int i = 0;
-    ui->tableWidget->clearContents();
-    while (query.next()) {
-        auto check = new QTableWidgetItem(query.value("href").toString());
-        check->setCheckState(Qt::CheckState::Unchecked);
-        ui->tableWidget->setItem(i, 0, check);
-        ui->tableWidget->setItem(i, 1, new QTableWidgetItem(query.value("date").toString()));
-        ui->tableWidget->setItem(i, 2, new QTableWidgetItem(query.value("description").toString()));
-        ui->tableWidget->setItem(i, 3, new QTableWidgetItem(query.value("type").toString()));
-        i++;
-    }
+    ui->tableWidget->fillItems(query, (currentPage - 1) * pageSizeTable);
 }
 
 void Search::tableCellDoubleClicked(int row, int column) {
     (void)column;
-    auto item = ui->tableWidget->item(row, 0);
+    auto item = ui->tableWidget->item(row, 1);
     if (item) {
         QString name = item->text();
         if (name != "") {
@@ -313,16 +299,48 @@ void Search::deleteButton_clicked() {
         if (item != NULL) {
             if (item->checkState() == Qt::CheckState::Checked) {
                 int res = QMessageBox::warning(this, "确认",
-                                               "确定删除" + item->text() + "吗？",
+                                               "确定删除" + ui->tableWidget->item(i, 1)->text() + "吗？",
                                                QMessageBox::Yes | QMessageBox::Cancel,
                                                QMessageBox::Cancel);
                 if (res == QMessageBox::Yes) {
-                    query.bindValue(":href", item->text());
+                    query.bindValue(":href", ui->tableWidget->item(i, 1)->text());
                     query.exec();
                 }
             }
         }
     }
+}
+
+void Search::exportButton_clicked() {
+    QString targetDirPath = "";
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::Directory);
+    if (dialog.exec() == QDialog::Accepted) {
+        auto files = dialog.selectedFiles();
+        if (files.size() >= 0) {
+            targetDirPath = files.at(0) + "/";
+        }
+    }
+    if (targetDirPath == "") {
+        return;
+    }
+    int success = 0;
+    int fail = 0;
+    for (int i = 0; i < ui->tableWidget->rowCount(); i++) {
+        QTableWidgetItem *item = ui->tableWidget->item(i, 0);
+        if (item != NULL) {
+            if (item->checkState() == Qt::CheckState::Checked) {
+                QString current = ui->tableWidget->item(i, 1)->text().simplified();
+                if (QFile::copy(imgBase + current, targetDirPath + current)) {
+                    success++;
+                } else {
+                    fail++;
+                    qDebug() << current;
+                }
+            }
+        }
+    }
+    QMessageBox::information(this, "导出", "导出完成\n成功：" + QString::number(success) + "，失败：" + QString::number(fail));
 }
 
 imgLoader::imgLoader(imagePreviewForm *target, QImageReader *reader, QString href, QString des) :
@@ -382,8 +400,8 @@ void Search::openDetailMenu(QString href) {
     newWindow->OpenImg(href);
 }
 
-void Search::sendSQL() {
-    QString sql = ui->lineEdit_2->text();
+void Search::sendSQL(QString text) {
+    QString sql = text;
     QString warning = "";
     if (sql.contains("insert")) {
         warning += "insert ";
@@ -414,24 +432,10 @@ void Search::sendSQL() {
             errortext = "empty query";
         }
         QMessageBox::critical(this, "错误", errortext);
-    }
-    ui->tableWidget_2->clear();
-    QStringList headers;
-    headers << "文件名"
-            << "日期"
-            << "描述"
-            << "分类";
-    ui->tableWidget_2->setHorizontalHeaderLabels(headers);
-    int i = 0;
-    while (query.next()) {
-        if (i > ui->tableWidget_2->rowCount()) {
-            ui->tableWidget_2->insertRow(i);
-        }
-        ui->tableWidget_2->setItem(i, 0, new QTableWidgetItem(query.value("href").toString()));
-        ui->tableWidget_2->setItem(i, 1, new QTableWidgetItem(query.value("date").toString()));
-        ui->tableWidget_2->setItem(i, 2, new QTableWidgetItem(query.value("description").toString()));
-        ui->tableWidget_2->setItem(i, 3, new QTableWidgetItem(query.value("type").toString()));
-        i++;
+    } else {
+        ui->tableWidget_2->clear();
+        ui->tableWidget_2->resetHeader();
+        ui->tableWidget_2->fillItems(query, 0, query.size());
     }
 }
 

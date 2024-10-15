@@ -164,12 +164,18 @@ void DetailView::updateTypes() {
 }
 
 void DetailView::savePic() {
-    QString targetDirPath = QFileDialog::getExistingDirectory(this, "选择保存的路径", "/");
-    targetDirPath += "/";
-    if (QFile::copy(imgBase + current, targetDirPath + current)) {
-        QMessageBox::information(this, "导出", targetDirPath + current + "导出完成");
-    } else {
-        QMessageBox::warning(this, "导出", targetDirPath + current + "导出失败：文件已存在");
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::Directory);
+    if (dialog.exec() == QDialog::Accepted) {
+        auto files = dialog.selectedFiles();
+        if (files.size() >= 0) {
+            QString targetDirPath = files.at(0) + "/";
+            if (QFile::copy(imgBase + current, targetDirPath + current)) {
+                QMessageBox::information(this, "导出", targetDirPath + current + "导出完成");
+            } else {
+                QMessageBox::warning(this, "导出", targetDirPath + current + "导出失败：文件已存在");
+            }
+        }
     }
 }
 
