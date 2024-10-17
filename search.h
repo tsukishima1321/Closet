@@ -38,6 +38,7 @@ private:
 
     QSqlDatabase &db;
     itemModel queryModel;
+    itemModel countModel;
     QString currentConditon;
     imagePreviewForm *preViewList;
     void searchButton_clicked();

@@ -21,7 +21,8 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
         currentColumnCount(3),
         pageSizeTable(itemModel::getPageSize()),
         db(db),
-        queryModel(nullptr, db) {
+        queryModel(nullptr, db),
+        countModel(nullptr, db) {
     ui->setupUi(this);
     ui->deleteButton->setIcon(QIcon(":/pic/trash.png"));
     ui->exportButton->setIcon(QIcon(":/pic/download.png"));
@@ -135,9 +136,7 @@ void Search::searchButton_clicked() {
     /*构造查询的条件，预先查询结果的总数来更新页码，最后调用updateSearch()*/
     //ui->statusbar->showMessage("正在搜索...");
     QString sql = "";
-
     QStringList conditions;
-    queryModel.setLimit(0, 0);
     if (ui->lineEdit->text() == "") {
     } else {
         if (ui->checkBoxTitle->isChecked() && !ui->checkBoxText->isChecked()) {
@@ -169,17 +168,17 @@ void Search::searchButton_clicked() {
             sql = sql.remove(sql.length() - 3, 3);
         currentConditon = sql;
     }
+    countModel.setFilter(sql);
     queryModel.setFilter(sql);
-    queryModel.setCountOnly(true);
-    qDebug() << queryModel.getSelectStatement();
-    qDebug() << queryModel.select();
-    queryModel.setCountOnly(false);
+    countModel.setCountOnly(true);
+    qDebug() << countModel.getSelectStatement();
+    qDebug() << countModel.select();
     if (ui->comboBoxShow->currentIndex() == 0) {
-        ui->pageNavigate->setMaxPage(queryModel.record(0).value("count(*)").toInt() / pageSize + 1);
+        ui->pageNavigate->setMaxPage(countModel.record(0).value("count(*)").toInt() / pageSize + 1);
         ui->pageNavigate->setCurrentPage(1, true);
         currentPage = 1;
     } else {
-        ui->pageNavigate->setMaxPage(queryModel.record(0).value("count(*)").toInt() / pageSizeTable + 1);
+        ui->pageNavigate->setMaxPage(countModel.record(0).value("count(*)").toInt() / pageSizeTable + 1);
         ui->pageNavigate->setCurrentPage(1, true);
         currentPage = 1;
     }
@@ -190,7 +189,6 @@ void Search::updateSearch() {
     /*接受查询条件，在此之上构造排序和分页条件，进行实际查询，根据radioButtn状态调用updateImgView()或updateTableView()
       除了被searchButtonClicked调用外，不改变查询条件，只改变排序和分类的操作最后也会调用此函数来显示结果*/
     queryModel.uncheckAll();
-    QString condition = currentConditon;
     switch (ui->comboBoxOrder->currentIndex()) {
     case 0:
         if (ui->radioButtonAsc->isChecked()) {
@@ -226,19 +224,8 @@ void Search::updateSearch() {
     } else if (ui->stackedWidget->currentIndex() == 1) {
         queryModel.setLimit((currentPage - 1) * pageSizeTable, pageSizeTable);
     }
-
-    if (condition != "") {
-        queryModel.setFilter(condition);
-        condition = "where " + condition;
-    } else {
-        queryModel.setFilter("1=1 ");
-    }
-    QSqlQuery query(db);
-    if (ui->checkBoxText->isChecked()) {
-        queryModel.setJoin(true);
-    } else {
-        queryModel.setJoin(false);
-    }
+    qDebug() << queryModel.getSelectStatement();
+    qDebug() << queryModel.select();
     if (ui->stackedWidget->currentIndex() == 0) {
         updateImgView();
     } else if (ui->stackedWidget->currentIndex() == 1) {
@@ -247,8 +234,6 @@ void Search::updateSearch() {
 }
 
 void Search::updateImgView() {
-    qDebug() << queryModel.getSelectStatement();
-    qDebug() << queryModel.select();
     //重置preViewList中所有Form到可用状态
     for (int i = 0; i < pageSize; i++) {
         imagePreviewForm *form = &preViewList[i];
@@ -299,9 +284,6 @@ void Search::locateImg() {
 }
 
 void Search::updateTableView() {
-    //qDebug() << queryModel.filter();
-    //qDebug() << queryModel.getSelectStatement();
-    qDebug() << queryModel.select();
     queryModel.resetHeader();
     ui->tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
     ui->tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
