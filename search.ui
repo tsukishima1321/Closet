@@ -266,6 +266,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="selectButton">
+            <property name="text">
+             <string>全选</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_4">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -451,33 +458,7 @@
              <number>0</number>
             </property>
             <item row="0" column="0">
-             <widget class="TableWidget" name="tableWidget">
-              <column>
-               <property name="text">
-                <string>序号</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>文件名</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>日期</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>描述</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>分类</string>
-               </property>
-              </column>
-             </widget>
+             <widget class="QTableView" name="tableView"/>
             </item>
            </layout>
           </widget>
@@ -521,33 +502,45 @@
          </layout>
         </item>
         <item>
-         <widget class="TableWidget" name="tableWidget_2">
-          <column>
-           <property name="text">
-            <string>序号</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>文件名</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>日期</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>描述</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>分类</string>
-           </property>
-          </column>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QToolButton" name="deleteButton_2">
+            <property name="text">
+             <string>x</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="exportButton_2">
+            <property name="text">
+             <string>e</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="selectButton_2">
+            <property name="text">
+             <string>全选</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableView" name="tableView_2"/>
         </item>
        </layout>
       </widget>
@@ -563,11 +556,6 @@
    <extends>QWidget</extends>
    <header>pagenavigator.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>TableWidget</class>
-   <extends>QTableWidget</extends>
-   <header>tablewidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

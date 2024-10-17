@@ -5,6 +5,7 @@
 #include "qimagereader.h"
 #include "qsqlerror.h"
 #include "qsqlquery.h"
+#include "qsqlrecord.h"
 #include "ui_search.h"
 #include <QFile>
 #include <QMessageBox>
@@ -18,16 +19,23 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
         ui(new Ui::Search),
         currentPage(1),
         currentColumnCount(3),
-        pageSizeTable(TableWidget::getPageSize()),
-        db(db) {
+        pageSizeTable(itemModel::getPageSize()),
+        db(db),
+        queryModel(nullptr, db) {
     ui->setupUi(this);
     ui->deleteButton->setIcon(QIcon(":/pic/trash.png"));
     ui->exportButton->setIcon(QIcon(":/pic/download.png"));
+    ui->deleteButton_2->setIcon(QIcon(":/pic/trash.png"));
+    ui->exportButton_2->setIcon(QIcon(":/pic/download.png"));
     ui->checkBoxTitle->setChecked(true);
     ui->radioButtonAsc->setChecked(true);
     ui->dateEditFrom->setDate(QDate::currentDate());
     ui->dateEditTo->setDate(QDate::currentDate());
-    ui->tableWidget->resetHeader();
+    ui->tableView->setModel(&queryModel);
+    ui->tableView_2->setModel(&queryModel);
+    ui->tableView->setStyleSheet("selection-background-color: rgb(200, 200, 200);\nselection-color: black;");
+    ui->tableView_2->setStyleSheet("selection-background-color: rgb(200, 200, 200);\nselection-color: black;");
+    ui->tableView->horizontalHeader()->setHighlightSections(false);
     hBoxLayout = new QHBoxLayout;
     for (int i = 0; i < currentColumnCount; i++) {
         QVBoxLayout *column = new QVBoxLayout;
@@ -74,6 +82,20 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
             ui->comboBoxType->setEnabled(false);
         }
     });
+    connect(ui->selectButton, &QCheckBox::stateChanged, this, [this](int stat) {
+        if (stat == Qt::CheckState::Checked) {
+            queryModel.checkAll();
+        } else {
+            queryModel.uncheckAll();
+        }
+    });
+    connect(ui->selectButton_2, &QCheckBox::stateChanged, this, [this](int stat) {
+        if (stat == Qt::CheckState::Checked) {
+            queryModel.checkAll();
+        } else {
+            queryModel.uncheckAll();
+        }
+    });
     connect(ui->checkBoxDate, &QCheckBox::stateChanged, this, [this](int stat) {
         if (stat == Qt::CheckState::Checked) {
             ui->dateEditFrom->setEnabled(true);
@@ -99,9 +121,13 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
         (void)i;
         updateSearch();
     });
-    connect(ui->tableWidget, &QTableWidget::cellDoubleClicked, this, &Search::tableCellDoubleClicked);
+    connect(ui->tableView, &QTableView::doubleClicked, this, &Search::tableCellDoubleClicked);
+    connect(ui->tableView, &QTableView::clicked, this, [this](const QModelIndex &index) { dynamic_cast<itemModel *>(ui->tableView->model())->check(index.row()); });
+    connect(ui->tableView_2, &QTableView::clicked, this, [this](const QModelIndex &index) { dynamic_cast<itemModel *>(ui->tableView->model())->check(index.row()); });
     connect(ui->deleteButton, &QPushButton::clicked, this, &Search::deleteButton_clicked);
     connect(ui->exportButton, &QPushButton::clicked, this, &Search::exportButton_clicked);
+    connect(ui->deleteButton_2, &QPushButton::clicked, this, &Search::deleteButton_clicked);
+    connect(ui->exportButton_2, &QPushButton::clicked, this, &Search::exportButton_clicked);
     connect(ui->sendSQLButton, &QPushButton::clicked, this, [this]() { this->sendSQL(ui->lineEdit_2->text()); });
 }
 
@@ -111,14 +137,17 @@ void Search::searchButton_clicked() {
     QString sql = "";
 
     QStringList conditions;
-
+    queryModel.setLimit(0, 0);
     if (ui->lineEdit->text() == "") {
     } else {
         if (ui->checkBoxTitle->isChecked() && !ui->checkBoxText->isChecked()) {
+            queryModel.setJoin(false);
             conditions.append("match(description) against('" + ui->lineEdit->text() + +"'in boolean mode)");
         } else if (ui->checkBoxTitle->isChecked() && ui->checkBoxText->isChecked()) {
+            queryModel.setJoin(true);
             conditions.append("match(description) against('" + ui->lineEdit->text() + "'in boolean mode) or match(ocr_result) against('" + ui->lineEdit->text() + "'in boolean mode)");
         } else if (!ui->checkBoxTitle->isChecked() && ui->checkBoxText->isChecked()) {
+            queryModel.setJoin(true);
             conditions.append("match(ocr_result) against('" + ui->lineEdit->text() + "'in boolean mode)");
         }
     }
@@ -132,102 +161,94 @@ void Search::searchButton_clicked() {
     }
 
     if (!conditions.empty()) {
-        sql += "where";
+        //sql += "where";
         for (auto &&c : conditions) {
             sql += " (" + c + ") and";
         }
         if (sql.right(3) == "and")
             sql = sql.remove(sql.length() - 3, 3);
+        currentConditon = sql;
     }
-    sql += " ";
-
-    //qDebug() << sql;
-    QSqlQuery query(db);
-    if (ui->checkBoxText->isChecked()) {
-        query.prepare("select count(*) from pictures_ocr join pictures on pictures.href=pictures_ocr.href " + sql);
+    queryModel.setFilter(sql);
+    queryModel.setCountOnly(true);
+    qDebug() << queryModel.getSelectStatement();
+    qDebug() << queryModel.select();
+    queryModel.setCountOnly(false);
+    if (ui->comboBoxShow->currentIndex() == 0) {
+        ui->pageNavigate->setMaxPage(queryModel.record(0).value("count(*)").toInt() / pageSize + 1);
+        ui->pageNavigate->setCurrentPage(1, true);
+        currentPage = 1;
     } else {
-        query.prepare("select count(*) from pictures " + sql);
+        ui->pageNavigate->setMaxPage(queryModel.record(0).value("count(*)").toInt() / pageSizeTable + 1);
+        ui->pageNavigate->setCurrentPage(1, true);
+        currentPage = 1;
     }
-    query.exec();
-    if (!query.exec()) {
-        QSqlError sqlerror = query.lastError();
-        qDebug() << sqlerror.nativeErrorCode();
-        QString errortext = sqlerror.text();
-        qDebug() << errortext;
-        if (errortext == "") {
-            errortext = "empty query";
-        }
-        QMessageBox::critical(this, "错误", errortext);
-    } else {
-        query.next();
-        if (ui->comboBoxShow->currentIndex() == 0) {
-            ui->pageNavigate->setMaxPage(query.value("count(*)").toInt() / pageSize + 1);
-            ui->pageNavigate->setCurrentPage(1, true);
-            currentPage = 1;
-        } else {
-            ui->pageNavigate->setMaxPage(query.value("count(*)").toInt() / pageSizeTable + 1);
-            ui->pageNavigate->setCurrentPage(1, true);
-            currentPage = 1;
-        }
-    }
-    currentConditon = sql;
     updateSearch();
 }
 
 void Search::updateSearch() {
     /*接受查询条件，在此之上构造排序和分页条件，进行实际查询，根据radioButtn状态调用updateImgView()或updateTableView()
       除了被searchButtonClicked调用外，不改变查询条件，只改变排序和分类的操作最后也会调用此函数来显示结果*/
-    QString sql = currentConditon;
+    queryModel.uncheckAll();
+    QString condition = currentConditon;
     switch (ui->comboBoxOrder->currentIndex()) {
     case 0:
-        sql += "order by pictures.href ";
+        if (ui->radioButtonAsc->isChecked()) {
+            queryModel.setSort(queryModel.fieldIndex("href"), Qt::SortOrder::AscendingOrder);
+        } else {
+            queryModel.setSort(queryModel.fieldIndex("href"), Qt::SortOrder::DescendingOrder);
+        }
         break;
     case 1:
-        sql += "order by pictures.date ";
+        if (ui->radioButtonAsc->isChecked()) {
+            queryModel.setSort(queryModel.fieldIndex("date"), Qt::SortOrder::AscendingOrder);
+        } else {
+            queryModel.setSort(queryModel.fieldIndex("date"), Qt::SortOrder::DescendingOrder);
+        }
         break;
     case 2:
-        sql += "order by pictures.description ";
+        if (ui->radioButtonAsc->isChecked()) {
+            queryModel.setSort(queryModel.fieldIndex("description"), Qt::SortOrder::AscendingOrder);
+        } else {
+            queryModel.setSort(queryModel.fieldIndex("description"), Qt::SortOrder::DescendingOrder);
+        }
         break;
     default:
-        sql += "order by pictures.href ";
+        if (ui->radioButtonAsc->isChecked()) {
+            queryModel.setSort(queryModel.fieldIndex("href"), Qt::SortOrder::AscendingOrder);
+        } else {
+            queryModel.setSort(queryModel.fieldIndex("href"), Qt::SortOrder::DescendingOrder);
+        }
         break;
     }
-    if (ui->radioButtonAsc->isChecked()) {
-        sql += "asc ";
-    } else {
-        sql += "desc ";
-    }
     if (ui->stackedWidget->currentIndex() == 0) {
-        sql += "limit " + QString::number((currentPage - 1) * pageSize) + "," + QString::number(pageSize) + " ";
+        queryModel.setLimit((currentPage - 1) * pageSize, pageSize);
     } else if (ui->stackedWidget->currentIndex() == 1) {
-        sql += "limit " + QString::number((currentPage - 1) * pageSizeTable) + "," + QString::number(pageSizeTable) + " ";
+        queryModel.setLimit((currentPage - 1) * pageSizeTable, pageSizeTable);
+    }
+
+    if (condition != "") {
+        queryModel.setFilter(condition);
+        condition = "where " + condition;
+    } else {
+        queryModel.setFilter("1=1 ");
     }
     QSqlQuery query(db);
     if (ui->checkBoxText->isChecked()) {
-        query.prepare("select * from pictures_ocr join pictures on pictures.href=pictures_ocr.href " + sql);
+        queryModel.setJoin(true);
     } else {
-        query.prepare("select * from pictures " + sql);
+        queryModel.setJoin(false);
     }
-    qDebug() << sql;
-    if (!query.exec()) {
-        QSqlError sqlerror = query.lastError();
-        qDebug() << sqlerror.nativeErrorCode();
-        QString errortext = sqlerror.text();
-        qDebug() << errortext;
-        if (errortext == "") {
-            errortext = "empty query";
-        }
-        QMessageBox::critical(this, "错误", errortext);
-    } else {
-        if (ui->stackedWidget->currentIndex() == 0) {
-            updateImgView(query);
-        } else if (ui->stackedWidget->currentIndex() == 1) {
-            updateTableView(query);
-        }
+    if (ui->stackedWidget->currentIndex() == 0) {
+        updateImgView();
+    } else if (ui->stackedWidget->currentIndex() == 1) {
+        updateTableView();
     }
 }
 
-void Search::updateImgView(QSqlQuery &query) {
+void Search::updateImgView() {
+    qDebug() << queryModel.getSelectStatement();
+    qDebug() << queryModel.select();
     //重置preViewList中所有Form到可用状态
     for (int i = 0; i < pageSize; i++) {
         imagePreviewForm *form = &preViewList[i];
@@ -238,8 +259,9 @@ void Search::updateImgView(QSqlQuery &query) {
     }
     //执行查询，将结果存入preViewList
     //图片大小和文字信息全部同步设置完毕，实际图片读取放入Thread中
-    while (query.next()) {
-        addImgItem(query.value("href").toString(), query.value("description").toString());
+    for (int i = 0; i < queryModel.rowCount(); i++) {
+        if (!queryModel.record(i).isEmpty())
+            addImgItem(queryModel.record(i).value("href").toString(), queryModel.record(i).value("description").toString());
     }
     //清空子布局
     for (QVBoxLayout *column : vBoxLayouts) {
@@ -276,36 +298,37 @@ void Search::locateImg() {
     }
 }
 
-void Search::updateTableView(QSqlQuery &query) {
-    ui->tableWidget->fillItems(query, (currentPage - 1) * pageSizeTable);
+void Search::updateTableView() {
+    //qDebug() << queryModel.filter();
+    //qDebug() << queryModel.getSelectStatement();
+    qDebug() << queryModel.select();
+    queryModel.resetHeader();
+    ui->tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Fixed);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
 }
 
-void Search::tableCellDoubleClicked(int row, int column) {
-    (void)column;
-    auto item = ui->tableWidget->item(row, 1);
-    if (item) {
-        QString name = item->text();
-        if (name != "") {
-            openDetailMenu(name);
-        }
+void Search::tableCellDoubleClicked(const QModelIndex &index) {
+    QString name = queryModel.data(queryModel.index(index.row(), queryModel.fieldIndex("href"))).toString();
+    //qDebug() << name;
+    if (name != "") {
+        openDetailMenu(name);
     }
 }
 
 void Search::deleteButton_clicked() {
     QSqlQuery query(db);
     query.prepare("delete from pictures where href=:href;");
-    for (int i = 0; i < ui->tableWidget->rowCount(); i++) {
-        QTableWidgetItem *item = ui->tableWidget->item(i, 0);
-        if (item != NULL) {
-            if (item->checkState() == Qt::CheckState::Checked) {
-                int res = QMessageBox::warning(this, "确认",
-                                               "确定删除" + ui->tableWidget->item(i, 1)->text() + "吗？",
-                                               QMessageBox::Yes | QMessageBox::Cancel,
-                                               QMessageBox::Cancel);
-                if (res == QMessageBox::Yes) {
-                    query.bindValue(":href", ui->tableWidget->item(i, 1)->text());
-                    query.exec();
-                }
+    for (int i = 0; i < queryModel.rowCount(); i++) {
+        if (queryModel.isChecked(i)) {
+            int res = QMessageBox::warning(this, "确认",
+                                           "确定删除" + queryModel.data(queryModel.index(i, queryModel.fieldIndex("href"))).toString() + "吗？",
+                                           QMessageBox::Yes | QMessageBox::Cancel,
+                                           QMessageBox::Cancel);
+            if (res == QMessageBox::Yes) {
+                query.bindValue(":href", queryModel.data(queryModel.index(i, queryModel.fieldIndex("href"))).toString());
+                query.exec();
             }
         }
     }
@@ -326,17 +349,14 @@ void Search::exportButton_clicked() {
     }
     int success = 0;
     int fail = 0;
-    for (int i = 0; i < ui->tableWidget->rowCount(); i++) {
-        QTableWidgetItem *item = ui->tableWidget->item(i, 0);
-        if (item != NULL) {
-            if (item->checkState() == Qt::CheckState::Checked) {
-                QString current = ui->tableWidget->item(i, 1)->text().simplified();
-                if (QFile::copy(imgBase + current, targetDirPath + current)) {
-                    success++;
-                } else {
-                    fail++;
-                    qDebug() << current;
-                }
+    for (int i = 0; i < queryModel.rowCount(); i++) {
+        if (queryModel.isChecked(i)) {
+            QString current = queryModel.data(queryModel.index(i, queryModel.fieldIndex("href"))).toString().simplified();
+            if (QFile::copy(imgBase + current, targetDirPath + current)) {
+                success++;
+            } else {
+                fail++;
+                qDebug() << current;
             }
         }
     }
@@ -423,8 +443,11 @@ void Search::sendSQL(QString text) {
         return;
     }
     QSqlQuery query(db);
-    if (!query.exec(sql)) {
-        QSqlError sqlerror = query.lastError();
+    query.prepare(sql);
+    query.exec();
+    queryModel.setQuery(std::move(query));
+    if (queryModel.lastError().isValid()) {
+        QSqlError sqlerror = queryModel.lastError();
         qDebug() << sqlerror.nativeErrorCode();
         QString errortext = sqlerror.text();
         qDebug() << errortext;
@@ -433,9 +456,10 @@ void Search::sendSQL(QString text) {
         }
         QMessageBox::critical(this, "错误", errortext);
     } else {
-        ui->tableWidget_2->clear();
-        ui->tableWidget_2->resetHeader();
-        ui->tableWidget_2->fillItems(query, 0, query.size());
+        ui->tableView_2->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
+        ui->tableView_2->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+        ui->tableView_2->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Fixed);
+        ui->tableView_2->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
     }
 }
 

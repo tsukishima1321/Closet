@@ -1,6 +1,7 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
+#include "itemmodel.h"
 #include <QLayout>
 #include <QList>
 #include <QMainWindow>
@@ -36,17 +37,17 @@ private:
     QList<QVBoxLayout *> vBoxLayouts;
 
     QSqlDatabase &db;
+    itemModel queryModel;
     QString currentConditon;
-    QStringList hrefList;
     imagePreviewForm *preViewList;
     void searchButton_clicked();
     void updateSearch();
     imagePreviewForm *addImgItem(QString href, QString des);
     void openDetailMenu(QString href);
-    void updateImgView(QSqlQuery &query);
-    void updateTableView(QSqlQuery &query);
+    void updateImgView();
+    void updateTableView();
     void locateImg();
-    void tableCellDoubleClicked(int, int);
+    void tableCellDoubleClicked(const QModelIndex &index);
     void deleteButton_clicked();
     void exportButton_clicked();
     void sendSQL(QString text);

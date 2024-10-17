@@ -29,6 +29,7 @@ SOURCES += \
         detailview.cpp \
         imagepreviewform.cpp \
         imageview.cpp \
+        itemmodel.cpp \
         labelcommit.cpp \
         labeling.cpp \
         login.cpp \
@@ -36,7 +37,6 @@ SOURCES += \
         ocrmenu.cpp \
         pagenavigator.cpp \
         search.cpp \
-        tablewidget.cpp \
         typeeditmenu.cpp \
         welcome.cpp
 
@@ -46,13 +46,13 @@ HEADERS += \
         imagepreviewform.h \
         imageview.h \
         item.h \
+        itemmodel.h \
         labelcommit.h \
         labeling.h \
         login.h \
         ocrmenu.h \
         pagenavigator.h \
         search.h \
-        tablewidget.h \
         typeeditmenu.h \
         welcome.h \
         window.h
