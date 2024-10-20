@@ -1,8 +1,9 @@
 #ifndef WELCOME_H
 #define WELCOME_H
 
-#include "qsqldatabase.h"
 #include <QMainWindow>
+#include <QSqlDatabase>
+#include <QSystemTrayIcon>
 
 namespace Ui {
     class Welcome;
@@ -14,6 +15,9 @@ class Welcome : public QMainWindow {
 public:
     explicit Welcome(QWidget *parent = nullptr);
     ~Welcome();
+
+protected:
+    virtual void closeEvent(QCloseEvent *event) override;
 
 private slots:
     void labelingButton_clicked();
@@ -27,6 +31,7 @@ private slots:
 private:
     Ui::Welcome *ui;
     void buildHtm(QSqlDatabase &db);
+    QSystemTrayIcon *tray;
 };
 
 #endif // WELCOME_H

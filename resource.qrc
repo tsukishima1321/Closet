@@ -13,5 +13,6 @@
         <file>square.png</file>
         <file>square-check.png</file>
         <file>download.png</file>
+        <file>icon.ico</file>
     </qresource>
 </RCC>

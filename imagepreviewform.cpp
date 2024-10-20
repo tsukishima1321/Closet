@@ -14,16 +14,17 @@ imagePreviewForm::imagePreviewForm(QWidget *parent) :
     this->hideElements();
 }
 
-void imagePreviewForm::setImg(QString href, QImage *img, QString des) {
+void imagePreviewForm::setImg(QSqlRecord record, QImage *img, QModelIndex index) {
+    this->index = index;
+    this->record = record;
     if (this->img) {
         delete this->img;
     }
-    this->href = href;
     this->img = img;
     if (img->isNull()) {
         ui->labelImg->setPixmap(QPixmap(imgBase + "href"));
     } else {
-        ui->labelText->setText(des);
+        ui->labelText->setText(record.value("description").toString());
         QPixmap pixmap = QPixmap::fromImage(*img);
         pixmap = pixmap.scaled(ui->labelImg->size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
         //ui->labelImg->setScaledContents(true);
@@ -58,7 +59,7 @@ bool imagePreviewForm::isAvailable() const {
 
 void imagePreviewForm::mouseDoubleClickEvent(QMouseEvent *event) {
     (void)event;
-    emit isClicked(href);
+    emit isClicked(record.value("href").toString(), index.row());
 }
 
 imagePreviewForm::~imagePreviewForm() {

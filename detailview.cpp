@@ -130,6 +130,7 @@ void DetailView::commitChange() {
         QMessageBox::information(this, "成功", "修改成功");
     }
     disableEdit();
+    emit edit();
 }
 
 void DetailView::cancelChange() {

@@ -14,6 +14,9 @@ namespace Ui {
 class DetailView : public Window {
     Q_OBJECT
 
+signals:
+    void edit();
+
 public:
     explicit DetailView(QWidget *parent, QSqlDatabase &db);
     void OpenImg(QString href);

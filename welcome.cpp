@@ -2,12 +2,13 @@
 #include "dbinstance.h"
 #include "labeling.h"
 #include "login.h"
-#include "qmessagebox.h"
-#include "qsqlquery.h"
+#include "qsystemtrayicon.h"
 #include "search.h"
 #include "typeeditmenu.h"
 #include "ui_welcome.h"
+#include <QMessageBox>
 #include <QSettings>
+#include <QSqlQuery>
 #include <QString>
 
 QString imgBase = "D:/Z/Pictures/";
@@ -38,6 +39,34 @@ Welcome::Welcome(QWidget *parent) :
     connect(ui->logInButton, &QPushButton::clicked, this, &Welcome::logInButton_clicked);
     connect(ui->logOutButton, &QPushButton::clicked, this, &Welcome::logOutButton_clicked);
     connect(ui->lineEdit, &QLineEdit::editingFinished, this, &Welcome::lineEditUpdate);
+
+    QMenu *menu = new QMenu(this);
+
+    QAction *min = new QAction("最小化", this);
+    connect(min, &QAction::triggered, this, &QMainWindow::hide);
+    QAction *restore = new QAction("恢复", this);
+    connect(restore, &QAction::triggered, this, [this]() {show();raise();activateWindow(); });
+    QAction *quit = new QAction("退出", this);
+    connect(quit, &QAction::triggered, QCoreApplication::instance(), &QApplication::quit);
+
+    menu->addAction(min);
+    menu->addAction(restore);
+    menu->addSeparator();
+    menu->addAction(quit);
+
+    tray = new QSystemTrayIcon(this);
+    tray->setContextMenu(menu);
+    QIcon icon(":/pic/icon.ico");
+    tray->setIcon(icon);
+    tray->setToolTip("静寂的壁橱");
+    connect(tray, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {if(reason==QSystemTrayIcon::DoubleClick){show();raise();activateWindow();} });
+    tray->show();
+}
+
+void Welcome::closeEvent(QCloseEvent *event) {
+    this->hide();
+    tray->showMessage("静寂的壁橱", "已最小化到托盘");
+    event->ignore();
 }
 
 Welcome::~Welcome() {

@@ -43,8 +43,8 @@ private:
     imagePreviewForm *preViewList;
     void searchButton_clicked();
     void updateSearch();
-    imagePreviewForm *addImgItem(QString href, QString des);
-    void openDetailMenu(QString href);
+    imagePreviewForm *addImgItem(QSqlRecord record, QModelIndex index);
+    void openDetailMenu(QString href, int row);
     void updateImgView();
     void updateTableView();
     void locateImg();
@@ -57,11 +57,11 @@ private:
 class imgLoader : public QObject, public QRunnable {
     Q_OBJECT
 public:
-    imgLoader(imagePreviewForm *target, QImageReader *reader, QString href, QString des);
+    imgLoader(imagePreviewForm *target, QImageReader *reader, QSqlRecord record, QModelIndex index);
     imagePreviewForm *target;
     QImageReader *reader;
-    QString href;
-    QString des;
+    QSqlRecord record;
+    QModelIndex index;
     void run() override;
 signals:
     void loadReady();

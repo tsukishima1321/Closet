@@ -12,6 +12,9 @@ public:
             QMainWindow(parent) {
         this->setAttribute(Qt::WA_DeleteOnClose, true);
     };
+    virtual ~Window(){};
+
+protected:
     virtual void keyPressEvent(QKeyEvent *event) override {
         if (event->matches(QKeySequence::Close)) {
             this->close();
@@ -19,7 +22,6 @@ public:
         }
         QMainWindow::keyPressEvent(event);
     }
-    virtual ~Window(){};
 };
 
 #endif // WINDOW_H

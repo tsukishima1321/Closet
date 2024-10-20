@@ -1,6 +1,8 @@
 #ifndef IMAGEPREVIEWFORM_H
 #define IMAGEPREVIEWFORM_H
 
+#include <QModelIndex>
+#include <QSqlRecord>
 #include <QWidget>
 
 namespace Ui {
@@ -11,13 +13,14 @@ class imagePreviewForm : public QWidget {
     Q_OBJECT
 
 signals:
-    void isClicked(QString href);
+    void isClicked(QString href, int row);
 
 public:
-    QString href;
+    QSqlRecord record;
+    QModelIndex index;
     explicit imagePreviewForm(QWidget *parent = nullptr);
     virtual ~imagePreviewForm() override;
-    void setImg(QString href, QImage *img, QString des);
+    void setImg(QSqlRecord record, QImage *img, QModelIndex index);
     void hideElements();
     bool isAvailable() const;
     int getHeight();

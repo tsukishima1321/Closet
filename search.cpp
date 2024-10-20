@@ -141,12 +141,15 @@ void Search::searchButton_clicked() {
     } else {
         if (ui->checkBoxTitle->isChecked() && !ui->checkBoxText->isChecked()) {
             queryModel.setJoin(false);
+            countModel.setJoin(false);
             conditions.append("match(description) against('" + ui->lineEdit->text() + +"'in boolean mode)");
         } else if (ui->checkBoxTitle->isChecked() && ui->checkBoxText->isChecked()) {
             queryModel.setJoin(true);
+            countModel.setJoin(true);
             conditions.append("match(description) against('" + ui->lineEdit->text() + "'in boolean mode) or match(ocr_result) against('" + ui->lineEdit->text() + "'in boolean mode)");
         } else if (!ui->checkBoxTitle->isChecked() && ui->checkBoxText->isChecked()) {
             queryModel.setJoin(true);
+            countModel.setJoin(true);
             conditions.append("match(ocr_result) against('" + ui->lineEdit->text() + "'in boolean mode)");
         }
     }
@@ -225,6 +228,7 @@ void Search::updateSearch() {
         queryModel.setLimit((currentPage - 1) * pageSizeTable, pageSizeTable);
     }
     qDebug() << queryModel.getSelectStatement();
+    ui->lineEdit_2->setText(queryModel.getSelectStatement());
     qDebug() << queryModel.select();
     if (ui->stackedWidget->currentIndex() == 0) {
         updateImgView();
@@ -246,7 +250,7 @@ void Search::updateImgView() {
     //图片大小和文字信息全部同步设置完毕，实际图片读取放入Thread中
     for (int i = 0; i < queryModel.rowCount(); i++) {
         if (!queryModel.record(i).isEmpty())
-            addImgItem(queryModel.record(i).value("href").toString(), queryModel.record(i).value("description").toString());
+            addImgItem(queryModel.record(i), queryModel.index(i, 0));
     }
     //清空子布局
     for (QVBoxLayout *column : vBoxLayouts) {
@@ -295,7 +299,7 @@ void Search::tableCellDoubleClicked(const QModelIndex &index) {
     QString name = queryModel.data(queryModel.index(index.row(), queryModel.fieldIndex("href"))).toString();
     //qDebug() << name;
     if (name != "") {
-        openDetailMenu(name);
+        openDetailMenu(name, index.row());
     }
 }
 
@@ -345,8 +349,8 @@ void Search::exportButton_clicked() {
     QMessageBox::information(this, "导出", "导出完成\n成功：" + QString::number(success) + "，失败：" + QString::number(fail));
 }
 
-imgLoader::imgLoader(imagePreviewForm *target, QImageReader *reader, QString href, QString des) :
-        target(target), reader(reader), href(href), des(des) {}
+imgLoader::imgLoader(imagePreviewForm *target, QImageReader *reader, QSqlRecord record, QModelIndex index) :
+        target(target), reader(reader), record(record), index(index) {}
 
 void imgLoader::run() {
     QImage *img = new QImage(reader->read());
@@ -355,14 +359,14 @@ void imgLoader::run() {
                                  "打开图像失败",
                                  "打开图像失败" + reader->fileName());
     }
-    target->setImg(href, img, des);
+    target->setImg(record, img, index);
     emit loadReady();
     delete reader;
 }
 
-imagePreviewForm *Search::addImgItem(QString href, QString des) {
+imagePreviewForm *Search::addImgItem(QSqlRecord record, QModelIndex index) {
     /*根据图片信息设置寻找preViewList中可用的imagePreviewForm放入，大小和文字同步设置，实际图片读取放入Thread中*/
-    QString filename(imgBase + href);
+    QString filename(imgBase + record.value("href").toString());
     QImageReader *reader = new QImageReader(filename.simplified()); //该指针由imgLoader::run释放内存
     reader->setDecideFormatFromContent(true);
     QSize size = reader->size();
@@ -381,8 +385,8 @@ imagePreviewForm *Search::addImgItem(QString href, QString des) {
     for (int i = 0; i < pageSize; i++) {
         imagePreviewForm *form = &preViewList[i];
         if (form->isAvailable()) {
-            form->setImg(href, img, des);
-            imgLoader *loader = new imgLoader(form, reader, href, des); //该指针由QThreadPool释放内存
+            form->setImg(record, img, index);
+            imgLoader *loader = new imgLoader(form, reader, record, index); //该指针由QThreadPool释放内存
             connect(loader, &imgLoader::loadReady, this, [this]() { update(); });
             QThreadPool::globalInstance()->start(loader);
             flag = true;
@@ -396,8 +400,9 @@ imagePreviewForm *Search::addImgItem(QString href, QString des) {
     return form;
 }
 
-void Search::openDetailMenu(QString href) {
+void Search::openDetailMenu(QString href, int row) {
     auto newWindow = new DetailView(nullptr, db);
+    connect(newWindow, &DetailView::edit, this, [this]() { updateSearch(); });
     newWindow->show();
     newWindow->OpenImg(href);
 }
