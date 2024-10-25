@@ -16,6 +16,7 @@ public:
     imageView(QWidget *parent = nullptr);
     void loadImage(QString href);
     void setWheelMode(WheelMode mode);
+    ~imageView();
 
 public slots:
     void slot_zoomIn() { scale(1.2, 1.2); }
@@ -24,6 +25,7 @@ public slots:
 
 private:
     double zoom;
+    QGraphicsScene *_scene;
     QPoint lastMousePos;
     WheelMode wheelMode;
     bool mousePressed;

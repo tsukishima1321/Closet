@@ -5,6 +5,7 @@
 imageView::imageView(QWidget *parent) :
         QGraphicsView(parent),
         zoom(1),
+        _scene(nullptr),
         mousePressed(false) {
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     setResizeAnchor(QGraphicsView::AnchorUnderMouse);
@@ -13,10 +14,13 @@ imageView::imageView(QWidget *parent) :
 }
 
 void imageView::loadImage(QString href) {
-    QGraphicsScene *scene = new QGraphicsScene;
+    if (_scene) {
+        delete _scene;
+    }
+    _scene = new QGraphicsScene;
     QGraphicsPixmapItem *item = new QGraphicsPixmapItem(QPixmap(href));
-    scene->addItem(item);
-    this->setScene(scene);
+    _scene->addItem(item);
+    this->setScene(_scene);
     this->slot_reset();
 }
 
@@ -47,4 +51,8 @@ void imageView::MyScale(double step) {
     if (this->zoom < 0.01)
         return;
     this->scale(factor, factor);
+}
+
+imageView::~imageView() {
+    delete this->scene();
 }

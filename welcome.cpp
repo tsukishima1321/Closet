@@ -64,9 +64,17 @@ Welcome::Welcome(QWidget *parent) :
 }
 
 void Welcome::closeEvent(QCloseEvent *event) {
-    this->hide();
-    tray->showMessage("静寂的壁橱", "已最小化到托盘");
-    event->ignore();
+    QMessageBox box(QMessageBox::Information, "关闭", "是否最小化到托盘");
+    QAbstractButton *yesButton = box.addButton("最小化", QMessageBox::AcceptRole);
+    box.addButton("退出", QMessageBox::RejectRole);
+    box.exec();
+    if (box.clickedButton() == yesButton) {
+        this->hide();
+        tray->showMessage("静寂的壁橱", "已最小化到托盘");
+        event->ignore();
+    } else {
+        event->accept();
+    }
 }
 
 Welcome::~Welcome() {

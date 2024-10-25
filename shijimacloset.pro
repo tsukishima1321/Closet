@@ -6,7 +6,7 @@
 
 QT       += core gui
 QT       += sql
-
+QT       += network
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = ShijimaCloset
@@ -36,6 +36,12 @@ SOURCES += \
         main.cpp \
         ocrmenu.cpp \
         pagenavigator.cpp \
+        qtsinglecoreapplication/qtlocalpeer.cpp \
+        qtsinglecoreapplication/qtlockedfile.cpp \
+        qtsinglecoreapplication/qtlockedfile_unix.cpp \
+        qtsinglecoreapplication/qtlockedfile_win.cpp \
+        qtsinglecoreapplication/qtsingleapplication.cpp \
+        qtsinglecoreapplication/qtsinglecoreapplication.cpp \
         search.cpp \
         typeeditmenu.cpp \
         welcome.cpp
@@ -52,6 +58,12 @@ HEADERS += \
         login.h \
         ocrmenu.h \
         pagenavigator.h \
+        qtsinglecoreapplication/QtLockedFile \
+        qtsinglecoreapplication/QtSingleApplication \
+        qtsinglecoreapplication/qtlocalpeer.h \
+        qtsinglecoreapplication/qtlockedfile.h \
+        qtsinglecoreapplication/qtsingleapplication.h \
+        qtsinglecoreapplication/qtsinglecoreapplication.h \
         search.h \
         typeeditmenu.h \
         welcome.h \
@@ -77,4 +89,6 @@ RC_FILE += logo.rc
 
 DISTFILES += \
     icon.ico \
-    logo.rc
+    logo.rc \
+    qtsinglecoreapplication/qtsingleapplication.pri \
+    qtsinglecoreapplication/qtsinglecoreapplication.pri
