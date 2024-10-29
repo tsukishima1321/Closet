@@ -3,7 +3,6 @@
 #include "iconresources.h"
 #include "labeling.h"
 #include "login.h"
-#include "qsystemtrayicon.h"
 #include "search.h"
 #include "typeeditmenu.h"
 #include "ui_welcome.h"
@@ -11,6 +10,7 @@
 #include <QSettings>
 #include <QSqlQuery>
 #include <QString>
+#include <QSystemTrayIcon>
 
 QString imgBase = "D:/Z/Pictures/";
 
@@ -106,8 +106,8 @@ void Welcome::typeEditButton_clicked() {
     if (instance == std::nullopt) {
         auto loginWindow = new login(this);
         connect(loginWindow, &login::loginRes, this, [this](QSqlDatabase &db) {
-            typeEditMenu *newWindow = new typeEditMenu(this, db);
             QMainWindow *window = new QMainWindow(this);
+            typeEditMenu *newWindow = new typeEditMenu(window, db);
             window->setCentralWidget(newWindow);
             window->setWindowTitle("编辑分类");
             window->show();

@@ -1,3 +1,10 @@
+#include "labeling.h"
+#include "dbinstance.h"
+#include "iconresources.h"
+#include "labelcommit.h"
+#include "login.h"
+#include "typeeditmenu.h"
+#include "ui_labeling.h"
 #include <QDebug>
 #include <QFile>
 #include <QImage>
@@ -7,14 +14,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QTextStream>
-
-#include "dbinstance.h"
-#include "iconresources.h"
-#include "labelcommit.h"
-#include "labeling.h"
-#include "login.h"
-#include "typeeditmenu.h"
-#include "ui_labeling.h"
 
 LabelWindow::LabelWindow(QWidget *parent) :
         Window(parent),

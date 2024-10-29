@@ -84,6 +84,9 @@ void labelCommit::tabClicked(int i) {
 }
 
 labelCommit::~labelCommit() {
+    if (cmd) {
+        delete cmd;
+    }
     delete ui;
 }
 
@@ -95,7 +98,10 @@ void labelCommit::pushButtonCommitAll_clicked() {
     }
     cmd = new QProcess(this);
     connect(cmd, &QProcess::readyReadStandardOutput, this, [this]() { ui->textEdit->append(QString::fromLocal8Bit(cmd->readAllStandardOutput())); });
+    connect(cmd, &QProcess::started, this, [this]() { ui->textEdit->setStyleSheet("border: 3px solid red"); });
+    connect(cmd, &QProcess::finished, this, [this]() { ui->textEdit->setStyleSheet("border: 3px solid green"); });
     cmd->setReadChannel(QProcess::StandardOutput);
+
     ui->progressBar->setValue(0);
     int n = itemList->length();
     int done = 0;
