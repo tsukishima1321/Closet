@@ -1,0 +1,11 @@
+build/
+.vscode/
+.qmake.stash
+*.pro.user
+*.pro.user.*
+debug/
+release/
+Makefile
+*.o
+Makefile.Debug
+Makefile.Release

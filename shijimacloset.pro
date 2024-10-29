@@ -29,11 +29,9 @@ pyScript.path = $$OUT_PWD
 pyScript.base = $$PWD
 
 INCLUDEPATH += \
-        $$PWD/qtsinglecoreapplication \
         $$PWD/xcombobox \
         $$PWD/pagenavigator \
 
-include     ($$PWD/qtsinglecoreapplication/qtsingleapplication.pri)
 include     ($$PWD/xcombobox/xcombobox.pri)
 include     ($$PWD/pagenavigator/pagenavigator.pri)
 
