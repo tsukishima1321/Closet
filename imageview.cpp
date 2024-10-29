@@ -17,11 +17,16 @@ void imageView::loadImage(QString href) {
     if (_scene) {
         delete _scene;
     }
+    imageHref = href;
     _scene = new QGraphicsScene;
     QGraphicsPixmapItem *item = new QGraphicsPixmapItem(QPixmap(href));
     _scene->addItem(item);
     this->setScene(_scene);
     this->slot_reset();
+}
+
+QString imageView::getImgHref() {
+    return imageHref;
 }
 
 void imageView::setWheelMode(WheelMode mode) {

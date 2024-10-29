@@ -2,6 +2,7 @@
 #include "ocrmenu.h"
 #include "typeeditmenu.h"
 #include "ui_detailview.h"
+#include <QClipboard>
 #include <QFileDialog>
 #include <QGraphicsItem>
 #include <QIcon>
@@ -35,13 +36,14 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
     QAction *zoomInAction = new QAction("放大", ui->graphicsView);
     QAction *zoomOutAction = new QAction("缩小", ui->graphicsView);
     QAction *zoomResetAction = new QAction("重置", ui->graphicsView);
-    QAction *separator = new QAction();
+    QAction *separator = new QAction(ui->graphicsView);
     separator->setSeparator(true);
     QAction *setScrollAction = new QAction("滚动模式", ui->graphicsView);
     QAction *setScaleAction = new QAction("缩放模式", ui->graphicsView);
-    QAction *separator_2 = new QAction();
+    QAction *separator_2 = new QAction(ui->graphicsView);
     separator_2->setSeparator(true);
     QAction *savePicAction = new QAction("图片另存为", ui->graphicsView);
+    QAction *copyPicAction = new QAction("复制到剪贴板", ui->graphicsView);
     ui->graphicsView->addAction(zoomInAction);
     ui->graphicsView->addAction(zoomOutAction);
     ui->graphicsView->addAction(zoomResetAction);
@@ -50,6 +52,7 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
     ui->graphicsView->addAction(setScaleAction);
     ui->graphicsView->addAction(separator_2);
     ui->graphicsView->addAction(savePicAction);
+    ui->graphicsView->addAction(copyPicAction);
     ui->graphicsView->setContextMenuPolicy(Qt::ActionsContextMenu);
     connect(zoomInAction, &QAction::triggered, ui->graphicsView, &imageView::slot_zoomIn);
     connect(zoomOutAction, &QAction::triggered, ui->graphicsView, &imageView::slot_zoomOut);
@@ -57,6 +60,11 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
     connect(setScrollAction, &QAction::triggered, ui->radioButtonScroll, &QRadioButton::click);
     connect(setScaleAction, &QAction::triggered, ui->radioButtonScale, &QRadioButton::click);
     connect(savePicAction, &QAction::triggered, this, &DetailView::savePic);
+    connect(copyPicAction, &QAction::triggered, this, [this]() {
+        if (ui->graphicsView->getImgHref() != "") {
+            QApplication::clipboard()->setImage(QImage(ui->graphicsView->getImgHref()));
+        }
+    });
 
     updateTypes();
     disableEdit();
@@ -148,7 +156,7 @@ void DetailView::cancelChange() {
 }
 
 void DetailView::typeMenuOpen() {
-    auto newWindow = new typeEditMenu(nullptr, db);
+    auto newWindow = new typeEditMenu(this, db);
     connect(newWindow, &QWidget::destroyed, this, &DetailView::updateTypes);
     newWindow->show();
 }
@@ -185,6 +193,6 @@ DetailView::~DetailView() {
 }
 
 void DetailView::ocrMenuOpen() {
-    auto newWindow = new ocrMenu(nullptr, db, current);
+    auto newWindow = new ocrMenu(this, db, current);
     newWindow->show();
 }

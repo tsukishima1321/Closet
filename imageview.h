@@ -16,6 +16,7 @@ public:
     imageView(QWidget *parent = nullptr);
     void loadImage(QString href);
     void setWheelMode(WheelMode mode);
+    QString getImgHref();
     ~imageView();
 
 public slots:
@@ -24,6 +25,7 @@ public slots:
     void slot_reset();
 
 private:
+    QString imageHref;
     double zoom;
     QGraphicsScene *_scene;
     QPoint lastMousePos;
