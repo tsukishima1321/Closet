@@ -1,5 +1,6 @@
 #include "search.h"
 #include "detailview.h"
+#include "iconresources.h"
 #include "imagepreviewform.h"
 #include "qfiledialog.h"
 #include "qimagereader.h"
@@ -24,10 +25,10 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
         queryModel(nullptr, db),
         countModel(nullptr, db) {
     ui->setupUi(this);
-    ui->deleteButton->setIcon(QIcon(":/pic/trash.png"));
-    ui->exportButton->setIcon(QIcon(":/pic/download.png"));
-    ui->deleteButton_2->setIcon(QIcon(":/pic/trash.png"));
-    ui->exportButton_2->setIcon(QIcon(":/pic/download.png"));
+    ui->deleteButton->setIcon(IconResources::getIcons()["trash"]);
+    ui->exportButton->setIcon(IconResources::getIcons()["download"]);
+    ui->deleteButton_2->setIcon(IconResources::getIcons()["trash"]);
+    ui->exportButton_2->setIcon(IconResources::getIcons()["download"]);
     ui->checkBoxTitle->setChecked(true);
     ui->radioButtonAsc->setChecked(true);
     ui->dateEditFrom->setDate(QDate::currentDate());

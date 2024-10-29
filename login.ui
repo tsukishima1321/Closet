@@ -27,7 +27,7 @@ font-style:MingLiU-ExtB;
 }
 QFrame{
 border:sold 10px rgba(0,0,0);
-background-image:url(:/pic/logInBack.jpg);
+background-image:url(:/pic/backgrounds/logInBack.jpg);
 border-radius:10px;
 }
 QLineEdit{

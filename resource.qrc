@@ -1,18 +1,19 @@
 <RCC>
-    <qresource prefix="/pic">
-        <file>back.jpg</file>
-        <file>zoomIn.png</file>
-        <file>refresh.png</file>
-        <file>zoomOut.png</file>
-        <file>reset.png</file>
-        <file>square-x.png</file>
-        <file>logInBack.jpg</file>
-        <file>step-back.png</file>
-        <file>step-forward.png</file>
-        <file>trash.png</file>
-        <file>square.png</file>
-        <file>square-check.png</file>
-        <file>download.png</file>
-        <file>icon.ico</file>
+    <qresource prefix="/pic"/>
+    <qresource prefix="/pic" lang="pic">
+        <file>icons/download.png</file>
+        <file>icons/refresh.png</file>
+        <file>icons/reset.png</file>
+        <file>icons/square.png</file>
+        <file>icons/square-check.png</file>
+        <file>icons/square-x.png</file>
+        <file>icons/step-back.png</file>
+        <file>icons/step-forward.png</file>
+        <file>icons/trash.png</file>
+        <file>backgrounds/back.jpg</file>
+        <file>backgrounds/logInBack.jpg</file>
+        <file>icons/icon.ico</file>
+        <file>icons/zoom-in.png</file>
+        <file>icons/zoom-out.png</file>
     </qresource>
 </RCC>

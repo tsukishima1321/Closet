@@ -1,6 +1,5 @@
 #include <QDebug>
 #include <QFile>
-#include <QIcon>
 #include <QImage>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -10,6 +9,7 @@
 #include <QTextStream>
 
 #include "dbinstance.h"
+#include "iconresources.h"
 #include "labelcommit.h"
 #include "labeling.h"
 #include "login.h"
@@ -27,13 +27,13 @@ LabelWindow::LabelWindow(QWidget *parent) :
     ui->tabWidget->setTabText(0, "录入记录");
     ui->tabWidget->setTabText(1, "记录预览");
     ui->tabWidget->setTabText(2, "记录提交");
-    ui->zoomInButton->setIcon(QIcon(":/pic/zoomIn.png"));
-    ui->zoomOutButton->setIcon(QIcon(":/pic/zoomOut.png"));
-    ui->zoomResetButton->setIcon(QIcon(":/pic/reset.png"));
-    ui->freshTypeButton->setIcon(QIcon(":/pic/refresh.png"));
-    ui->freshDateButton->setIcon(QIcon(":/pic/refresh.png"));
-    ui->toolButtonNext->setIcon(QIcon(":/pic/step-forward.png"));
-    ui->toolButtonLast->setIcon(QIcon(":/pic/step-back.png"));
+    ui->zoomInButton->setIcon(IconResources::getIcons()["zoom-in"]);
+    ui->zoomOutButton->setIcon(IconResources::getIcons()["zoom-out"]);
+    ui->zoomResetButton->setIcon(IconResources::getIcons()["reset"]);
+    ui->freshTypeButton->setIcon(IconResources::getIcons()["refresh"]);
+    ui->freshDateButton->setIcon(IconResources::getIcons()["refresh"]);
+    ui->toolButtonNext->setIcon(IconResources::getIcons()["step-forward"]);
+    ui->toolButtonLast->setIcon(IconResources::getIcons()["step-back"]);
     ui->dateEdit->setDate(QDate::currentDate());
     //链接来自gui的信号
     connect(ui->zoomInButton, &QPushButton::clicked, ui->imageViewPort, &imageView::slot_zoomIn);

@@ -1,5 +1,6 @@
 #include "welcome.h"
 #include "dbinstance.h"
+#include "iconresources.h"
 #include "labeling.h"
 #include "login.h"
 #include "qsystemtrayicon.h"
@@ -17,7 +18,7 @@ Welcome::Welcome(QWidget *parent) :
         QMainWindow(parent),
         ui(new Ui::Welcome) {
     ui->setupUi(this);
-    QPixmap *pixmap = new QPixmap(":/pic/back.jpg");
+    QPixmap *pixmap = new QPixmap(":/pic/backgrounds/back.jpg");
     pixmap->scaled(ui->label->size(), Qt::KeepAspectRatio);
     ui->label->setScaledContents(true);
     ui->label->setPixmap(*pixmap);
@@ -56,8 +57,7 @@ Welcome::Welcome(QWidget *parent) :
 
     tray = new QSystemTrayIcon(this);
     tray->setContextMenu(menu);
-    QIcon icon(":/pic/icon.ico");
-    tray->setIcon(icon);
+    tray->setIcon(IconResources::getIcons()["main-icon"]);
     tray->setToolTip("静寂的壁橱");
     connect(tray, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {if(reason==QSystemTrayIcon::DoubleClick){show();raise();activateWindow();} });
     tray->show();

@@ -1,11 +1,11 @@
 #include "detailview.h"
+#include "iconresources.h"
 #include "ocrmenu.h"
 #include "typeeditmenu.h"
 #include "ui_detailview.h"
 #include <QClipboard>
 #include <QFileDialog>
 #include <QGraphicsItem>
-#include <QIcon>
 #include <QMessageBox>
 #include <QSqlError>
 
@@ -17,9 +17,9 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
         db(db) {
     ui->setupUi(this);
     this->setAttribute(Qt::WA_DeleteOnClose, true);
-    ui->zoomInButton->setIcon(QIcon(":/pic/zoomIn.png"));
-    ui->zoomOutButton->setIcon(QIcon(":/pic/zoomOut.png"));
-    ui->zoomResetButton->setIcon(QIcon(":/pic/reset.png"));
+    ui->zoomInButton->setIcon(IconResources::getIcons()["zoom-in"]);
+    ui->zoomOutButton->setIcon(IconResources::getIcons()["zoom-out"]);
+    ui->zoomResetButton->setIcon(IconResources::getIcons()["reset"]);
 
     connect(ui->zoomInButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_zoomIn);
     connect(ui->zoomOutButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_zoomOut);

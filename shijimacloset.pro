@@ -27,6 +27,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         dbinstance.cpp \
         detailview.cpp \
+        iconresources.cpp \
         imagepreviewform.cpp \
         imageview.cpp \
         itemmodel.cpp \
@@ -50,6 +51,7 @@ SOURCES += \
 HEADERS += \
         dbinstance.h \
         detailview.h \
+        iconresources.h \
         imagepreviewform.h \
         imageview.h \
         item.h \

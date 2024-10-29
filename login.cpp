@@ -1,14 +1,14 @@
 #include "login.h"
 #include "dbinstance.h"
+#include "iconresources.h"
 #include "ui_login.h"
-#include <QIcon>
 
 login::login(QWidget *parent) :
         QDialog(parent),
         ui(new Ui::login) {
     this->setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(this);
-    ui->toolButton->setIcon(QIcon(":/pic/square-x.png"));
+    ui->toolButton->setIcon(IconResources::getIcons()["square-x"]);
     ui->lineEditName->setFocus();
     setWindowFlags(Qt::FramelessWindowHint | windowFlags());
     setAttribute(Qt::WA_TranslucentBackground);
