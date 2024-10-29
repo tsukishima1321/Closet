@@ -220,3 +220,14 @@ void LabelWindow::pushButtonAddType_clicked() {
         newWindow->show();
     }
 }
+
+void LabelWindow::closeEvent(QCloseEvent *event) {
+    if (isLogedIn) {
+        if (dynamic_cast<labelCommit *>(ui->tabWidget->widget(2))->isRunning()) {
+            event->ignore();
+            QMessageBox::information(this, "提示", "OCR进程运行中，请勿关闭窗口");
+            return;
+        }
+    }
+    return Window::closeEvent(event);
+}

@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QList>
+#include <QProcess>
 #include <QSqlQuery>
 #include <QString>
 #include <QWidget>
@@ -22,6 +23,7 @@ class labelCommit : public QWidget {
 public:
     labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &db, QString fromDir);
     void tabClicked(int i);
+    bool isRunning();
 
 private:
     QList<Item> *itemList;
@@ -31,13 +33,13 @@ private:
     ~labelCommit();
 private slots:
     void pushButtonCommitAll_clicked();
-    void pushButtonCommit_clicked();
     void pushButtonDelete_clicked();
 
 private:
     //void updateTable1();
     void updateTable();
     Ui::labelCommit *ui;
+    QProcess *cmd;
 };
 
 #endif // LABELCOMMIT_H

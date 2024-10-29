@@ -29,6 +29,7 @@ private:
     QSqlDatabase dbVisitor;
     void updateTypes();
     virtual void keyPressEvent(QKeyEvent *) override;
+    virtual void closeEvent(QCloseEvent *) override;
 private slots:
     void pushButtonNext_clicked();
     void pushButtonStart_clicked();

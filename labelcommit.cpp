@@ -1,8 +1,10 @@
 #include "labelcommit.h"
 #include "ui_labelcommit.h"
+#include <QCloseEvent>
 #include <QDebug>
 #include <QFile>
 #include <QMessageBox>
+#include <QProcess>
 #include <QSettings>
 #include <QSqlError>
 
@@ -34,11 +36,10 @@ labelCommit::labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &d
         QWidget(parent),
         db(db),
         fromDir(fromDir),
-        ui(new Ui::labelCommit) {
+        ui(new Ui::labelCommit), cmd(nullptr) {
     this->setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(this);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    connect(ui->pushButtonCommit, &QPushButton::clicked, this, &labelCommit::pushButtonCommit_clicked);
     connect(ui->pushButtonCommitAll, &QPushButton::clicked, this, &labelCommit::pushButtonCommitAll_clicked);
     connect(ui->pushButtonDelete, &QPushButton::clicked, this, &labelCommit::pushButtonDelete_clicked);
     //qDebug() << QSqlDatabase::drivers();
@@ -87,9 +88,27 @@ labelCommit::~labelCommit() {
 }
 
 void labelCommit::pushButtonCommitAll_clicked() {
+    if (cmd) {
+        cmd->close();
+        cmd->waitForFinished();
+        delete cmd;
+    }
+    cmd = new QProcess(this);
+    connect(cmd, &QProcess::readyReadStandardOutput, this, [this]() { ui->textEdit->append(QString::fromLocal8Bit(cmd->readAllStandardOutput())); });
+    cmd->setReadChannel(QProcess::StandardOutput);
     ui->progressBar->setValue(0);
     int n = itemList->length();
     int done = 0;
+    QStringList paras;
+    paras << "doOcr.py"
+          << db.userName() << db.password();
+    for (const Item &item : *(this->itemList)) {
+        paras.append(fromDir + "/" + item.href);
+    }
+
+    cmd->start("python", paras);
+    qDebug() << cmd->state();
+    cmd->waitForStarted();
     QSqlQuery query(db);
     query.prepare("INSERT INTO pictures (date,href,description,type) VALUES (:date,:href,:description,:type)");
     for (const Item &item : *(this->itemList)) {
@@ -108,24 +127,6 @@ void labelCommit::pushButtonCommitAll_clicked() {
     ui->tableWidget->clearContents();
 }
 
-void labelCommit::pushButtonCommit_clicked() {
-    if (ui->tableWidget->rowCount() == 0) {
-        return;
-    }
-    int i = ui->tableWidget->currentRow();
-    QSqlQuery query(db);
-    query.prepare("INSERT INTO pictures (date,href,description,type) VALUES (:date,:href,:description,:type)");
-    const Item &item = (*itemList)[i];
-    query.bindValue(":date", item.date);
-    query.bindValue(":href", item.href);
-    query.bindValue(":description", item.description);
-    query.bindValue(":type", item.type);
-    query.exec();
-    copyFileToPath(fromDir + item.href, imgBase, false);
-    itemList->removeAt(i);
-    updateTable();
-}
-
 void labelCommit::pushButtonDelete_clicked() {
     if (ui->tableWidget->rowCount() == 0) {
         return;
@@ -133,6 +134,15 @@ void labelCommit::pushButtonDelete_clicked() {
     int i = ui->tableWidget->currentRow();
     itemList->remove(i);
     updateTable();
+}
+
+bool labelCommit::isRunning() {
+    if (cmd) {
+        if (cmd->state() == QProcess::Running) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**/

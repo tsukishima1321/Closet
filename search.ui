@@ -115,7 +115,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBoxType">
+           <widget class="XComboBox" name="comboBoxType">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -554,8 +554,13 @@
   <customwidget>
    <class>PageNavigator</class>
    <extends>QWidget</extends>
-   <header>pagenavigator.h</header>
+   <header>pagenavigator/pagenavigator.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>XComboBox</class>
+   <extends>QComboBox</extends>
+   <header>xcombobox/xcombobox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

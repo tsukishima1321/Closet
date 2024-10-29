@@ -52,11 +52,13 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
     QSqlQuery query(db);
     query.prepare(sql);
     query.exec();
+    QStringList typeList;
     while (query.next()) {
         QString type = query.value("typename").toString();
-        ui->comboBoxType->addItem(type);
+        typeList.append(type);
         // qDebug()<<type;
     }
+    ui->comboBoxType->xAddItems(typeList);
     currentPage = ui->pageNavigate->getCurrentPage();
     preViewList = new imagePreviewForm[pageSize];
     for (int i = 0; i < pageSize; i++) {
@@ -134,8 +136,7 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
 
 void Search::searchButton_clicked() {
     /*构造查询的条件，预先查询结果的总数来更新页码，最后调用updateSearch()*/
-    //ui->statusbar->showMessage("正在搜索...");
-    QString sql = "";
+    QString sql = "1=1";
     QStringList conditions;
     if (ui->lineEdit->text() == "") {
     } else {
@@ -155,21 +156,24 @@ void Search::searchButton_clicked() {
     }
 
     if (ui->comboBoxType->isEnabled()) {
-        conditions.append("type='" + ui->comboBoxType->currentText() + "'");
+        QString typeFilter = "1=0";
+        QStringList typeFilterList;
+        QStringList typeList = ui->comboBoxType->GetSelItemsText();
+        for (auto &&s : typeList) {
+            typeFilterList.append("type='" + s + "'");
+        }
+        for (auto &&s : typeFilterList) {
+            typeFilter += " or (" + s + ")";
+        }
+        conditions.append(typeFilter);
     }
 
     if (ui->dateEditFrom->isEnabled()) {
         conditions.append("date between '" + ui->dateEditFrom->text() + "' and '" + ui->dateEditTo->text() + "'");
     }
 
-    if (!conditions.empty()) {
-        //sql += "where";
-        for (auto &&c : conditions) {
-            sql += " (" + c + ") and";
-        }
-        if (sql.right(3) == "and")
-            sql = sql.remove(sql.length() - 3, 3);
-        currentConditon = sql;
+    for (auto &&c : conditions) {
+        sql += " and (" + c + ")";
     }
     countModel.setFilter(sql);
     queryModel.setFilter(sql);

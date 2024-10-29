@@ -156,7 +156,7 @@ void DetailView::cancelChange() {
 }
 
 void DetailView::typeMenuOpen() {
-    auto newWindow = new typeEditMenu(this, db);
+    auto newWindow = new typeEditMenu(nullptr, db);
     connect(newWindow, &QWidget::destroyed, this, &DetailView::updateTypes);
     newWindow->show();
 }
@@ -193,6 +193,6 @@ DetailView::~DetailView() {
 }
 
 void DetailView::ocrMenuOpen() {
-    auto newWindow = new ocrMenu(this, db, current);
+    auto newWindow = new ocrMenu(nullptr, db, current);
     newWindow->show();
 }

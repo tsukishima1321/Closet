@@ -35,7 +35,7 @@ SOURCES += \
         login.cpp \
         main.cpp \
         ocrmenu.cpp \
-        pagenavigator.cpp \
+        pagenavigator/pagenavigator.cpp \
         qtsinglecoreapplication/qtlocalpeer.cpp \
         qtsinglecoreapplication/qtlockedfile.cpp \
         qtsinglecoreapplication/qtlockedfile_unix.cpp \
@@ -44,7 +44,8 @@ SOURCES += \
         qtsinglecoreapplication/qtsinglecoreapplication.cpp \
         search.cpp \
         typeeditmenu.cpp \
-        welcome.cpp
+        welcome.cpp \
+        xcombobox/xcombobox.cpp
 
 HEADERS += \
         dbinstance.h \
@@ -57,7 +58,7 @@ HEADERS += \
         labeling.h \
         login.h \
         ocrmenu.h \
-        pagenavigator.h \
+        pagenavigator/pagenavigator.h \
         qtsinglecoreapplication/QtLockedFile \
         qtsinglecoreapplication/QtSingleApplication \
         qtsinglecoreapplication/qtlocalpeer.h \
@@ -67,7 +68,8 @@ HEADERS += \
         search.h \
         typeeditmenu.h \
         welcome.h \
-        window.h
+        window.h \
+        xcombobox/xcombobox.h
 
 FORMS += \
         detailview.ui \
@@ -76,7 +78,7 @@ FORMS += \
         labeling.ui \
         login.ui \
         ocrmenu.ui \
-        pagenavigator.ui \
+        pagenavigator/pagenavigator.ui \
         search.ui \
         typeeditmenu.ui \
         welcome.ui
@@ -88,6 +90,7 @@ RC_FILE += logo.rc
 
 
 DISTFILES += \
+    doOcr.py \
     icon.ico \
     logo.rc \
     qtsinglecoreapplication/qtsingleapplication.pri \

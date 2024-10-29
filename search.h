@@ -39,7 +39,6 @@ private:
     QSqlDatabase &db;
     itemModel queryModel;
     itemModel countModel;
-    QString currentConditon;
     imagePreviewForm *preViewList;
     void searchButton_clicked();
     void updateSearch();
@@ -58,11 +57,14 @@ class imgLoader : public QObject, public QRunnable {
     Q_OBJECT
 public:
     imgLoader(imagePreviewForm *target, QImageReader *reader, QSqlRecord record, QModelIndex index);
+    void run() override;
+
+private:
     imagePreviewForm *target;
     QImageReader *reader;
     QSqlRecord record;
     QModelIndex index;
-    void run() override;
+
 signals:
     void loadReady();
 };
