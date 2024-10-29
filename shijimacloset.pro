@@ -6,7 +6,6 @@
 
 QT       += core gui
 QT       += sql
-QT       += network
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = ShijimaCloset
@@ -21,8 +20,22 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+CONFIG += file_copies
+COPIES += pyScript
+pyScript.files = $$files(doOcr.py)
+pyScript.path = $$OUT_PWD
+pyScript.base = $$PWD
+
+INCLUDEPATH += \
+        $$PWD/qtsinglecoreapplication \
+        $$PWD/xcombobox \
+        $$PWD/pagenavigator \
+
+include     ($$PWD/qtsinglecoreapplication/qtsingleapplication.pri)
+include     ($$PWD/xcombobox/xcombobox.pri)
+include     ($$PWD/pagenavigator/pagenavigator.pri)
 
 SOURCES += \
         dbinstance.cpp \
@@ -36,17 +49,9 @@ SOURCES += \
         login.cpp \
         main.cpp \
         ocrmenu.cpp \
-        pagenavigator/pagenavigator.cpp \
-        qtsinglecoreapplication/qtlocalpeer.cpp \
-        qtsinglecoreapplication/qtlockedfile.cpp \
-        qtsinglecoreapplication/qtlockedfile_unix.cpp \
-        qtsinglecoreapplication/qtlockedfile_win.cpp \
-        qtsinglecoreapplication/qtsingleapplication.cpp \
-        qtsinglecoreapplication/qtsinglecoreapplication.cpp \
         search.cpp \
         typeeditmenu.cpp \
         welcome.cpp \
-        xcombobox/xcombobox.cpp
 
 HEADERS += \
         dbinstance.h \
@@ -60,18 +65,10 @@ HEADERS += \
         labeling.h \
         login.h \
         ocrmenu.h \
-        pagenavigator/pagenavigator.h \
-        qtsinglecoreapplication/QtLockedFile \
-        qtsinglecoreapplication/QtSingleApplication \
-        qtsinglecoreapplication/qtlocalpeer.h \
-        qtsinglecoreapplication/qtlockedfile.h \
-        qtsinglecoreapplication/qtsingleapplication.h \
-        qtsinglecoreapplication/qtsinglecoreapplication.h \
         search.h \
         typeeditmenu.h \
         welcome.h \
         window.h \
-        xcombobox/xcombobox.h
 
 FORMS += \
         detailview.ui \
@@ -80,7 +77,6 @@ FORMS += \
         labeling.ui \
         login.ui \
         ocrmenu.ui \
-        pagenavigator/pagenavigator.ui \
         search.ui \
         typeeditmenu.ui \
         welcome.ui
@@ -95,5 +91,3 @@ DISTFILES += \
     doOcr.py \
     icon.ico \
     logo.rc \
-    qtsinglecoreapplication/qtsingleapplication.pri \
-    qtsinglecoreapplication/qtsinglecoreapplication.pri
