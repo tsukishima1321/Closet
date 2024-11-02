@@ -5,7 +5,7 @@
 textPreviewForm::textPreviewForm(QWidget *parent) : QWidget(parent), ui(new Ui::textPreviewForm) {
     ui->setupUi(this);
     available = true;
-    this->setMinimumHeight(200);
+    this->setMinimumHeight(100);
     this->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
     this->hideElements();
     ui->labelText->setWordWrap(true);
@@ -18,7 +18,7 @@ textPreviewForm::~textPreviewForm() {
 
 void textPreviewForm::setText(QString text, QString date, int id) {
     this->id = id;
-    ui->labelText->setText(text + "\n......");
+    ui->labelText->setText(text);
     ui->labelText->adjustSize();
     ui->labelDate->setText(date);
     ui->labelText->show();
@@ -35,6 +35,7 @@ void textPreviewForm::hideElements() {
     ui->labelText->adjustSize();
     ui->checkBox->hide();
     ui->line->hide();
+    ui->labelOmit->hide();
     available = true;
 }
 
@@ -64,6 +65,14 @@ QString textPreviewForm::getDate() const {
 
 int textPreviewForm::getHeight() const{
     return ui->labelText->height();
+}
+
+void textPreviewForm::setOmit(bool omit) {
+    if(omit) {
+        ui->labelOmit->show();
+    } else {
+        ui->labelOmit->hide();
+    }
 }
 
 void textPreviewForm::mouseDoubleClickEvent(QMouseEvent *event) {

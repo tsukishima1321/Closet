@@ -87,6 +87,7 @@ TextView::TextView(QWidget *parent, QSqlDatabase &db) :
     connect(ui->deleteButton, &QPushButton::clicked, this, &TextView::deleteButton_clicked);
     connect(ui->newTextButton, &QPushButton::clicked, this, [this]() {
         textDetailView *detail = new textDetailView(this, this->db);
+        connect(detail, &textDetailView::edit, this, [this]() { updateSearch(); });
         detail->setDate(QDate::currentDate());
         detail->show();
     });
@@ -125,7 +126,7 @@ void TextView::searchButton_clicked() {
 void TextView::updateSearch() {
     /*接受查询条件，在此之上构造排序和分页条件，进行实际查询，根据radioButtn状态调用updateImgView()或updateTableView()
       除了被searchButtonClicked调用外，不改变查询条件，只改变排序和分类的操作最后也会调用此函数来显示结果*/
-    QString sql = "select id,date,left(text,200) as preview from texts where " + currentFilter;
+    QString sql = "select id,date,left(text,200) as preview,length(text) as length from texts where " + currentFilter;
     switch (ui->comboBoxOrder->currentIndex()) {
     case 0:
         if (ui->radioButtonAsc->isChecked()) {
@@ -168,7 +169,10 @@ void TextView::updateTextView(QSqlQuery &&query) {
     }
     for (int i = 0; i < TextViewConstants::pageSize; i++) {
         if (query.next()) {
-            addTextItem(query.value("preview").toString(), query.value("date").toString(), query.value("id").toInt());
+            auto item = addTextItem(query.value("preview").toString(), query.value("date").toString(), query.value("id").toInt());
+            if(query.value("length").toInt() > 200) {
+                item->setOmit(true);
+            }
         }
     }
     for (QVBoxLayout *column : vBoxLayouts) {

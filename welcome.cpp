@@ -6,6 +6,7 @@
 #include "search.h"
 #include "typeeditmenu.h"
 #include "textview.h"
+#include "textdetailview.h"
 #include "ui_welcome.h"
 #include <QFileDialog>
 #include <QMessageBox>
@@ -60,6 +61,23 @@ Welcome::Welcome(QWidget *parent) : QMainWindow(parent),
 
     QMenu *menu = new QMenu(this);
 
+    QAction *quickWrite = new QAction("随手记", this);
+    connect(quickWrite, &QAction::triggered, this, [this]() {
+        std::optional<dbInstance *> instance = dbInstance::getInstanceByName("root");
+        if (instance == std::nullopt) {
+            auto loginWindow = new login(this);
+            connect(loginWindow, &login::loginRes, this, [this](QSqlDatabase &db) {
+                auto newWindow = new textDetailView(this, db);
+                newWindow->setDate(QDate::currentDate());
+                newWindow->show();
+            });
+            loginWindow->exec();
+        } else {
+            auto newWindow = new textDetailView(nullptr, (*instance)->db);
+            newWindow->setDate(QDate::currentDate());
+            newWindow->show();
+        }
+    });
     QAction *min = new QAction("最小化", this);
     connect(min, &QAction::triggered, this, &QMainWindow::hide);
     QAction *restore = new QAction("恢复", this);
@@ -67,6 +85,8 @@ Welcome::Welcome(QWidget *parent) : QMainWindow(parent),
     QAction *quit = new QAction("退出", this);
     connect(quit, &QAction::triggered, QCoreApplication::instance(), &QApplication::quit);
 
+    menu->addAction(quickWrite);
+    menu->addSeparator();
     menu->addAction(min);
     menu->addAction(restore);
     menu->addSeparator();

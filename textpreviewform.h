@@ -25,6 +25,7 @@ public:
     QString getDate() const;
     void check();
     void uncheck();
+    void setOmit(bool omit);
 
 private:
     Ui::textPreviewForm *ui;
