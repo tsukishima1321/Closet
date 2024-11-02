@@ -1,6 +1,7 @@
 #include "ocrmenu.h"
 #include "qsqlerror.h"
 #include "ui_ocrmenu.h"
+#include "item.h"
 #include <QMessageBox>
 #include <QSqlQuery>
 
@@ -17,7 +18,7 @@ ocrMenu::ocrMenu(QWidget *parent, QSqlDatabase &db, QString key) :
     query.bindValue(":href", key);
     query.exec();
     if (query.next()) {
-        ui->textEdit->setText(query.value("ocr_result").toString());
+        ui->textEdit->setText(Item(query.record()).ocr);
     }
     connect(ui->commitButton, &QPushButton::clicked, this, &ocrMenu::editCommit);
     connect(ui->cancelButton, &QPushButton::clicked, this, &ocrMenu::editCancel);
@@ -58,7 +59,7 @@ void ocrMenu::editCancel() {
     query.bindValue(":href", key);
     query.exec();
     if (query.next()) {
-        ui->textEdit->setText(query.value("ocr_result").toString());
+        ui->textEdit->setText(Item(query.record()).ocr);
     }
 }
 

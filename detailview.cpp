@@ -2,6 +2,7 @@
 #include "iconresources.h"
 #include "ocrmenu.h"
 #include "typeeditmenu.h"
+#include "item.h"
 #include "ui_detailview.h"
 #include <QClipboard>
 #include <QFileDialog>
@@ -87,9 +88,10 @@ void DetailView::OpenImg(QString href) {
         QMessageBox::critical(this, "错误", errortext);
     } else {
         query.next();
-        ui->dateEdit->setDate(QDate::fromString(query.value("date").toString(), "yyyy-MM-dd"));
-        ui->desText->setText(query.value("description").toString());
-        ui->typeSelect->setCurrentText(query.value("type").toString());
+        Item item(query.record());
+        ui->dateEdit->setDate(QDate::fromString(item.date, "yyyy-MM-dd"));
+        ui->desText->setText(item.description);
+        ui->typeSelect->setCurrentText(item.type);
     }
 }
 
@@ -148,9 +150,10 @@ void DetailView::cancelChange() {
     query.bindValue(":href", current);
     query.exec();
     if (query.next()) {
-        ui->dateEdit->setDate(QDate::fromString(query.value("date").toString(), "yyyy-MM-dd"));
-        ui->desText->setText(query.value("description").toString());
-        ui->typeSelect->setCurrentText(query.value("type").toString());
+        Item item(query.record());
+        ui->dateEdit->setDate(QDate::fromString(item.date, "yyyy-MM-dd"));
+        ui->desText->setText(item.description);
+        ui->typeSelect->setCurrentText(item.type);
     }
     disableEdit();
 }

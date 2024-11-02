@@ -22,6 +22,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+DEFINES -= QT_NO_DEBUG_OUTPUT
+
 CONFIG += file_copies
 COPIES += pyScript
 pyScript.files = $$files(doOcr.py)
@@ -50,6 +52,7 @@ SOURCES += \
         search.cpp \
         typeeditmenu.cpp \
         welcome.cpp \
+        textview.cpp \
 
 HEADERS += \
         dbinstance.h \
@@ -67,6 +70,7 @@ HEADERS += \
         typeeditmenu.h \
         welcome.h \
         window.h \
+        textview.h \
 
 FORMS += \
         detailview.ui \
@@ -77,7 +81,8 @@ FORMS += \
         ocrmenu.ui \
         search.ui \
         typeeditmenu.ui \
-        welcome.ui
+        welcome.ui \
+        textview.ui \
 
 RESOURCES += \
     resource.qrc

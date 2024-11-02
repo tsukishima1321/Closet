@@ -23,7 +23,7 @@ class labelCommit : public QWidget {
 public:
     labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &db, QString fromDir);
     void tabClicked(int i);
-    bool isRunning();
+    bool isRunning() const;
 
 private:
     QList<Item> *itemList;

@@ -22,15 +22,19 @@ protected:
 private slots:
     void labelingButton_clicked();
     void searchButton_clicked();
-    void typeEditButton_clicked();
-    void buildHtmButton_clicked();
-    void lineEditUpdate();
+    void textButton_clicked();
+    void typeEdit();
+    void exportHtm();
+    void exportDB();
+    void setBaseDir();
+    //void lineEditUpdate();
     void logInButton_clicked();
     void logOutButton_clicked();
 
 private:
     Ui::Welcome *ui;
     void buildHtm(QSqlDatabase &db);
+    void sqlDump(QSqlDatabase &db);
     QSystemTrayIcon *tray;
 };
 

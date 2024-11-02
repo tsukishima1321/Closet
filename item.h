@@ -17,11 +17,11 @@ public:
         if (record.value("description").isValid())
             description = record.value("description").toString();
         if (record.value("date").isValid())
-            href = record.value("date").toString();
+            date = record.value("date").toString();
         if (record.value("type").isValid())
-            href = record.value("type").toString();
-        if (record.value("ocr").isValid())
-            href = record.value("ocr").toString();
+            type = record.value("type").toString();
+        if (record.value("ocr_result").isValid())
+            ocr = record.value("ocr_result").toString();
     }
     QString href;
     QString description;

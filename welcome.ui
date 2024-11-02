@@ -98,7 +98,7 @@
          </font>
         </property>
         <property name="text">
-         <string>搜索&amp;&amp;查看</string>
+         <string>搜索图片</string>
         </property>
        </widget>
       </item>
@@ -119,17 +119,11 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="typeEditButton">
+       <widget class="QPushButton" name="textButton">
         <property name="minimumSize">
          <size>
           <width>0</width>
           <height>50</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>60</height>
          </size>
         </property>
         <property name="font">
@@ -138,47 +132,7 @@
          </font>
         </property>
         <property name="text">
-         <string>编辑分类</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer_4">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="buildButton">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>50</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>60</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>导出文件</string>
+         <string>搜索文本</string>
         </property>
        </widget>
       </item>
@@ -244,26 +198,6 @@
         </item>
        </layout>
       </item>
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>编辑图片库地址：</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="lineEdit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>
@@ -296,11 +230,31 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionExportHtm">
+   <property name="text">
+    <string>导出图片信息为htm</string>
+   </property>
+  </action>
+  <action name="actionExportDB">
+   <property name="text">
+    <string>导出数据库为sql</string>
+   </property>
+  </action>
+  <action name="actionSetBaseDir">
+   <property name="text">
+    <string>图片库地址</string>
+   </property>
+  </action>
+  <action name="actionEditTypes">
+   <property name="text">
+    <string>编辑分类</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

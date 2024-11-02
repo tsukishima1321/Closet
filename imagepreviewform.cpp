@@ -1,5 +1,6 @@
 #include "imagepreviewform.h"
 #include "ui_imagepreviewform.h"
+#include "item.h"
 
 extern QString imgBase;
 
@@ -16,7 +17,7 @@ imagePreviewForm::imagePreviewForm(QWidget *parent) :
 
 void imagePreviewForm::setImg(QSqlRecord record, QImage *img, QModelIndex index) {
     this->index = index;
-    this->record = record;
+    this->item = Item(record);
     if (this->img) {
         delete this->img;
     }
@@ -24,7 +25,7 @@ void imagePreviewForm::setImg(QSqlRecord record, QImage *img, QModelIndex index)
     if (img->isNull()) {
         ui->labelImg->setPixmap(QPixmap(imgBase + "href"));
     } else {
-        ui->labelText->setText(record.value("description").toString());
+        ui->labelText->setText(item.description);
         QPixmap pixmap = QPixmap::fromImage(*img);
         pixmap = pixmap.scaled(ui->labelImg->size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
         //ui->labelImg->setScaledContents(true);
@@ -59,7 +60,7 @@ bool imagePreviewForm::isAvailable() const {
 
 void imagePreviewForm::mouseDoubleClickEvent(QMouseEvent *event) {
     (void)event;
-    emit isClicked(record.value("href").toString(), index.row());
+    emit isClicked(item.href, index.row());
 }
 
 imagePreviewForm::~imagePreviewForm() {

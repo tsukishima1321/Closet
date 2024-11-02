@@ -142,7 +142,7 @@ void labelCommit::pushButtonDelete_clicked() {
     updateTable();
 }
 
-bool labelCommit::isRunning() {
+bool labelCommit::isRunning() const {
     if (cmd) {
         if (cmd->state() == QProcess::Running) {
             return true;
@@ -150,5 +150,3 @@ bool labelCommit::isRunning() {
     }
     return false;
 }
-
-/**/

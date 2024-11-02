@@ -4,6 +4,7 @@
 #include <QModelIndex>
 #include <QSqlRecord>
 #include <QWidget>
+#include "item.h"
 
 namespace Ui {
     class imagePreviewForm;
@@ -16,7 +17,7 @@ signals:
     void isClicked(QString href, int row);
 
 public:
-    QSqlRecord record;
+    Item item;
     QModelIndex index;
     explicit imagePreviewForm(QWidget *parent = nullptr);
     virtual ~imagePreviewForm() override;

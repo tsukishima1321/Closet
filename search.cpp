@@ -8,6 +8,7 @@
 #include "qsqlquery.h"
 #include "qsqlrecord.h"
 #include "ui_search.h"
+#include "item.h"
 #include <QFile>
 #include <QMessageBox>
 #include <QRegularExpression>
@@ -371,7 +372,7 @@ void imgLoader::run() {
 
 imagePreviewForm *Search::addImgItem(QSqlRecord record, QModelIndex index) {
     /*根据图片信息设置寻找preViewList中可用的imagePreviewForm放入，大小和文字同步设置，实际图片读取放入Thread中*/
-    QString filename(imgBase + record.value("href").toString());
+    QString filename(imgBase + Item(record).href);
     QImageReader *reader = new QImageReader(filename.simplified()); //该指针由imgLoader::run释放内存
     reader->setDecideFormatFromContent(true);
     QSize size = reader->size();
@@ -406,6 +407,7 @@ imagePreviewForm *Search::addImgItem(QSqlRecord record, QModelIndex index) {
 }
 
 void Search::openDetailMenu(QString href, int row) {
+    (void)row;
     auto newWindow = new DetailView(nullptr, db);
     connect(newWindow, &DetailView::edit, this, [this]() { updateSearch(); });
     newWindow->show();
