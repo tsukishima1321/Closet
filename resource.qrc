@@ -15,5 +15,6 @@
         <file>icons/icon.ico</file>
         <file>icons/zoom-in.png</file>
         <file>icons/zoom-out.png</file>
+        <file>icons/file-plus.png</file>
     </qresource>
 </RCC>

@@ -38,7 +38,7 @@ void imagePreviewForm::setImg(QSqlRecord record, QImage *img, QModelIndex index)
     available = false;
 }
 
-int imagePreviewForm::getHeight() {
+int imagePreviewForm::getHeight() const {
     if (img) {
         if (!img->isNull()) {
             return this->img->height();

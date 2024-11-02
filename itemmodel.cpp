@@ -103,6 +103,7 @@ QVariant itemModel::data(const QModelIndex &index, int role) const {
 
             return Qt::Unchecked;
         }
+        break;
     default:
         return QSqlTableModel::data(index, role);
     }

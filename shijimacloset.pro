@@ -54,6 +54,7 @@ SOURCES += \
         welcome.cpp \
         textview.cpp \
         textpreviewform.cpp \
+        textdetailview.cpp \
 
 HEADERS += \
         dbinstance.h \
@@ -73,6 +74,7 @@ HEADERS += \
         window.h \
         textview.h \
         textpreviewform.h \
+        textdetailview.h \
 
 FORMS += \
         detailview.ui \
@@ -86,6 +88,7 @@ FORMS += \
         welcome.ui \
         textview.ui \
         textpreviewform.ui \
+        textdetailview.ui \
 
 RESOURCES += \
     resource.qrc

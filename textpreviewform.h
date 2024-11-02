@@ -19,7 +19,12 @@ public:
     void setText(QString text, QString date, int id);
     void hideElements();
     bool isAvailable() const;
-    int getHeight();
+    bool isCheck() const;
+    int getHeight() const;
+    int getId() const;
+    QString getDate() const;
+    void check();
+    void uncheck();
 
 private:
     Ui::textPreviewForm *ui;

@@ -43,6 +43,8 @@ private:
 
     void openDetailMenu(int id);
     int currentPage;
+
+    void deleteButton_clicked();
 };
 
 #endif // TEXTVIEW_H

@@ -24,7 +24,7 @@ public:
     void setImg(QSqlRecord record, QImage *img, QModelIndex index);
     void hideElements();
     bool isAvailable() const;
-    int getHeight();
+    int getHeight() const;
 
 private:
     Ui::imagePreviewForm *ui;

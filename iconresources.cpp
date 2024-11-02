@@ -15,6 +15,7 @@ IconResources::IconResources() {
     icons["zoom-in"] = QIcon(":/pic/icons/zoom-in.png");
     icons["zoom-out"] = QIcon(":/pic/icons/zoom-out.png");
     icons["main-icon"] = QIcon(":/pic/icons/icon.ico");
+    icons["new-file"] = QIcon(":/pic/icons/file-plus.png");
 }
 
 const QMap<QString, QIcon> &IconResources::getIcons() {

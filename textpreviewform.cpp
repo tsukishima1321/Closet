@@ -23,6 +23,9 @@ void textPreviewForm::setText(QString text, QString date, int id) {
     ui->labelDate->setText(date);
     ui->labelText->show();
     ui->labelDate->show();
+    ui->checkBox->show();
+    ui->line->show();
+    this->adjustSize();
     available = false;
 }
 
@@ -30,6 +33,8 @@ void textPreviewForm::hideElements() {
     ui->labelDate->hide();
     ui->labelText->hide();
     ui->labelText->adjustSize();
+    ui->checkBox->hide();
+    ui->line->hide();
     available = true;
 }
 
@@ -37,7 +42,27 @@ bool textPreviewForm::isAvailable() const {
     return available;
 }
 
-int textPreviewForm::getHeight() {
+bool textPreviewForm::isCheck() const {
+    return ui->checkBox->isChecked();
+}
+
+void textPreviewForm::check() {
+    ui->checkBox->setChecked(true);
+}
+
+void textPreviewForm::uncheck() {
+    ui->checkBox->setChecked(false);
+}
+
+int textPreviewForm::getId() const {
+    return id;
+}
+
+QString textPreviewForm::getDate() const {
+    return ui->labelDate->text();
+}
+
+int textPreviewForm::getHeight() const{
     return ui->labelText->height();
 }
 

@@ -1,5 +1,8 @@
 #include "textview.h"
+#include "iconresources.h"
+#include "textdetailview.h"
 #include "ui_textview.h"
+#include <QMessageBox>
 #include <QSqlQuery>
 
 TextView::TextView(QWidget *parent, QSqlDatabase &db) :
@@ -9,9 +12,11 @@ TextView::TextView(QWidget *parent, QSqlDatabase &db) :
         currentColumnCount(3),
         currentPage(1) {
     ui->setupUi(this);
-    ui->radioButtonAsc->setChecked(true);
+    ui->radioButtonDesc->setChecked(true);
     ui->dateEditFrom->setDate(QDate::currentDate());
     ui->dateEditTo->setDate(QDate::currentDate());
+    ui->deleteButton->setIcon(IconResources::getIcons()["trash"]);
+    ui->newTextButton->setIcon(IconResources::getIcons()["new-file"]);
 
     hBoxLayout = new QHBoxLayout;
     for (int i = 0; i < currentColumnCount; i++) {
@@ -28,6 +33,24 @@ TextView::TextView(QWidget *parent, QSqlDatabase &db) :
         textPreviewForm *form = &preViewList[i];
         connect(form, &textPreviewForm::isClicked, this, &TextView::openDetailMenu);
     }
+
+    connect(ui->selectButton, &QCheckBox::stateChanged, this, [this](int stat) {
+        if (stat == Qt::CheckState::Checked) {
+            for (int i = 0; i < TextViewConstants::pageSize; i++) {
+                textPreviewForm *form = &preViewList[i];
+                if (!form->isAvailable()) {
+                    form->check();
+                }
+            }
+        } else {
+            for (int i = 0; i < TextViewConstants::pageSize; i++) {
+                textPreviewForm *form = &preViewList[i];
+                if (!form->isAvailable()) {
+                    form->uncheck();
+                }
+            }
+        }
+    });
 
     connect(ui->pageNavigate, &PageNavigator::currentPageChanged, this, [this](int p) {
         if (p != currentPage) {
@@ -54,8 +77,19 @@ TextView::TextView(QWidget *parent, QSqlDatabase &db) :
         }
     });
 
+    connect(ui->comboBoxOrder, &QComboBox::currentIndexChanged, this, [this](int i) {
+        (void)i;
+        updateSearch();
+    });
+
     connect(ui->searchButton, &QPushButton::clicked, this, &TextView::searchButton_clicked);
     connect(ui->lineEdit, &QLineEdit::returnPressed, this, &TextView::searchButton_clicked);
+    connect(ui->deleteButton, &QPushButton::clicked, this, &TextView::deleteButton_clicked);
+    connect(ui->newTextButton, &QPushButton::clicked, this, [this]() {
+        textDetailView *detail = new textDetailView(this, this->db);
+        detail->setDate(QDate::currentDate());
+        detail->show();
+    });
 }
 
 void TextView::searchButton_clicked() {
@@ -91,9 +125,35 @@ void TextView::searchButton_clicked() {
 void TextView::updateSearch() {
     /*接受查询条件，在此之上构造排序和分页条件，进行实际查询，根据radioButtn状态调用updateImgView()或updateTableView()
       除了被searchButtonClicked调用外，不改变查询条件，只改变排序和分类的操作最后也会调用此函数来显示结果*/
+    QString sql = "select id,date,left(text,200) as preview from texts where " + currentFilter;
+    switch (ui->comboBoxOrder->currentIndex()) {
+    case 0:
+        if (ui->radioButtonAsc->isChecked()) {
+            sql += " order by date asc";
+        } else {
+            sql += " order by date desc";
+        }
+        break;
+    case 1:
+        if (ui->radioButtonAsc->isChecked()) {
+            sql += " order by id asc";
+        } else {
+            sql += " order by id desc";
+        }
+        break;
+    case 2:
+        if (ui->radioButtonAsc->isChecked()) {
+            sql += " order by text asc";
+        } else {
+            sql += " order by text desc";
+        }
+        break;
+    default:
+        sql += " order by date desc";
+        break;
+    }
     QSqlQuery query(db);
-    //qDebug() << "select id,date,left(text,200) as preview from texts where " + currentFilter + " limit " + QString::number((currentPage - 1) * TextViewConstants::pageSize) + ", " + QString::number(TextViewConstants::pageSize);
-    query.prepare("select id,date,left(text,200) as preview from texts where " + currentFilter + " limit " + QString::number((currentPage - 1) * TextViewConstants::pageSize) + ", " + QString::number(TextViewConstants::pageSize));
+    query.prepare(sql + " limit " + QString::number((currentPage - 1) * TextViewConstants::pageSize) + ", " + QString::number(TextViewConstants::pageSize));
     query.exec();
     updateTextView(std::move(query));
 }
@@ -104,7 +164,7 @@ void TextView::updateTextView(QSqlQuery &&query) {
         form->~textPreviewForm();
         new (form) textPreviewForm;
         connect(form, &textPreviewForm::isClicked, this, &TextView::openDetailMenu);
-        //form->hideElements();
+        // form->hideElements();
     }
     for (int i = 0; i < TextViewConstants::pageSize; i++) {
         if (query.next()) {
@@ -145,7 +205,7 @@ void TextView::locateText() {
                 height += dynamic_cast<textPreviewForm *>(column->itemAt(i)->widget())->getHeight();
             }
             if (height < minHeight) {
-                //qDebug() << height;
+                // qDebug() << height;
                 columnMinHeight = column;
                 minHeight = height;
             }
@@ -186,7 +246,27 @@ void TextView::resizeEvent(QResizeEvent *event) {
 }
 
 void TextView::openDetailMenu(int id) {
-    qDebug() << id;
+    auto newWindow = new textDetailView(nullptr, db);
+    newWindow->OpenText(id);
+    newWindow->show();
+    connect(newWindow, &textDetailView::edit, this, [this]() { updateSearch(); });
+}
+
+void TextView::deleteButton_clicked() {
+    QSqlQuery query(db);
+    query.prepare("delete from texts where id=:id;");
+    for (int i = 0; i < TextViewConstants::pageSize; i++) {
+        if (preViewList[i].isCheck()) {
+            int res = QMessageBox::warning(this, "确认",
+                                           "确定删除" + QString::number(preViewList[i].getId()) + "：" + preViewList[i].getDate() + "吗？",
+                                           QMessageBox::Yes | QMessageBox::Cancel,
+                                           QMessageBox::Cancel);
+            if (res == QMessageBox::Yes) {
+                query.bindValue(":id", preViewList[i].getId());
+                query.exec();
+            }
+        }
+    }
 }
 
 TextView::~TextView() {

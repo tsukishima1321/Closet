@@ -5,7 +5,7 @@
 #include <QSqlQuery>
 #include <QString>
 #include <QtSql/QSqlDatabase>
-#include <window.h>
+#include "window.h"
 
 namespace Ui {
     class DetailView;
