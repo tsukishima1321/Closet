@@ -2,13 +2,13 @@
 #include "detailview.h"
 #include "iconresources.h"
 #include "imagepreviewform.h"
+#include "item.h"
 #include "qfiledialog.h"
 #include "qimagereader.h"
 #include "qsqlerror.h"
 #include "qsqlquery.h"
 #include "qsqlrecord.h"
 #include "ui_search.h"
-#include "item.h"
 #include <QFile>
 #include <QMessageBox>
 #include <QRegularExpression>
@@ -47,7 +47,6 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
         vBoxLayouts.append(column);
     }
     ui->scrollAreaWidgetContents->setLayout(hBoxLayout);
-    this->setAttribute(Qt::WA_DeleteOnClose, true);
     ui->comboBoxType->clear();
     // qDebug()<<"database connected";
     QString sql = "SELECT * FROM types";
@@ -62,8 +61,8 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
     }
     ui->comboBoxType->xAddItems(typeList);
     currentPage = ui->pageNavigate->getCurrentPage();
-    preViewList = new imagePreviewForm[pageSize];
-    for (int i = 0; i < pageSize; i++) {
+    preViewList = new imagePreviewForm[imgViewConstants::pageSize];
+    for (int i = 0; i < imgViewConstants::pageSize; i++) {
         imagePreviewForm *form = &preViewList[i];
         connect(form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
     }
@@ -183,7 +182,7 @@ void Search::searchButton_clicked() {
     qDebug() << countModel.getSelectStatement();
     qDebug() << countModel.select();
     if (ui->comboBoxShow->currentIndex() == 0) {
-        ui->pageNavigate->setMaxPage(countModel.record(0).value("count(*)").toInt() / pageSize + 1);
+        ui->pageNavigate->setMaxPage(countModel.record(0).value("count(*)").toInt() / imgViewConstants::pageSize + 1);
         ui->pageNavigate->setCurrentPage(1, true);
         currentPage = 1;
     } else {
@@ -229,7 +228,7 @@ void Search::updateSearch() {
         break;
     }
     if (ui->stackedWidget->currentIndex() == 0) {
-        queryModel.setLimit((currentPage - 1) * pageSize, pageSize);
+        queryModel.setLimit((currentPage - 1) * imgViewConstants::pageSize, imgViewConstants::pageSize);
     } else if (ui->stackedWidget->currentIndex() == 1) {
         queryModel.setLimit((currentPage - 1) * pageSizeTable, pageSizeTable);
     }
@@ -245,7 +244,7 @@ void Search::updateSearch() {
 
 void Search::updateImgView() {
     //重置preViewList中所有Form到可用状态
-    for (int i = 0; i < pageSize; i++) {
+    for (int i = 0; i < imgViewConstants::pageSize; i++) {
         imagePreviewForm *form = &preViewList[i];
         form->~imagePreviewForm();
         new (form) imagePreviewForm;
@@ -272,7 +271,7 @@ void Search::locateImg() {
     /*读取preViewList中的所有窗口，根据他们的高度将他们排入布局
     调用该函数前所有子布局应该已被创建好且是空的
     要显示的图片发生改变，或者窗口大小发生改变时会调用此函数*/
-    for (int i = 0; i < pageSize; i++) {
+    for (int i = 0; i < imgViewConstants::pageSize; i++) {
         imagePreviewForm *form = &preViewList[i];
         QVBoxLayout *columnMinHeight = nullptr;
         int minHeight = 999999;
@@ -388,7 +387,7 @@ imagePreviewForm *Search::addImgItem(QSqlRecord record, QModelIndex index) {
     img->fill(QColor(Qt::white));
     imagePreviewForm *form = nullptr;
     bool flag = false;
-    for (int i = 0; i < pageSize; i++) {
+    for (int i = 0; i < imgViewConstants::pageSize; i++) {
         imagePreviewForm *form = &preViewList[i];
         if (form->isAvailable()) {
             form->setImg(record, img, index);
@@ -482,6 +481,7 @@ void Search::resizeEvent(QResizeEvent *event) {
         vBoxLayouts.append(column);
     }
     locateImg();
+    Window::resizeEvent(event);
 }
 
 Search::~Search() {

@@ -53,6 +53,7 @@ SOURCES += \
         typeeditmenu.cpp \
         welcome.cpp \
         textview.cpp \
+        textpreviewform.cpp \
 
 HEADERS += \
         dbinstance.h \
@@ -71,6 +72,7 @@ HEADERS += \
         welcome.h \
         window.h \
         textview.h \
+        textpreviewform.h \
 
 FORMS += \
         detailview.ui \
@@ -83,6 +85,7 @@ FORMS += \
         typeeditmenu.ui \
         welcome.ui \
         textview.ui \
+        textpreviewform.ui \
 
 RESOURCES += \
     resource.qrc

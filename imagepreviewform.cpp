@@ -1,6 +1,7 @@
 #include "imagepreviewform.h"
 #include "ui_imagepreviewform.h"
 #include "item.h"
+#include <QPainter>
 
 extern QString imgBase;
 
@@ -62,6 +63,14 @@ void imagePreviewForm::mouseDoubleClickEvent(QMouseEvent *event) {
     (void)event;
     emit isClicked(item.href, index.row());
 }
+
+/*void imagePreviewForm::paintEvent(QPaintEvent *event) {
+    (void)event;
+    QPainter painter(this);
+    painter.setPen(QPen(Qt::black, 2));
+    painter.drawRect(0, 0, this->width(), this->height());
+    QWidget::paintEvent(event);
+}*/
 
 imagePreviewForm::~imagePreviewForm() {
     if (img) {

@@ -2,6 +2,7 @@
 #define SEARCH_H
 
 #include "itemmodel.h"
+#include "window.h"
 #include <QLayout>
 #include <QList>
 #include <QMainWindow>
@@ -9,10 +10,11 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <imagepreviewform.h>
-#include <window.h>
 
-constexpr int pageSize = 20;
-//constexpr int pageSizeTable = 100;
+namespace imgViewConstants {
+    constexpr int pageSize = 20;
+}
+// constexpr int pageSizeTable = 100;
 
 namespace Ui {
     class Search;

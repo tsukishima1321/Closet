@@ -33,6 +33,7 @@ private:
 
 protected:
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+    //virtual void paintEvent(QPaintEvent *event) override;
 };
 
 #endif // IMAGEPREVIEWFORM_H
