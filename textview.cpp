@@ -17,6 +17,7 @@ TextView::TextView(QWidget *parent, QSqlDatabase &db) :
     ui->dateEditTo->setDate(QDate::currentDate());
     ui->deleteButton->setIcon(IconResources::getIcons()["trash"]);
     ui->newTextButton->setIcon(IconResources::getIcons()["new-file"]);
+    ui->combineButton->setIcon(IconResources::getIcons()["combine"]);
 
     hBoxLayout = new QHBoxLayout;
     for (int i = 0; i < currentColumnCount; i++) {
@@ -85,6 +86,7 @@ TextView::TextView(QWidget *parent, QSqlDatabase &db) :
     connect(ui->searchButton, &QPushButton::clicked, this, &TextView::searchButton_clicked);
     connect(ui->lineEdit, &QLineEdit::returnPressed, this, &TextView::searchButton_clicked);
     connect(ui->deleteButton, &QPushButton::clicked, this, &TextView::deleteButton_clicked);
+    connect(ui->combineButton, &QPushButton::clicked, this, &TextView::combineButton_clicked);
     connect(ui->newTextButton, &QPushButton::clicked, this, [this]() {
         textDetailView *detail = new textDetailView(this, this->db);
         connect(detail, &textDetailView::edit, this, [this]() { updateSearch(); });
@@ -170,7 +172,7 @@ void TextView::updateTextView(QSqlQuery &&query) {
     for (int i = 0; i < TextViewConstants::pageSize; i++) {
         if (query.next()) {
             auto item = addTextItem(query.value("preview").toString(), query.value("date").toString(), query.value("id").toInt());
-            if(query.value("length").toInt() > 200) {
+            if (query.value("length").toInt() > 200) {
                 item->setOmit(true);
             }
         }
@@ -240,7 +242,7 @@ void TextView::resizeEvent(QResizeEvent *event) {
     }
     vBoxLayouts.clear();
     for (int i = 0; i < currentColumnCount; i++) {
-        QVBoxLayout *column = new QVBoxLayout;
+        QVBoxLayout *column = new QVBoxLayout();
         column->setAlignment(Qt::AlignTop);
         hBoxLayout->addLayout(column);
         vBoxLayouts.append(column);
@@ -271,6 +273,39 @@ void TextView::deleteButton_clicked() {
             }
         }
     }
+    updateSearch();
+}
+
+void TextView::combineButton_clicked() {
+    QList<int> ids;
+    for (int i = 0; i < TextViewConstants::pageSize; i++) {
+        if (preViewList[i].isCheck()) {
+            ids.append(preViewList[i].getId());
+        }
+    }
+    if (ids.size() < 2) {
+        QMessageBox::warning(this, "错误", "请至少选择两个文本");
+        return;
+    }
+    std::sort(ids.begin(), ids.end());
+    QString text;
+    QDate date = QDate::fromString("2000-01-01");
+    for (int id : ids) {
+        QSqlQuery query(db);
+        query.prepare("select text,date from texts where id=:id");
+        query.bindValue(":id", id);
+        query.exec();
+        query.next();
+        text += query.value("text").toString() + "\n\n";
+        if (query.value("date").toDate() > date) {
+            date = query.value("date").toDate();
+        }
+    }
+    textDetailView *detail = new textDetailView(this, db);
+    connect(detail, &textDetailView::edit, this, [this]() { deleteButton_clicked();updateSearch(); });
+    detail->setText(text);
+    detail->setDate(date);
+    detail->show();
 }
 
 TextView::~TextView() {

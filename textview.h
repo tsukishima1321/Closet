@@ -40,11 +40,12 @@ private:
     void searchButton_clicked();
     void updateSearch();
     QString currentFilter;
-
-    void openDetailMenu(int id);
     int currentPage;
 
+    void openDetailMenu(int id);
+
     void deleteButton_clicked();
+    void combineButton_clicked();
 };
 
 #endif // TEXTVIEW_H

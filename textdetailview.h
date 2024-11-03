@@ -18,6 +18,7 @@ public:
     explicit textDetailView(QWidget *parent, QSqlDatabase &db);
     void OpenText(int id);
     void setDate(QDate date);
+    void setText(QString text);
     ~textDetailView();
 
 private:

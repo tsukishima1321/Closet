@@ -121,6 +121,10 @@ void textDetailView::setDate(QDate date) {
     ui->dateEdit->setDate(date);
 }
 
+void textDetailView::setText(QString text){
+    ui->textEdit->setText(text);
+}
+
 textDetailView::~textDetailView() {
     delete ui;
 }
