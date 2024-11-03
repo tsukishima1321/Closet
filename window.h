@@ -18,7 +18,6 @@ protected:
     virtual void keyPressEvent(QKeyEvent *event) override {
         if (event->matches(QKeySequence::Close)) {
             this->close();
-            this->deleteLater();
         }
         QMainWindow::keyPressEvent(event);
     }

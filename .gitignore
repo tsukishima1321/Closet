@@ -1,6 +1,5 @@
 build/
 .vscode/
-.qmake.stash
 *.pro.user
 *.pro.user.*
 debug/
@@ -9,3 +8,4 @@ Makefile
 *.o
 Makefile.Debug
 Makefile.Release
+shijimacloset.pro.user

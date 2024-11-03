@@ -21,6 +21,10 @@ public:
     void setText(QString text);
     ~textDetailView();
 
+protected:
+    virtual void keyPressEvent(QKeyEvent *event) override;
+    virtual void closeEvent(QCloseEvent *event) override;
+
 private:
     Ui::textDetailView *ui;
     QSqlDatabase &db;

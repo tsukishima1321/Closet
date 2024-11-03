@@ -20,6 +20,8 @@ protected:
     bool open;
     explicit dbInstance(QString name, QString password);
     ~dbInstance();
+
+    //ensure db connection is properly closed when the program exit
     class dbGarbo {
     public:
         ~dbGarbo() {

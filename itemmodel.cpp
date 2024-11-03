@@ -59,6 +59,9 @@ QString itemModel::selectStatement() const {
     if (pageSize != 0) {
         sql += QString(" limit %1,%2").arg(QString::number(offset), QString::number(pageSize));
     }
+    //附加一个主键排序来保证分页的稳定性
+    sql.replace("ASC", "ASC, pictures.href ASC");
+    sql.replace("DESC", "DESC, pictures.href DESC");
     return sql;
 }
 

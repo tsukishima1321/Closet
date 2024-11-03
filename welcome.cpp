@@ -110,7 +110,7 @@ void Welcome::closeEvent(QCloseEvent *event) {
         tray->showMessage("静寂的壁橱", "已最小化到托盘");
         event->ignore();
     } else {
-        event->accept();
+        return QMainWindow::closeEvent(event);
     }
 }
 
