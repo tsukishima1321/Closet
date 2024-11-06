@@ -29,25 +29,23 @@ TextView::TextView(QWidget *parent, QSqlDatabase &db) :
     ui->scrollAreaWidgetContents->setLayout(hBoxLayout);
 
     currentPage = ui->pageNavigate->getCurrentPage();
-    preViewList = new textPreviewForm[TextViewConstants::pageSize];
-    for (int i = 0; i < TextViewConstants::pageSize; i++) {
-        textPreviewForm *form = &preViewList[i];
-        connect(form, &textPreviewForm::isClicked, this, &TextView::openDetailMenu);
+    previewList = new textPreviewForm[TextViewConstants::pageSize];
+    previewListSpan = std::span<textPreviewForm>(previewList, TextViewConstants::pageSize);
+    for (auto &&form : previewListSpan) {
+        connect(&form, &textPreviewForm::isClicked, this, &TextView::openDetailMenu);
     }
 
     connect(ui->selectButton, &QCheckBox::stateChanged, this, [this](int stat) {
         if (stat == Qt::CheckState::Checked) {
-            for (int i = 0; i < TextViewConstants::pageSize; i++) {
-                textPreviewForm *form = &preViewList[i];
-                if (!form->isAvailable()) {
-                    form->check();
+            for (auto &&form : previewListSpan) {
+                if (!form.isAvailable()) {
+                    form.check();
                 }
             }
         } else {
-            for (int i = 0; i < TextViewConstants::pageSize; i++) {
-                textPreviewForm *form = &preViewList[i];
-                if (!form->isAvailable()) {
-                    form->uncheck();
+            for (auto &&form : previewListSpan) {
+                if (!form.isAvailable()) {
+                    form.uncheck();
                 }
             }
         }
@@ -132,9 +130,9 @@ void TextView::updateSearch() {
     switch (ui->comboBoxOrder->currentIndex()) {
     case 0:
         if (ui->radioButtonAsc->isChecked()) {
-            sql += " order by date asc";
+            sql += " order by date asc, id asc";
         } else {
-            sql += " order by date desc";
+            sql += " order by date desc, id desc";
         }
         break;
     case 1:
@@ -146,13 +144,13 @@ void TextView::updateSearch() {
         break;
     case 2:
         if (ui->radioButtonAsc->isChecked()) {
-            sql += " order by text asc";
+            sql += " order by text asc, id asc";
         } else {
-            sql += " order by text desc";
+            sql += " order by text desc, id desc";
         }
         break;
     default:
-        sql += " order by date desc";
+        sql += " order by date desc, id desc";
         break;
     }
     QSqlQuery query(db);
@@ -162,11 +160,10 @@ void TextView::updateSearch() {
 }
 
 void TextView::updateTextView(QSqlQuery &&query) {
-    for (int i = 0; i < TextViewConstants::pageSize; i++) {
-        textPreviewForm *form = &preViewList[i];
-        form->~textPreviewForm();
-        new (form) textPreviewForm;
-        connect(form, &textPreviewForm::isClicked, this, &TextView::openDetailMenu);
+    for (auto &&form : previewListSpan) {
+        form.~textPreviewForm();
+        new (&form) textPreviewForm;
+        connect(&form, &textPreviewForm::isClicked, this, &TextView::openDetailMenu);
         // form->hideElements();
     }
     for (int i = 0; i < TextViewConstants::pageSize; i++) {
@@ -186,23 +183,21 @@ void TextView::updateTextView(QSqlQuery &&query) {
 }
 
 textPreviewForm *TextView::addTextItem(QString text, QString date, int id) {
-    textPreviewForm *form = nullptr;
-    for (int i = 0; i < TextViewConstants::pageSize; i++) {
-        textPreviewForm *f = &preViewList[i];
-        if (f->isAvailable()) {
-            form = f;
+    textPreviewForm *formToAdd = nullptr;
+    for (auto &&form : previewListSpan) {
+        if (form.isAvailable()) {
+            formToAdd = &form;
             break;
         }
     }
-    if (form) {
-        form->setText(text, date, id);
+    if (formToAdd) {
+        formToAdd->setText(text, date, id);
     }
-    return form;
+    return formToAdd;
 }
 
 void TextView::locateText() {
-    for (int i = 0; i < TextViewConstants::pageSize; i++) {
-        textPreviewForm *form = &preViewList[i];
+    for (auto &&form : previewListSpan) {
         QVBoxLayout *columnMinHeight = nullptr;
         int minHeight = 999999;
         for (QVBoxLayout *column : vBoxLayouts) {
@@ -217,7 +212,7 @@ void TextView::locateText() {
             }
         }
         if (columnMinHeight) {
-            columnMinHeight->addWidget(form);
+            columnMinHeight->addWidget(&form);
         }
     }
 }
@@ -261,14 +256,14 @@ void TextView::openDetailMenu(int id) {
 void TextView::deleteButton_clicked() {
     QSqlQuery query(db);
     query.prepare("delete from texts where id=:id;");
-    for (int i = 0; i < TextViewConstants::pageSize; i++) {
-        if (preViewList[i].isCheck()) {
+    for (auto &&form : previewListSpan) {
+        if (form.isCheck()) {
             int res = QMessageBox::warning(this, "确认",
-                                           "确定删除" + QString::number(preViewList[i].getId()) + "：" + preViewList[i].getDate() + "吗？",
+                                           "确定删除" + QString::number(form.getId()) + "：" + form.getDate() + "吗？",
                                            QMessageBox::Yes | QMessageBox::Cancel,
                                            QMessageBox::Cancel);
             if (res == QMessageBox::Yes) {
-                query.bindValue(":id", preViewList[i].getId());
+                query.bindValue(":id", form.getId());
                 query.exec();
             }
         }
@@ -278,9 +273,9 @@ void TextView::deleteButton_clicked() {
 
 void TextView::combineButton_clicked() {
     QList<int> ids;
-    for (int i = 0; i < TextViewConstants::pageSize; i++) {
-        if (preViewList[i].isCheck()) {
-            ids.append(preViewList[i].getId());
+    for (auto &&form : previewListSpan) {
+        if (form.isCheck()) {
+            ids.append(form.getId());
         }
     }
     if (ids.size() < 2) {
@@ -309,7 +304,7 @@ void TextView::combineButton_clicked() {
 }
 
 TextView::~TextView() {
-    delete[] preViewList;
+    delete[] previewList;
     if (hBoxLayout) {
         delete hBoxLayout;
     }

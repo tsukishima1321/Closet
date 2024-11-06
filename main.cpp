@@ -6,13 +6,14 @@
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
+    a.setQuitOnLastWindowClosed(false);
     QString path = QDir::temp().absoluteFilePath("SingleApp.lock");
     QLockFile lockFile(path);
 
     bool isLock = lockFile.isLocked();
     (void)isLock;
     if (!lockFile.tryLock(100)) {
-        QMessageBox::warning(NULL, "提示", "程序已在运行中");
+        QMessageBox::warning(nullptr, "提示", "程序已在运行中");
         return 0;
     }
 

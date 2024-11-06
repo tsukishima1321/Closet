@@ -24,6 +24,8 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 
 DEFINES -= QT_NO_DEBUG_OUTPUT
 
+CONFIG+=c++2a
+
 CONFIG += file_copies
 COPIES += pyScript
 pyScript.files = $$files(doOcr.py)

@@ -14,6 +14,9 @@ imagePreviewForm::imagePreviewForm(QWidget *parent) :
     this->setMinimumHeight(300);
     this->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
     this->hideElements();
+    connect(ui->checkBox, &QCheckBox::stateChanged, [this](int state) {
+        emit checked(index.row());
+    });
 }
 
 void imagePreviewForm::setImg(QSqlRecord record, QImage *img, QModelIndex index) {
@@ -35,6 +38,7 @@ void imagePreviewForm::setImg(QSqlRecord record, QImage *img, QModelIndex index)
     }
     ui->labelImg->show();
     ui->labelText->show();
+    ui->checkBox->show();
     available = false;
 }
 
@@ -52,6 +56,7 @@ void imagePreviewForm::hideElements() {
     ui->labelImg->adjustSize();
     ui->labelImg->hide();
     ui->labelText->hide();
+    ui->checkBox->hide();
     available = true;
 }
 
@@ -62,6 +67,14 @@ bool imagePreviewForm::isAvailable() const {
 void imagePreviewForm::mouseDoubleClickEvent(QMouseEvent *event) {
     (void)event;
     emit isClicked(item.href, index.row());
+}
+
+void imagePreviewForm::check() {
+    ui->checkBox->setChecked(true);
+}
+
+void imagePreviewForm::uncheck() {
+    ui->checkBox->setChecked(false);
 }
 
 /*void imagePreviewForm::paintEvent(QPaintEvent *event) {

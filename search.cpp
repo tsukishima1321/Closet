@@ -62,9 +62,9 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
     ui->comboBoxType->xAddItems(typeList);
     currentPage = ui->pageNavigate->getCurrentPage();
     preViewList = new imagePreviewForm[imgViewConstants::pageSize];
-    for (int i = 0; i < imgViewConstants::pageSize; i++) {
-        imagePreviewForm *form = &preViewList[i];
-        connect(form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
+    preViewListSpan = std::span<imagePreviewForm>(preViewList, imgViewConstants::pageSize);
+    for (auto &&form : preViewListSpan) {
+        connect(&form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
     }
     connect(ui->pageNavigate, &PageNavigator::currentPageChanged, this, [this](int p) {
         if (p != currentPage) {
@@ -88,8 +88,18 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
     });
     connect(ui->selectButton, &QCheckBox::stateChanged, this, [this](int stat) {
         if (stat == Qt::CheckState::Checked) {
+            if (ui->stackedWidget->currentIndex() == 0) {
+                for (auto &&form : preViewListSpan) {
+                    form.check();
+                }
+            }
             queryModel.checkAll();
         } else {
+            if (ui->stackedWidget->currentIndex() == 0) {
+                for (auto &&form : preViewListSpan) {
+                    form.uncheck();
+                }
+            }
             queryModel.uncheckAll();
         }
     });
@@ -243,27 +253,27 @@ void Search::updateSearch() {
 }
 
 void Search::updateImgView() {
-    //重置preViewList中所有Form到可用状态
-    for (int i = 0; i < imgViewConstants::pageSize; i++) {
-        imagePreviewForm *form = &preViewList[i];
-        form->~imagePreviewForm();
-        new (form) imagePreviewForm;
-        connect(form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
-        //form->hideElements();
+    // 重置preViewList中所有Form到可用状态
+    for (auto &&form : preViewListSpan) {
+        form.~imagePreviewForm();
+        new (&form) imagePreviewForm;
+        connect(&form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
+        connect(&form, &imagePreviewForm::checked, &queryModel, &itemModel::check);
+        // form->hideElements();
     }
-    //执行查询，将结果存入preViewList
-    //图片大小和文字信息全部同步设置完毕，实际图片读取放入Thread中
+    // 执行查询，将结果存入preViewList
+    // 图片大小和文字信息全部同步设置完毕，实际图片读取放入Thread中
     for (int i = 0; i < queryModel.rowCount(); i++) {
         if (!queryModel.record(i).isEmpty())
             addImgItem(queryModel.record(i), queryModel.index(i, 0));
     }
-    //清空子布局
+    // 清空子布局
     for (QVBoxLayout *column : vBoxLayouts) {
         for (int i = column->count() - 1; i >= 0; i--) {
             column->removeItem(column->itemAt(i));
         }
     }
-    //将preViewList中的窗口排入布局
+    // 将preViewList中的窗口排入布局
     locateImg();
 }
 
@@ -271,8 +281,7 @@ void Search::locateImg() {
     /*读取preViewList中的所有窗口，根据他们的高度将他们排入布局
     调用该函数前所有子布局应该已被创建好且是空的
     要显示的图片发生改变，或者窗口大小发生改变时会调用此函数*/
-    for (int i = 0; i < imgViewConstants::pageSize; i++) {
-        imagePreviewForm *form = &preViewList[i];
+    for (auto &&form : preViewListSpan) {
         QVBoxLayout *columnMinHeight = nullptr;
         int minHeight = 999999;
         for (QVBoxLayout *column : vBoxLayouts) {
@@ -281,13 +290,13 @@ void Search::locateImg() {
                 height += dynamic_cast<imagePreviewForm *>(column->itemAt(i)->widget())->getHeight();
             }
             if (height < minHeight) {
-                //qDebug() << height;
+                // qDebug() << height;
                 columnMinHeight = column;
                 minHeight = height;
             }
         }
         if (columnMinHeight) {
-            columnMinHeight->addWidget(form);
+            columnMinHeight->addWidget(&form);
         }
     }
 }
@@ -302,7 +311,7 @@ void Search::updateTableView() {
 
 void Search::tableCellDoubleClicked(const QModelIndex &index) {
     QString name = queryModel.data(queryModel.index(index.row(), queryModel.fieldIndex("href"))).toString();
-    //qDebug() << name;
+    // qDebug() << name;
     if (name != "") {
         openDetailMenu(name, index.row());
     }
@@ -372,7 +381,7 @@ void imgLoader::run() {
 imagePreviewForm *Search::addImgItem(QSqlRecord record, QModelIndex index) {
     /*根据图片信息设置寻找preViewList中可用的imagePreviewForm放入，大小和文字同步设置，实际图片读取放入Thread中*/
     QString filename(imgBase + Item(record).href);
-    QImageReader *reader = new QImageReader(filename.simplified()); //该指针由imgLoader::run释放内存
+    QImageReader *reader = new QImageReader(filename.simplified()); // 该指针由imgLoader::run释放内存
     reader->setDecideFormatFromContent(true);
     QSize size = reader->size();
     if (size.width() > 4000) {
@@ -383,15 +392,15 @@ imagePreviewForm *Search::addImgItem(QSqlRecord record, QModelIndex index) {
         size.setHeight(size.height() / 4);
     }
     reader->setScaledSize(size);
-    QImage *img = new QImage(reader->scaledSize().width(), reader->scaledSize().height(), QImage::Format_RGB888); //该指针由form->setImg传入对象内，由~imagePreViewForm释放内存
+    QImage *img = new QImage(reader->scaledSize().width(), reader->scaledSize().height(), QImage::Format_RGB888); // 该指针由form->setImg传入对象内，由~imagePreViewForm释放内存
     img->fill(QColor(Qt::white));
-    imagePreviewForm *form = nullptr;
+    imagePreviewForm *formToAdd = nullptr;
     bool flag = false;
-    for (int i = 0; i < imgViewConstants::pageSize; i++) {
-        imagePreviewForm *form = &preViewList[i];
-        if (form->isAvailable()) {
-            form->setImg(record, img, index);
-            imgLoader *loader = new imgLoader(form, reader, record, index); //该指针由QThreadPool释放内存
+    for (auto &&form : preViewListSpan) {
+        if (form.isAvailable()) {
+            formToAdd = &form;
+            form.setImg(record, img, index);
+            imgLoader *loader = new imgLoader(&form, reader, record, index); // 该指针由QThreadPool释放内存
             connect(loader, &imgLoader::loadReady, this, [this]() { update(); });
             QThreadPool::globalInstance()->start(loader);
             flag = true;
@@ -402,7 +411,7 @@ imagePreviewForm *Search::addImgItem(QSqlRecord record, QModelIndex index) {
         qDebug() << "why?";
         throw;
     }
-    return form;
+    return formToAdd;
 }
 
 void Search::openDetailMenu(QString href, int row) {

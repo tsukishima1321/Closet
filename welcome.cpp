@@ -4,9 +4,9 @@
 #include "labeling.h"
 #include "login.h"
 #include "search.h"
-#include "typeeditmenu.h"
-#include "textview.h"
 #include "textdetailview.h"
+#include "textview.h"
+#include "typeeditmenu.h"
 #include "ui_welcome.h"
 #include <QFileDialog>
 #include <QMessageBox>
@@ -18,8 +18,9 @@
 
 QString imgBase = "D:/Z/Pictures/";
 
-Welcome::Welcome(QWidget *parent) : QMainWindow(parent),
-                                    ui(new Ui::Welcome) {
+Welcome::Welcome(QWidget *parent) :
+        QMainWindow(parent),
+        ui(new Ui::Welcome) {
     ui->setupUi(this);
     QPixmap *pixmap = new QPixmap(":/pic/backgrounds/back.jpg");
     pixmap->scaled(ui->label->size(), Qt::KeepAspectRatio);
@@ -110,6 +111,7 @@ void Welcome::closeEvent(QCloseEvent *event) {
         tray->showMessage("静寂的壁橱", "已最小化到托盘");
         event->ignore();
     } else {
+        QApplication::instance()->quit();
         return QMainWindow::closeEvent(event);
     }
 }
@@ -138,7 +140,7 @@ void Welcome::searchButton_clicked() {
     }
 }
 
-void Welcome::textButton_clicked(){
+void Welcome::textButton_clicked() {
     std::optional<dbInstance *> instance = dbInstance::getInstanceByName("root");
     if (instance == std::nullopt) {
         auto loginWindow = new login(this);
@@ -238,9 +240,7 @@ void Welcome::exportDB() {
 }
 
 void Welcome::sqlDump(QSqlDatabase &db) {
-    // use QProcess to call mysqldump
-    // ask for path to save
-    if(db.userName()!="root"){
+    if (db.userName() != "root") {
         QMessageBox::warning(this, "拒绝访问", "请使用root用户登录");
         return;
     }
@@ -250,7 +250,10 @@ void Welcome::sqlDump(QSqlDatabase &db) {
     }
     QProcess process;
     process.setStandardOutputFile(path);
-    process.start("mysqldump", QStringList() << "-u" + db.userName() << "-p" + db.password() << "-c" << "--skip-extended-insert" << "--add-drop-table" << "diary" );
+    process.start("mysqldump", QStringList() << "-u" + db.userName() << "-p" + db.password() << "-c"
+                                             << "--skip-extended-insert"
+                                             << "--add-drop-table"
+                                             << "diary");
     process.waitForFinished();
     QMessageBox::information(this, "导出", "导出完成", QMessageBox::Ok);
 }

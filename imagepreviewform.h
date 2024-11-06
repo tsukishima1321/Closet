@@ -15,6 +15,7 @@ class imagePreviewForm : public QWidget {
 
 signals:
     void isClicked(QString href, int row);
+    void checked(int row);
 
 public:
     Item item;
@@ -23,6 +24,8 @@ public:
     virtual ~imagePreviewForm() override;
     void setImg(QSqlRecord record, QImage *img, QModelIndex index);
     void hideElements();
+    void check();
+    void uncheck();
     bool isAvailable() const;
     int getHeight() const;
 

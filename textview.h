@@ -6,6 +6,7 @@
 #include <QLayout>
 #include <QMainWindow>
 #include <QSqlDatabase>
+#include <span>
 
 namespace Ui {
     class TextView;
@@ -32,7 +33,8 @@ private:
     int currentColumnCount;
     QHBoxLayout *hBoxLayout;
     QList<QVBoxLayout *> vBoxLayouts;
-    textPreviewForm *preViewList;
+    textPreviewForm *previewList;
+    std::span<textPreviewForm> previewListSpan;
     void updateTextView(QSqlQuery &&query);
     void locateText();
     textPreviewForm *addTextItem(QString text, QString date, int id);

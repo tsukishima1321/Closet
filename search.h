@@ -10,6 +10,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <imagepreviewform.h>
+#include <span>
 
 namespace imgViewConstants {
     constexpr int pageSize = 20;
@@ -42,6 +43,7 @@ private:
     itemModel queryModel;
     itemModel countModel;
     imagePreviewForm *preViewList;
+    std::span<imagePreviewForm> preViewListSpan;
     void searchButton_clicked();
     void updateSearch();
     imagePreviewForm *addImgItem(QSqlRecord record, QModelIndex index);
