@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QList>
+#include <QMap>
 #include <QProcess>
 #include <QSqlQuery>
 #include <QString>
@@ -21,12 +22,13 @@ class labelCommit : public QWidget {
     Q_OBJECT
 
 public:
-    labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &db, QString fromDir);
+    labelCommit(QWidget *parent, QMap<QString, Item>* itemMap, QSqlDatabase &db, QString fromDir);
     void tabClicked(int i);
     bool isRunning() const;
 
 private:
-    QList<Item> *itemList;
+    //QList<Item> *itemList;
+    QMap<QString, Item>* itemMap;
     QList<QString> typeList;
     QSqlDatabase &db;
     QString fromDir;

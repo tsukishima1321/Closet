@@ -32,7 +32,7 @@ bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist) {
     return true;
 }
 
-labelCommit::labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &db, QString fromDir) :
+labelCommit::labelCommit(QWidget *parent, QMap<QString, Item>* itemMap, QSqlDatabase &db, QString fromDir) :
         QWidget(parent),
         db(db),
         fromDir(fromDir),
@@ -50,7 +50,7 @@ labelCommit::labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &d
     } else {
         //qDebug()<<"database connected";
         typeList.clear();
-        this->itemList = itemList;
+        this->itemMap = itemMap;
         updateTable();
         this->show();
         QString sql = "SELECT * FROM types";
@@ -67,8 +67,8 @@ labelCommit::labelCommit(QWidget *parent, QList<Item> *itemList, QSqlDatabase &d
 void labelCommit::updateTable() {
     int i = 0;
     ui->tableWidget->clearContents();
-    ui->tableWidget->setRowCount(itemList->length());
-    for (const Item &item : *(this->itemList)) {
+    ui->tableWidget->setRowCount(itemMap->count());
+    for (const Item &item : *(this->itemMap)) {
         ui->tableWidget->setItem(i, 0, new QTableWidgetItem(item.date));
         ui->tableWidget->setItem(i, 1, new QTableWidgetItem(item.href));
         ui->tableWidget->setItem(i, 2, new QTableWidgetItem(item.description));
@@ -103,12 +103,12 @@ void labelCommit::pushButtonCommitAll_clicked() {
     cmd->setReadChannel(QProcess::StandardOutput);
 
     ui->progressBar->setValue(0);
-    int n = itemList->length();
+    int n = itemMap->count();
     int done = 0;
     QStringList paras;
     paras << "doOcr.py"
           << db.userName() << db.password();
-    for (const Item &item : *(this->itemList)) {
+    for (const Item &item : *(this->itemMap)) {
         paras.append(fromDir + "/" + item.href);
     }
 
@@ -117,7 +117,7 @@ void labelCommit::pushButtonCommitAll_clicked() {
     cmd->waitForStarted();
     QSqlQuery query(db);
     query.prepare("INSERT INTO pictures (date,href,description,type) VALUES (:date,:href,:description,:type)");
-    for (const Item &item : *(this->itemList)) {
+    for (const Item &item : *(this->itemMap)) {
         query.bindValue(":date", item.date);
         query.bindValue(":href", item.href);
         query.bindValue(":description", item.description);
@@ -128,7 +128,7 @@ void labelCommit::pushButtonCommitAll_clicked() {
         ui->progressBar->setValue(static_cast<int>(100.0 * done / n));
         this->update();
     }
-    itemList->clear();
+    itemMap->clear();
     ui->progressBar->setValue(100);
     ui->tableWidget->clearContents();
 }
@@ -138,7 +138,7 @@ void labelCommit::pushButtonDelete_clicked() {
         return;
     }
     int i = ui->tableWidget->currentRow();
-    itemList->remove(i);
+    itemMap->remove(ui->tableWidget->item(i, 1)->text());
     updateTable();
 }
 

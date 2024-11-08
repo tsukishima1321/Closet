@@ -20,7 +20,6 @@ LabelWindow::LabelWindow(QWidget *parent) :
         ui(new Ui::LabelWindow),
         isLogedIn(false) {
     this->setAttribute(Qt::WA_DeleteOnClose, true);
-    itemList.clear();
     ui->setupUi(this);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     ui->tabWidget->setTabText(0, "录入记录");
@@ -134,9 +133,9 @@ void LabelWindow::pushButtonStart_clicked() {
 
 void LabelWindow::updateTable() {
     ui->tableWidget->clearContents();
-    ui->tableWidget->setRowCount(itemList.length());
+    ui->tableWidget->setRowCount(itemMap.count());
     int i = 0;
-    for (const Item &item : itemList) {
+    for (const Item &item : itemMap) {
         ui->tableWidget->setItem(i, 0, new QTableWidgetItem(item.date));
         ui->tableWidget->setItem(i, 1, new QTableWidgetItem(item.href));
         ui->tableWidget->setItem(i, 2, new QTableWidgetItem(item.description));
@@ -149,7 +148,7 @@ void LabelWindow::pushButtonAdd_clicked() {
     QString date = ui->dateEdit->text();
     QString name = ui->labelName->text();
     QString des = ui->plainTextEdit->toPlainText();
-    itemList.push_back(Item(date, name, des, ui->comboBoxType->currentText()));
+    itemMap[name] = Item(date, name, des, ui->comboBoxType->currentText());
 }
 
 void LabelWindow::keyPressEvent(QKeyEvent *event) {
@@ -171,7 +170,7 @@ void LabelWindow::pushButtonDelete_clicked() {
         return;
     }
     int i = ui->tableWidget->currentRow();
-    itemList.remove(i);
+    itemMap.remove(ui->tableWidget->item(i, 1)->text());
     updateTable();
 }
 
@@ -184,7 +183,7 @@ void LabelWindow::pushButtonFinish_clicked() {
     if (instance == std::nullopt) {
         auto loginWindow = new login(this);
         labelCommit *newWindow = nullptr;
-        connect(loginWindow, &login::loginRes, this, [&newWindow, this](QSqlDatabase &db) { newWindow = new labelCommit(nullptr, &itemList, db, ui->lineEditPath->text()); });
+        connect(loginWindow, &login::loginRes, this, [&newWindow, this](QSqlDatabase &db) { newWindow = new labelCommit(nullptr, &itemMap, db, ui->lineEditPath->text()); });
         auto res = loginWindow->exec();
         if (res == QDialog::Accepted) {
             isLogedIn = true;
@@ -196,7 +195,7 @@ void LabelWindow::pushButtonFinish_clicked() {
     } else {
         labelCommit *newWindow = nullptr;
         isLogedIn = true;
-        newWindow = new labelCommit(nullptr, &itemList, (*instance)->db, ui->lineEditPath->text());
+        newWindow = new labelCommit(nullptr, &itemMap, (*instance)->db, ui->lineEditPath->text());
         connect(ui->tabWidget, &QTabWidget::tabBarClicked, newWindow, &labelCommit::tabClicked);
         ui->tabWidget->removeTab(2);
         ui->tabWidget->addTab(newWindow, "记录提交");

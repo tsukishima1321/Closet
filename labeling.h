@@ -3,7 +3,7 @@
 
 #include "item.h"
 #include <QDir>
-#include <QList>
+#include <QMap>
 #include <QMainWindow>
 #include <QString>
 #include <QtSql/QSqlDatabase>
@@ -25,7 +25,8 @@ private:
     int ImageCount;
     int currentImgIndex;
     QString imagePath;
-    QList<Item> itemList;
+    //QList<Item> itemList;
+    QMap<QString, Item> itemMap;
     QSqlDatabase dbVisitor;
     void updateTypes();
     virtual void keyPressEvent(QKeyEvent *) override;
