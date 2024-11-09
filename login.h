@@ -9,25 +9,25 @@
 #include <optional>
 
 namespace Ui {
-    class login;
+    class Login;
 }
 
-class login : public QDialog {
+class Login : public QDialog {
     Q_OBJECT
 
 signals:
     void loginRes(QSqlDatabase &db);
 
 public:
-    explicit login(QWidget *parent);
-    ~login();
+    explicit Login(QWidget *parent);
+    ~Login();
 
 private slots:
     void pushButton_clicked();
     void lineEditName_returnPressed();
 
 private:
-    Ui::login *ui;
+    Ui::Login *ui;
     void submit(QSqlDatabase &db);
 };
 

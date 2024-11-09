@@ -2,7 +2,7 @@
 #include <QGraphicsItem>
 #include <QWheelEvent>
 
-imageView::imageView(QWidget *parent) :
+ImageView::ImageView(QWidget *parent) :
         QGraphicsView(parent),
         zoom(1),
         _scene(nullptr),
@@ -13,7 +13,7 @@ imageView::imageView(QWidget *parent) :
     wheelMode = WheelMode::Scroll;
 }
 
-void imageView::loadImage(QString href) {
+void ImageView::loadImage(QString href) {
     if (_scene) {
         delete _scene;
     }
@@ -25,15 +25,15 @@ void imageView::loadImage(QString href) {
     this->slot_reset();
 }
 
-QString imageView::getImgHref() {
+QString ImageView::getImgHref() {
     return imageHref;
 }
 
-void imageView::setWheelMode(WheelMode mode) {
+void ImageView::setWheelMode(WheelMode mode) {
     this->wheelMode = mode;
 }
 
-void imageView::slot_reset() {
+void ImageView::slot_reset() {
     if (this->scene()) {
         double ratio = this->size().width() / this->scene()->items()[0]->boundingRect().width();
         resetTransform();
@@ -42,7 +42,7 @@ void imageView::slot_reset() {
     }
 }
 
-void imageView::wheelEvent(QWheelEvent *event) {
+void ImageView::wheelEvent(QWheelEvent *event) {
     if (wheelMode == WheelMode::Scale) {
         this->MyScale(event->angleDelta().y() / 2);
     } else if (wheelMode == WheelMode::Scroll) {
@@ -50,7 +50,7 @@ void imageView::wheelEvent(QWheelEvent *event) {
     }
 }
 
-void imageView::MyScale(double step) {
+void ImageView::MyScale(double step) {
     double factor = 1.0 + step / 500.0;
     this->zoom *= factor;
     if (this->zoom < 0.01)
@@ -58,6 +58,6 @@ void imageView::MyScale(double step) {
     this->scale(factor, factor);
 }
 
-imageView::~imageView() {
+ImageView::~ImageView() {
     delete this->scene();
 }

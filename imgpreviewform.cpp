@@ -1,13 +1,13 @@
-#include "imagepreviewform.h"
-#include "ui_imagepreviewform.h"
+#include "imgpreviewform.h"
+#include "ui_imgpreviewform.h"
 #include "item.h"
 #include <QPainter>
 
 extern QString imgBase;
 
-imagePreviewForm::imagePreviewForm(QWidget *parent) :
+ImgPreviewForm::ImgPreviewForm(QWidget *parent) :
         QWidget(parent),
-        ui(new Ui::imagePreviewForm),
+        ui(new Ui::ImgPreviewForm),
         img(nullptr),
         available(true) {
     ui->setupUi(this);
@@ -15,11 +15,12 @@ imagePreviewForm::imagePreviewForm(QWidget *parent) :
     this->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
     this->hideElements();
     connect(ui->checkBox, &QCheckBox::stateChanged, [this](int state) {
+        (void)state;
         emit checked(index.row());
     });
 }
 
-void imagePreviewForm::setImg(QSqlRecord record, QImage *img, QModelIndex index) {
+void ImgPreviewForm::setImg(QSqlRecord record, QImage *img, QModelIndex index) {
     this->index = index;
     this->item = Item(record);
     if (this->img) {
@@ -42,7 +43,7 @@ void imagePreviewForm::setImg(QSqlRecord record, QImage *img, QModelIndex index)
     available = false;
 }
 
-int imagePreviewForm::getHeight() const {
+int ImgPreviewForm::getHeight() const {
     if (img) {
         if (!img->isNull()) {
             return this->img->height();
@@ -51,7 +52,7 @@ int imagePreviewForm::getHeight() const {
     return 0;
 }
 
-void imagePreviewForm::hideElements() {
+void ImgPreviewForm::hideElements() {
     ui->labelImg->clear();
     ui->labelImg->adjustSize();
     ui->labelImg->hide();
@@ -60,24 +61,24 @@ void imagePreviewForm::hideElements() {
     available = true;
 }
 
-bool imagePreviewForm::isAvailable() const {
+bool ImgPreviewForm::isAvailable() const {
     return available;
 }
 
-void imagePreviewForm::mouseDoubleClickEvent(QMouseEvent *event) {
+void ImgPreviewForm::mouseDoubleClickEvent(QMouseEvent *event) {
     (void)event;
     emit isClicked(item.href, index.row());
 }
 
-void imagePreviewForm::check() {
+void ImgPreviewForm::check() {
     ui->checkBox->setChecked(true);
 }
 
-void imagePreviewForm::uncheck() {
+void ImgPreviewForm::uncheck() {
     ui->checkBox->setChecked(false);
 }
 
-/*void imagePreviewForm::paintEvent(QPaintEvent *event) {
+/*void ImgPreviewForm::paintEvent(QPaintEvent *event) {
     (void)event;
     QPainter painter(this);
     painter.setPen(QPen(Qt::black, 2));
@@ -85,7 +86,7 @@ void imagePreviewForm::uncheck() {
     QWidget::paintEvent(event);
 }*/
 
-imagePreviewForm::~imagePreviewForm() {
+ImgPreviewForm::~ImgPreviewForm() {
     if (img) {
         delete img;
     }

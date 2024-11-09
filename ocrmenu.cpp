@@ -5,9 +5,9 @@
 #include <QMessageBox>
 #include <QSqlQuery>
 
-ocrMenu::ocrMenu(QWidget *parent, QSqlDatabase &db, QString key) :
+OCRMenu::OCRMenu(QWidget *parent, QSqlDatabase &db, QString key) :
         QWidget(parent),
-        ui(new Ui::ocrMenu),
+        ui(new Ui::OCRMenu),
         db(db),
         key(key) {
     ui->setupUi(this);
@@ -20,11 +20,11 @@ ocrMenu::ocrMenu(QWidget *parent, QSqlDatabase &db, QString key) :
     if (query.next()) {
         ui->textEdit->setText(Item(query.record()).ocr);
     }
-    connect(ui->commitButton, &QPushButton::clicked, this, &ocrMenu::editCommit);
-    connect(ui->cancelButton, &QPushButton::clicked, this, &ocrMenu::editCancel);
+    connect(ui->commitButton, &QPushButton::clicked, this, &OCRMenu::editCommit);
+    connect(ui->cancelButton, &QPushButton::clicked, this, &OCRMenu::editCancel);
 }
 
-void ocrMenu::editCommit() {
+void OCRMenu::editCommit() {
     QSqlQuery query(db);
     QString sql = "select * from pictures_ocr where href=:href;";
     query.prepare(sql);
@@ -52,7 +52,7 @@ void ocrMenu::editCommit() {
     }
 }
 
-void ocrMenu::editCancel() {
+void OCRMenu::editCancel() {
     QSqlQuery query(db);
     QString sql = "select * from pictures_ocr where href=:href;";
     query.prepare(sql);
@@ -63,6 +63,6 @@ void ocrMenu::editCancel() {
     }
 }
 
-ocrMenu::~ocrMenu() {
+OCRMenu::~OCRMenu() {
     delete ui;
 }

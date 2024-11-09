@@ -5,9 +5,9 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-textDetailView::textDetailView(QWidget *parent, QSqlDatabase &db) :
+TextDetailView::TextDetailView(QWidget *parent, QSqlDatabase &db) :
         Window(parent),
-        ui(new Ui::textDetailView),
+        ui(new Ui::TextDetailView),
         db(db) {
     current = 0;
 
@@ -15,9 +15,9 @@ textDetailView::textDetailView(QWidget *parent, QSqlDatabase &db) :
     ui->deleteButton->setIcon(IconResources::getIcons()["trash"]);
     ui->status->setText("新建记录");
 
-    connect(ui->commitButton, &QPushButton::clicked, this, &textDetailView::commitChange);
-    connect(ui->cancelButton, &QPushButton::clicked, this, &textDetailView::cancelChange);
-    connect(ui->deleteButton, &QToolButton::clicked, this, &textDetailView::deleteText);
+    connect(ui->commitButton, &QPushButton::clicked, this, &TextDetailView::commitChange);
+    connect(ui->cancelButton, &QPushButton::clicked, this, &TextDetailView::cancelChange);
+    connect(ui->deleteButton, &QToolButton::clicked, this, &TextDetailView::deleteText);
     connect(ui->textEdit, QTextEdit::textChanged, this, [this]() {
         if (ui->status->text() != "新建记录") {
             ui->status->setText("修改未提交");
@@ -30,7 +30,7 @@ textDetailView::textDetailView(QWidget *parent, QSqlDatabase &db) :
     });
 }
 
-void textDetailView::OpenText(int id) {
+void TextDetailView::OpenText(int id) {
     current = id;
     QSqlQuery query(db);
     QString sql = "select * from texts where id=:id;";
@@ -44,7 +44,7 @@ void textDetailView::OpenText(int id) {
     ui->status->setText("未修改");
 }
 
-void textDetailView::commitChange() {
+void TextDetailView::commitChange() {
     if (current != 0) {
         QSqlQuery query(db);
         QString sql = "select * from texts where id=:id;";
@@ -95,7 +95,7 @@ void textDetailView::commitChange() {
     emit edit();
 }
 
-void textDetailView::cancelChange() {
+void TextDetailView::cancelChange() {
     if (current != 0) {
         QSqlQuery query(db);
         QString sql = "select * from texts where id=:id;";
@@ -113,7 +113,7 @@ void textDetailView::cancelChange() {
     }
 }
 
-void textDetailView::deleteText() {
+void TextDetailView::deleteText() {
     if (current == 0) {
         return;
     }
@@ -132,22 +132,22 @@ void textDetailView::deleteText() {
     }
 }
 
-void textDetailView::setDate(QDate date) {
+void TextDetailView::setDate(QDate date) {
     ui->dateEdit->setDate(date);
 }
 
-void textDetailView::setText(QString text) {
+void TextDetailView::setText(QString text) {
     ui->textEdit->setText(text);
 }
 
-void textDetailView::keyPressEvent(QKeyEvent *event) {
+void TextDetailView::keyPressEvent(QKeyEvent *event) {
     if (event->key() == Qt::Key_S && event->modifiers() == Qt::ControlModifier) {
         commitChange();
     }
     Window::keyPressEvent(event);
 }
 
-void textDetailView::closeEvent(QCloseEvent *event) {
+void TextDetailView::closeEvent(QCloseEvent *event) {
     if (ui->status->text() == "修改未提交" || ui->status->text() == "新建记录") {
         QMessageBox box(QMessageBox::Information, "关闭", "有未提交的修改，是否保存？");
         QAbstractButton *yesButton = box.addButton("保存", QMessageBox::AcceptRole);
@@ -171,6 +171,6 @@ void textDetailView::closeEvent(QCloseEvent *event) {
     }
 }
 
-textDetailView::~textDetailView() {
+TextDetailView::~TextDetailView() {
     delete ui;
 }

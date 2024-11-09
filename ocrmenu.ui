@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ocrMenu</class>
- <widget class="QWidget" name="ocrMenu">
+ <class>OCRMenu</class>
+ <widget class="QWidget" name="OCRMenu">
   <property name="geometry">
    <rect>
     <x>0</x>

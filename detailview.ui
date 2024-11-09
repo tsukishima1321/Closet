@@ -135,7 +135,7 @@
        </layout>
       </item>
       <item>
-       <widget class="imageView" name="graphicsView"/>
+       <widget class="ImageView" name="graphicsView"/>
       </item>
      </layout>
     </item>
@@ -378,7 +378,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>imageView</class>
+   <class>ImageView</class>
    <extends>QGraphicsView</extends>
    <header>imageview.h</header>
   </customwidget>

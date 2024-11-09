@@ -22,17 +22,17 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
     ui->zoomOutButton->setIcon(IconResources::getIcons()["zoom-out"]);
     ui->zoomResetButton->setIcon(IconResources::getIcons()["reset"]);
 
-    connect(ui->zoomInButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_zoomIn);
-    connect(ui->zoomOutButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_zoomOut);
-    connect(ui->zoomResetButton, &QPushButton::clicked, ui->graphicsView, &imageView::slot_reset);
+    connect(ui->zoomInButton, &QPushButton::clicked, ui->graphicsView, &ImageView::slot_zoomIn);
+    connect(ui->zoomOutButton, &QPushButton::clicked, ui->graphicsView, &ImageView::slot_zoomOut);
+    connect(ui->zoomResetButton, &QPushButton::clicked, ui->graphicsView, &ImageView::slot_reset);
     connect(ui->commitButton, &QPushButton::clicked, this, &DetailView::commitChange);
     connect(ui->cancelButton, &QPushButton::clicked, this, &DetailView::cancelChange);
     connect(ui->typeMenuButton, &QPushButton::clicked, this, &DetailView::typeMenuOpen);
     connect(ui->ocrMenuButton, &QPushButton::clicked, this, &DetailView::ocrMenuOpen);
     connect(ui->editEnableButton, &QPushButton::clicked, this, &DetailView::enableEdit);
     connect(ui->picSaveButton, &QPushButton::clicked, this, &DetailView::savePic);
-    connect(ui->radioButtonScale, &QRadioButton::clicked, this, [this]() { ui->graphicsView->setWheelMode(imageView::WheelMode::Scale); });
-    connect(ui->radioButtonScroll, &QRadioButton::clicked, this, [this]() { ui->graphicsView->setWheelMode(imageView::WheelMode::Scroll); });
+    connect(ui->radioButtonScale, &QRadioButton::clicked, this, [this]() { ui->graphicsView->setWheelMode(ImageView::WheelMode::Scale); });
+    connect(ui->radioButtonScroll, &QRadioButton::clicked, this, [this]() { ui->graphicsView->setWheelMode(ImageView::WheelMode::Scroll); });
 
     QAction *zoomInAction = new QAction("放大", ui->graphicsView);
     QAction *zoomOutAction = new QAction("缩小", ui->graphicsView);
@@ -55,9 +55,9 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
     ui->graphicsView->addAction(savePicAction);
     ui->graphicsView->addAction(copyPicAction);
     ui->graphicsView->setContextMenuPolicy(Qt::ActionsContextMenu);
-    connect(zoomInAction, &QAction::triggered, ui->graphicsView, &imageView::slot_zoomIn);
-    connect(zoomOutAction, &QAction::triggered, ui->graphicsView, &imageView::slot_zoomOut);
-    connect(zoomResetAction, &QAction::triggered, ui->graphicsView, &imageView::slot_reset);
+    connect(zoomInAction, &QAction::triggered, ui->graphicsView, &ImageView::slot_zoomIn);
+    connect(zoomOutAction, &QAction::triggered, ui->graphicsView, &ImageView::slot_zoomOut);
+    connect(zoomResetAction, &QAction::triggered, ui->graphicsView, &ImageView::slot_reset);
     connect(setScrollAction, &QAction::triggered, ui->radioButtonScroll, &QRadioButton::click);
     connect(setScaleAction, &QAction::triggered, ui->radioButtonScale, &QRadioButton::click);
     connect(savePicAction, &QAction::triggered, this, &DetailView::savePic);
@@ -159,7 +159,7 @@ void DetailView::cancelChange() {
 }
 
 void DetailView::typeMenuOpen() {
-    auto newWindow = new typeEditMenu(nullptr, db);
+    auto newWindow = new TypeEditMenu(nullptr, db);
     connect(newWindow, &QWidget::destroyed, this, &DetailView::updateTypes);
     newWindow->show();
 }
@@ -196,6 +196,6 @@ DetailView::~DetailView() {
 }
 
 void DetailView::ocrMenuOpen() {
-    auto newWindow = new ocrMenu(nullptr, db, current);
+    auto newWindow = new OCRMenu(nullptr, db, current);
     newWindow->show();
 }

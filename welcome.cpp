@@ -3,9 +3,9 @@
 #include "iconresources.h"
 #include "labeling.h"
 #include "login.h"
-#include "search.h"
+#include "ImgSearch.h"
 #include "textdetailview.h"
-#include "textview.h"
+#include "TextSearch.h"
 #include "typeeditmenu.h"
 #include "ui_welcome.h"
 #include <QFileDialog>
@@ -64,17 +64,17 @@ Welcome::Welcome(QWidget *parent) :
 
     QAction *quickWrite = new QAction("随手记", this);
     connect(quickWrite, &QAction::triggered, this, [this]() {
-        std::optional<dbInstance *> instance = dbInstance::getInstanceByName("root");
+        std::optional<DBInstance *> instance = DBInstance::getInstanceByName("root");
         if (instance == std::nullopt) {
-            auto loginWindow = new login(this);
-            connect(loginWindow, &login::loginRes, this, [this](QSqlDatabase &db) {
-                auto newWindow = new textDetailView(this, db);
+            auto loginWindow = new Login(this);
+            connect(loginWindow, &Login::loginRes, this, [this](QSqlDatabase &db) {
+                auto newWindow = new TextDetailView(this, db);
                 newWindow->setDate(QDate::currentDate());
                 newWindow->show();
             });
             loginWindow->exec();
         } else {
-            auto newWindow = new textDetailView(nullptr, (*instance)->db);
+            auto newWindow = new TextDetailView(nullptr, (*instance)->db);
             newWindow->setDate(QDate::currentDate());
             newWindow->show();
         }
@@ -126,58 +126,58 @@ void Welcome::labelingButton_clicked() {
 }
 
 void Welcome::searchButton_clicked() {
-    std::optional<dbInstance *> instance = dbInstance::getInstanceByName("root");
+    std::optional<DBInstance *> instance = DBInstance::getInstanceByName("root");
     if (instance == std::nullopt) {
-        auto loginWindow = new login(this);
-        connect(loginWindow, &login::loginRes, this, [this](QSqlDatabase &db) {
-            Search *newWindow = new Search(this, db);
+        auto loginWindow = new Login(this);
+        connect(loginWindow, &Login::loginRes, this, [this](QSqlDatabase &db) {
+            ImgSearch *newWindow = new ImgSearch(this, db);
             newWindow->show();
         });
         loginWindow->exec();
     } else {
-        auto newWindow = new Search(nullptr, (*instance)->db);
+        auto newWindow = new ImgSearch(nullptr, (*instance)->db);
         newWindow->show();
     }
 }
 
 void Welcome::textButton_clicked() {
-    std::optional<dbInstance *> instance = dbInstance::getInstanceByName("root");
+    std::optional<DBInstance *> instance = DBInstance::getInstanceByName("root");
     if (instance == std::nullopt) {
-        auto loginWindow = new login(this);
-        connect(loginWindow, &login::loginRes, this, [this](QSqlDatabase &db) {
-            TextView *newWindow = new TextView(this, db);
+        auto loginWindow = new Login(this);
+        connect(loginWindow, &Login::loginRes, this, [this](QSqlDatabase &db) {
+            TextSearch *newWindow = new TextSearch(this, db);
             newWindow->show();
         });
         loginWindow->exec();
     } else {
-        auto newWindow = new TextView(nullptr, (*instance)->db);
+        auto newWindow = new TextSearch(nullptr, (*instance)->db);
         newWindow->show();
     }
 }
 
 void Welcome::typeEdit() {
-    std::optional<dbInstance *> instance = dbInstance::getInstanceByName("root");
+    std::optional<DBInstance *> instance = DBInstance::getInstanceByName("root");
     if (instance == std::nullopt) {
-        auto loginWindow = new login(this);
-        connect(loginWindow, &login::loginRes, this, [this](QSqlDatabase &db) {
+        auto loginWindow = new Login(this);
+        connect(loginWindow, &Login::loginRes, this, [this](QSqlDatabase &db) {
             QMainWindow *window = new QMainWindow(this);
-            typeEditMenu *newWindow = new typeEditMenu(window, db);
+            TypeEditMenu *newWindow = new TypeEditMenu(window, db);
             window->setCentralWidget(newWindow);
             window->setWindowTitle("编辑分类");
             window->show();
         });
         loginWindow->exec();
     } else {
-        auto newWindow = new typeEditMenu(nullptr, (*instance)->db);
+        auto newWindow = new TypeEditMenu(nullptr, (*instance)->db);
         newWindow->show();
     }
 }
 
 void Welcome::exportHtm() {
-    std::optional<dbInstance *> instance = dbInstance::getInstanceByName("root");
+    std::optional<DBInstance *> instance = DBInstance::getInstanceByName("root");
     if (instance == std::nullopt) {
-        auto loginWindow = new login(this);
-        connect(loginWindow, &login::loginRes, this, [this](QSqlDatabase &db) {
+        auto loginWindow = new Login(this);
+        connect(loginWindow, &Login::loginRes, this, [this](QSqlDatabase &db) {
             buildHtm(db);
         });
         loginWindow->exec();
@@ -227,10 +227,10 @@ void Welcome::buildHtm(QSqlDatabase &db) {
 }
 
 void Welcome::exportDB() {
-    std::optional<dbInstance *> instance = dbInstance::getInstanceByName("root");
+    std::optional<DBInstance *> instance = DBInstance::getInstanceByName("root");
     if (instance == std::nullopt) {
-        auto loginWindow = new login(this);
-        connect(loginWindow, &login::loginRes, this, [this](QSqlDatabase &db) {
+        auto loginWindow = new Login(this);
+        connect(loginWindow, &Login::loginRes, this, [this](QSqlDatabase &db) {
             sqlDump(db);
         });
         loginWindow->exec();
@@ -266,7 +266,7 @@ void Welcome::setBaseDir() {
 }
 
 void Welcome::logInButton_clicked() {
-    auto logInWindow = new login(this);
+    auto logInWindow = new Login(this);
     auto res = logInWindow->exec();
     if (res == QDialog::Accepted) {
         // ui->lineEdit->setText(imgBase);
@@ -274,7 +274,7 @@ void Welcome::logInButton_clicked() {
 }
 
 void Welcome::logOutButton_clicked() {
-    std::optional<dbInstance *> instance = dbInstance::getInstance();
+    std::optional<DBInstance *> instance = DBInstance::getInstance();
     if (instance == std::nullopt) {
         QMessageBox::warning(this, "登出", "当前未以任何用户登录");
     } else {

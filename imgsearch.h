@@ -9,7 +9,7 @@
 #include <QRunnable>
 #include <QSqlDatabase>
 #include <QSqlQuery>
-#include <imagepreviewform.h>
+#include <imgpreviewform.h>
 #include <span>
 
 namespace imgViewConstants {
@@ -18,21 +18,21 @@ namespace imgViewConstants {
 // constexpr int pageSizeTable = 100;
 
 namespace Ui {
-    class Search;
+    class ImgSearch;
 }
 
-class Search : public Window {
+class ImgSearch : public Window {
     Q_OBJECT
 
 public:
-    explicit Search(QWidget *parent, QSqlDatabase &db);
-    ~Search();
+    explicit ImgSearch(QWidget *parent, QSqlDatabase &db);
+    ~ImgSearch();
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
 
 private:
-    Ui::Search *ui;
+    Ui::ImgSearch *ui;
     int currentPage;
     int currentColumnCount;
     int pageSizeTable;
@@ -40,13 +40,13 @@ private:
     QList<QVBoxLayout *> vBoxLayouts;
 
     QSqlDatabase &db;
-    itemModel queryModel;
-    itemModel countModel;
-    imagePreviewForm *preViewList;
-    std::span<imagePreviewForm> preViewListSpan;
+    ItemModel queryModel;
+    ItemModel countModel;
+    ImgPreviewForm *preViewList;
+    std::span<ImgPreviewForm> preViewListSpan;
     void searchButton_clicked();
     void updateSearch();
-    imagePreviewForm *addImgItem(QSqlRecord record, QModelIndex index);
+    ImgPreviewForm *addImgItem(QSqlRecord record, QModelIndex index);
     void openDetailMenu(QString href, int row);
     void updateImgView();
     void updateTableView();
@@ -60,11 +60,11 @@ private:
 class imgLoader : public QObject, public QRunnable {
     Q_OBJECT
 public:
-    imgLoader(imagePreviewForm *target, QImageReader *reader, QSqlRecord record, QModelIndex index);
+    imgLoader(ImgPreviewForm *target, QImageReader *reader, QSqlRecord record, QModelIndex index);
     void run() override;
 
 private:
-    imagePreviewForm *target;
+    ImgPreviewForm *target;
     QImageReader *reader;
     QSqlRecord record;
     QModelIndex index;

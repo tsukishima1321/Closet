@@ -13,16 +13,16 @@
 #include <QtSql/QSqlDatabase>
 
 namespace Ui {
-    class labelCommit;
+    class LabelCommit;
 }
 
 bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist);
 
-class labelCommit : public QWidget {
+class LabelCommit : public QWidget {
     Q_OBJECT
 
 public:
-    labelCommit(QWidget *parent, QMap<QString, Item>* itemMap, QSqlDatabase &db, QString fromDir);
+    LabelCommit(QWidget *parent, QMap<QString, Item>* itemMap, QSqlDatabase &db, QString fromDir);
     void tabClicked(int i);
     bool isRunning() const;
 
@@ -32,7 +32,7 @@ private:
     QList<QString> typeList;
     QSqlDatabase &db;
     QString fromDir;
-    ~labelCommit();
+    ~LabelCommit();
 private slots:
     void pushButtonCommitAll_clicked();
     void pushButtonDelete_clicked();
@@ -40,7 +40,7 @@ private slots:
 private:
     //void updateTable1();
     void updateTable();
-    Ui::labelCommit *ui;
+    Ui::LabelCommit *ui;
     QProcess *cmd;
 };
 

@@ -1,5 +1,5 @@
-#ifndef TEXTVIEW_H
-#define TEXTVIEW_H
+#ifndef textSearch_H
+#define textSearch_H
 
 #include "textpreviewform.h"
 #include "window.h"
@@ -9,35 +9,35 @@
 #include <span>
 
 namespace Ui {
-    class TextView;
+    class TextSearch;
 }
 
-namespace TextViewConstants {
+namespace textSearchConstants {
     constexpr int pageSize = 30;
 }
 
-class TextView : public Window {
+class TextSearch : public Window {
     Q_OBJECT
 
 public:
-    explicit TextView(QWidget *parent, QSqlDatabase &db);
-    ~TextView();
+    explicit TextSearch(QWidget *parent, QSqlDatabase &db);
+    ~TextSearch();
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
 
 private:
-    Ui::TextView *ui;
+    Ui::TextSearch *ui;
     QSqlDatabase &db;
 
     int currentColumnCount;
     QHBoxLayout *hBoxLayout;
     QList<QVBoxLayout *> vBoxLayouts;
-    textPreviewForm *previewList;
-    std::span<textPreviewForm> previewListSpan;
-    void updateTextView(QSqlQuery &&query);
+    TextPreviewForm *previewList;
+    std::span<TextPreviewForm> previewListSpan;
+    void updatetextSearch(QSqlQuery &&query);
     void locateText();
-    textPreviewForm *addTextItem(QString text, QString date, int id);
+    TextPreviewForm *addTextItem(QString text, QString date, int id);
 
     void searchButton_clicked();
     void updateSearch();
@@ -50,4 +50,4 @@ private:
     void combineButton_clicked();
 };
 
-#endif // TEXTVIEW_H
+#endif // textSearch_H

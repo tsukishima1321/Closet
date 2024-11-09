@@ -1,14 +1,14 @@
-#include "search.h"
+#include "ImgSearch.h"
 #include "detailview.h"
 #include "iconresources.h"
-#include "imagepreviewform.h"
+#include "imgpreviewform.h"
 #include "item.h"
 #include "qfiledialog.h"
 #include "qimagereader.h"
 #include "qsqlerror.h"
 #include "qsqlquery.h"
 #include "qsqlrecord.h"
-#include "ui_search.h"
+#include "ui_imgsearch.h"
 #include <QFile>
 #include <QMessageBox>
 #include <QRegularExpression>
@@ -16,12 +16,12 @@
 
 extern QString imgBase;
 
-Search::Search(QWidget *parent, QSqlDatabase &db) :
+ImgSearch::ImgSearch(QWidget *parent, QSqlDatabase &db) :
         Window(parent),
-        ui(new Ui::Search),
+        ui(new Ui::ImgSearch),
         currentPage(1),
         currentColumnCount(3),
-        pageSizeTable(itemModel::getPageSize()),
+        pageSizeTable(ItemModel::getPageSize()),
         db(db),
         queryModel(nullptr, db),
         countModel(nullptr, db) {
@@ -61,10 +61,10 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
     }
     ui->comboBoxType->xAddItems(typeList);
     currentPage = ui->pageNavigate->getCurrentPage();
-    preViewList = new imagePreviewForm[imgViewConstants::pageSize];
-    preViewListSpan = std::span<imagePreviewForm>(preViewList, imgViewConstants::pageSize);
+    preViewList = new ImgPreviewForm[imgViewConstants::pageSize];
+    preViewListSpan = std::span<ImgPreviewForm>(preViewList, imgViewConstants::pageSize);
     for (auto &&form : preViewListSpan) {
-        connect(&form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
+        connect(&form, &ImgPreviewForm::isClicked, this, &ImgSearch::openDetailMenu);
     }
     connect(ui->pageNavigate, &PageNavigator::currentPageChanged, this, [this](int p) {
         if (p != currentPage) {
@@ -119,8 +119,8 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
             ui->dateEditTo->setEnabled(false);
         }
     });
-    connect(ui->searchButton, &QPushButton::clicked, this, &Search::searchButton_clicked);
-    connect(ui->lineEdit, &QLineEdit::returnPressed, this, &Search::searchButton_clicked);
+    connect(ui->searchButton, &QPushButton::clicked, this, &ImgSearch::searchButton_clicked);
+    connect(ui->lineEdit, &QLineEdit::returnPressed, this, &ImgSearch::searchButton_clicked);
     connect(ui->comboBoxShow, &QComboBox::currentIndexChanged, this, [this](int i) {
         if (i == 0) {
             ui->stackedWidget->setCurrentIndex(0);
@@ -135,17 +135,17 @@ Search::Search(QWidget *parent, QSqlDatabase &db) :
         (void)i;
         updateSearch();
     });
-    connect(ui->tableView, &QTableView::doubleClicked, this, &Search::tableCellDoubleClicked);
-    connect(ui->tableView, &QTableView::clicked, this, [this](const QModelIndex &index) { dynamic_cast<itemModel *>(ui->tableView->model())->check(index.row()); });
-    connect(ui->tableView_2, &QTableView::clicked, this, [this](const QModelIndex &index) { dynamic_cast<itemModel *>(ui->tableView->model())->check(index.row()); });
-    connect(ui->deleteButton, &QPushButton::clicked, this, &Search::deleteButton_clicked);
-    connect(ui->exportButton, &QPushButton::clicked, this, &Search::exportButton_clicked);
-    connect(ui->deleteButton_2, &QPushButton::clicked, this, &Search::deleteButton_clicked);
-    connect(ui->exportButton_2, &QPushButton::clicked, this, &Search::exportButton_clicked);
+    connect(ui->tableView, &QTableView::doubleClicked, this, &ImgSearch::tableCellDoubleClicked);
+    connect(ui->tableView, &QTableView::clicked, this, [this](const QModelIndex &index) { dynamic_cast<ItemModel *>(ui->tableView->model())->check(index.row()); });
+    connect(ui->tableView_2, &QTableView::clicked, this, [this](const QModelIndex &index) { dynamic_cast<ItemModel *>(ui->tableView->model())->check(index.row()); });
+    connect(ui->deleteButton, &QPushButton::clicked, this, &ImgSearch::deleteButton_clicked);
+    connect(ui->exportButton, &QPushButton::clicked, this, &ImgSearch::exportButton_clicked);
+    connect(ui->deleteButton_2, &QPushButton::clicked, this, &ImgSearch::deleteButton_clicked);
+    connect(ui->exportButton_2, &QPushButton::clicked, this, &ImgSearch::exportButton_clicked);
     connect(ui->sendSQLButton, &QPushButton::clicked, this, [this]() { this->sendSQL(ui->lineEdit_2->text()); });
 }
 
-void Search::searchButton_clicked() {
+void ImgSearch::searchButton_clicked() {
     /*构造查询的条件，预先查询结果的总数来更新页码，最后调用updateSearch()*/
     QString sql = "1=1";
     QStringList conditions;
@@ -203,7 +203,7 @@ void Search::searchButton_clicked() {
     updateSearch();
 }
 
-void Search::updateSearch() {
+void ImgSearch::updateSearch() {
     /*接受查询条件，在此之上构造排序和分页条件，进行实际查询，根据radioButtn状态调用updateImgView()或updateTableView()
       除了被searchButtonClicked调用外，不改变查询条件，只改变排序和分类的操作最后也会调用此函数来显示结果*/
     queryModel.uncheckAll();
@@ -252,13 +252,13 @@ void Search::updateSearch() {
     }
 }
 
-void Search::updateImgView() {
+void ImgSearch::updateImgView() {
     // 重置preViewList中所有Form到可用状态
     for (auto &&form : preViewListSpan) {
-        form.~imagePreviewForm();
-        new (&form) imagePreviewForm;
-        connect(&form, &imagePreviewForm::isClicked, this, &Search::openDetailMenu);
-        connect(&form, &imagePreviewForm::checked, &queryModel, &itemModel::check);
+        form.~ImgPreviewForm();
+        new (&form) ImgPreviewForm;
+        connect(&form, &ImgPreviewForm::isClicked, this, &ImgSearch::openDetailMenu);
+        connect(&form, &ImgPreviewForm::checked, &queryModel, &ItemModel::check);
         // form->hideElements();
     }
     // 执行查询，将结果存入preViewList
@@ -277,7 +277,7 @@ void Search::updateImgView() {
     locateImg();
 }
 
-void Search::locateImg() {
+void ImgSearch::locateImg() {
     /*读取preViewList中的所有窗口，根据他们的高度将他们排入布局
     调用该函数前所有子布局应该已被创建好且是空的
     要显示的图片发生改变，或者窗口大小发生改变时会调用此函数*/
@@ -287,7 +287,7 @@ void Search::locateImg() {
         for (QVBoxLayout *column : vBoxLayouts) {
             int height = 0;
             for (int i = column->count() - 1; i >= 0; i--) {
-                height += dynamic_cast<imagePreviewForm *>(column->itemAt(i)->widget())->getHeight();
+                height += dynamic_cast<ImgPreviewForm *>(column->itemAt(i)->widget())->getHeight();
             }
             if (height < minHeight) {
                 // qDebug() << height;
@@ -301,7 +301,7 @@ void Search::locateImg() {
     }
 }
 
-void Search::updateTableView() {
+void ImgSearch::updateTableView() {
     queryModel.resetHeader();
     ui->tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
     ui->tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
@@ -309,7 +309,7 @@ void Search::updateTableView() {
     ui->tableView->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
 }
 
-void Search::tableCellDoubleClicked(const QModelIndex &index) {
+void ImgSearch::tableCellDoubleClicked(const QModelIndex &index) {
     QString name = queryModel.data(queryModel.index(index.row(), queryModel.fieldIndex("href"))).toString();
     // qDebug() << name;
     if (name != "") {
@@ -317,7 +317,7 @@ void Search::tableCellDoubleClicked(const QModelIndex &index) {
     }
 }
 
-void Search::deleteButton_clicked() {
+void ImgSearch::deleteButton_clicked() {
     QSqlQuery query(db);
     query.prepare("delete from pictures where href=:href;");
     for (int i = 0; i < queryModel.rowCount(); i++) {
@@ -334,7 +334,7 @@ void Search::deleteButton_clicked() {
     }
 }
 
-void Search::exportButton_clicked() {
+void ImgSearch::exportButton_clicked() {
     QString targetDirPath = "";
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::Directory);
@@ -363,7 +363,7 @@ void Search::exportButton_clicked() {
     QMessageBox::information(this, "导出", "导出完成\n成功：" + QString::number(success) + "，失败：" + QString::number(fail));
 }
 
-imgLoader::imgLoader(imagePreviewForm *target, QImageReader *reader, QSqlRecord record, QModelIndex index) :
+imgLoader::imgLoader(ImgPreviewForm *target, QImageReader *reader, QSqlRecord record, QModelIndex index) :
         target(target), reader(reader), record(record), index(index) {}
 
 void imgLoader::run() {
@@ -378,7 +378,7 @@ void imgLoader::run() {
     delete reader;
 }
 
-imagePreviewForm *Search::addImgItem(QSqlRecord record, QModelIndex index) {
+ImgPreviewForm *ImgSearch::addImgItem(QSqlRecord record, QModelIndex index) {
     /*根据图片信息设置寻找preViewList中可用的imagePreviewForm放入，大小和文字同步设置，实际图片读取放入Thread中*/
     QString filename(imgBase + Item(record).href);
     QImageReader *reader = new QImageReader(filename.simplified()); // 该指针由imgLoader::run释放内存
@@ -394,7 +394,7 @@ imagePreviewForm *Search::addImgItem(QSqlRecord record, QModelIndex index) {
     reader->setScaledSize(size);
     QImage *img = new QImage(reader->scaledSize().width(), reader->scaledSize().height(), QImage::Format_RGB888); // 该指针由form->setImg传入对象内，由~imagePreViewForm释放内存
     img->fill(QColor(Qt::white));
-    imagePreviewForm *formToAdd = nullptr;
+    ImgPreviewForm *formToAdd = nullptr;
     bool flag = false;
     for (auto &&form : preViewListSpan) {
         if (form.isAvailable()) {
@@ -414,7 +414,7 @@ imagePreviewForm *Search::addImgItem(QSqlRecord record, QModelIndex index) {
     return formToAdd;
 }
 
-void Search::openDetailMenu(QString href, int row) {
+void ImgSearch::openDetailMenu(QString href, int row) {
     (void)row;
     auto newWindow = new DetailView(nullptr, db);
     connect(newWindow, &DetailView::edit, this, [this]() { updateSearch(); });
@@ -422,7 +422,7 @@ void Search::openDetailMenu(QString href, int row) {
     newWindow->OpenImg(href);
 }
 
-void Search::sendSQL(QString text) {
+void ImgSearch::sendSQL(QString text) {
     QString sql = text;
     QString warning = "";
     if (sql.contains("insert")) {
@@ -465,7 +465,7 @@ void Search::sendSQL(QString text) {
     }
 }
 
-void Search::resizeEvent(QResizeEvent *event) {
+void ImgSearch::resizeEvent(QResizeEvent *event) {
     (void)event;
     int width = ui->stackedWidget->width();
     currentColumnCount = width / 300;
@@ -493,7 +493,7 @@ void Search::resizeEvent(QResizeEvent *event) {
     Window::resizeEvent(event);
 }
 
-Search::~Search() {
+ImgSearch::~ImgSearch() {
     delete[] preViewList;
     if (hBoxLayout) {
         delete hBoxLayout;

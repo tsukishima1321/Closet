@@ -584,7 +584,7 @@
             <item>
              <layout class="QGridLayout" name="gridLayoutImageView">
               <item row="2" column="0">
-               <widget class="imageView" name="imageViewPort"/>
+               <widget class="ImageView" name="imageViewPort"/>
               </item>
               <item row="3" column="0">
                <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -865,7 +865,7 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>imageView</class>
+   <class>ImageView</class>
    <extends>QGraphicsView</extends>
    <header>imageview.h</header>
   </customwidget>

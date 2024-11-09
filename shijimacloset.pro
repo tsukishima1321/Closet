@@ -43,7 +43,7 @@ SOURCES += \
         dbinstance.cpp \
         detailview.cpp \
         iconresources.cpp \
-        imagepreviewform.cpp \
+        imgpreviewform.cpp \
         imageview.cpp \
         itemmodel.cpp \
         labelcommit.cpp \
@@ -51,10 +51,10 @@ SOURCES += \
         login.cpp \
         main.cpp \
         ocrmenu.cpp \
-        search.cpp \
+        imgsearch.cpp \
         typeeditmenu.cpp \
         welcome.cpp \
-        textview.cpp \
+        textsearch.cpp \
         textpreviewform.cpp \
         textdetailview.cpp \
 
@@ -62,7 +62,7 @@ HEADERS += \
         dbinstance.h \
         detailview.h \
         iconresources.h \
-        imagepreviewform.h \
+        imgpreviewform.h \
         imageview.h \
         item.h \
         itemmodel.h \
@@ -70,25 +70,25 @@ HEADERS += \
         labeling.h \
         login.h \
         ocrmenu.h \
-        search.h \
+        imgsearch.h \
         typeeditmenu.h \
         welcome.h \
         window.h \
-        textview.h \
+        textsearch.h \
         textpreviewform.h \
         textdetailview.h \
 
 FORMS += \
         detailview.ui \
-        imagepreviewform.ui \
+        imgpreviewform.ui \
         labelcommit.ui \
         labeling.ui \
         login.ui \
         ocrmenu.ui \
-        search.ui \
+        imgsearch.ui \
         typeeditmenu.ui \
         welcome.ui \
-        textview.ui \
+        textsearch.ui \
         textpreviewform.ui \
         textdetailview.ui \
 

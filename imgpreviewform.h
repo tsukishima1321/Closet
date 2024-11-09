@@ -7,10 +7,10 @@
 #include "item.h"
 
 namespace Ui {
-    class imagePreviewForm;
+    class ImgPreviewForm;
 }
 
-class imagePreviewForm : public QWidget {
+class ImgPreviewForm : public QWidget {
     Q_OBJECT
 
 signals:
@@ -20,8 +20,8 @@ signals:
 public:
     Item item;
     QModelIndex index;
-    explicit imagePreviewForm(QWidget *parent = nullptr);
-    virtual ~imagePreviewForm() override;
+    explicit ImgPreviewForm(QWidget *parent = nullptr);
+    virtual ~ImgPreviewForm() override;
     void setImg(QSqlRecord record, QImage *img, QModelIndex index);
     void hideElements();
     void check();
@@ -30,7 +30,7 @@ public:
     int getHeight() const;
 
 private:
-    Ui::imagePreviewForm *ui;
+    Ui::ImgPreviewForm *ui;
     QImage *img;
     bool available;
 

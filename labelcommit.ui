@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>labelCommit</class>
- <widget class="QWidget" name="labelCommit">
+ <class>LabelCommit</class>
+ <widget class="QWidget" name="LabelCommit">
   <property name="geometry">
    <rect>
     <x>0</x>

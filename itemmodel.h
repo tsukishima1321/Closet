@@ -6,9 +6,9 @@
 
 constexpr int pageSizeTable = 100;
 
-class itemModel : public QSqlTableModel {
+class ItemModel : public QSqlTableModel {
 public:
-    explicit itemModel(QObject *parent = nullptr, const QSqlDatabase &db = QSqlDatabase());
+    explicit ItemModel(QObject *parent = nullptr, const QSqlDatabase &db = QSqlDatabase());
     void setLimit(int offset, int pageSize);
     void setJoin(bool join);
     void setCountOnly(bool countOnly);

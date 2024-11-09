@@ -6,23 +6,23 @@
 #include <QWidget>
 
 namespace Ui {
-    class typeEditMenu;
+    class TypeEditMenu;
 }
 
-class typeEditMenu : public QWidget {
+class TypeEditMenu : public QWidget {
     Q_OBJECT
 signals:
     void typeUpdateEvent();
 
 public:
-    explicit typeEditMenu(QWidget *parent, QSqlDatabase &db);
-    ~typeEditMenu();
+    explicit TypeEditMenu(QWidget *parent, QSqlDatabase &db);
+    ~TypeEditMenu();
 
 private slots:
     void listWidget_itemClicked(QListWidgetItem *item);
 
 private:
-    Ui::typeEditMenu *ui;
+    Ui::TypeEditMenu *ui;
     QSqlDatabase &db;
     QString itemSelected;
     void addType();

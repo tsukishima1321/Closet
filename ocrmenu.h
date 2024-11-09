@@ -5,18 +5,18 @@
 #include <QWidget>
 
 namespace Ui {
-    class ocrMenu;
+    class OCRMenu;
 }
 
-class ocrMenu : public QWidget {
+class OCRMenu : public QWidget {
     Q_OBJECT
 
 public:
-    explicit ocrMenu(QWidget *parent, QSqlDatabase &db, QString key);
-    ~ocrMenu();
+    explicit OCRMenu(QWidget *parent, QSqlDatabase &db, QString key);
+    ~OCRMenu();
 
 private:
-    Ui::ocrMenu *ui;
+    Ui::OCRMenu *ui;
     QSqlDatabase &db;
     QString key;
 private slots:

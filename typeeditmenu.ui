@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>typeEditMenu</class>
- <widget class="QWidget" name="typeEditMenu">
+ <class>TypeEditMenu</class>
+ <widget class="QWidget" name="TypeEditMenu">
   <property name="geometry">
    <rect>
     <x>0</x>

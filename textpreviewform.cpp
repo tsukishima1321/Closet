@@ -2,7 +2,7 @@
 #include "ui_textpreviewform.h"
 #include <QPainter>
 
-textPreviewForm::textPreviewForm(QWidget *parent) : QWidget(parent), ui(new Ui::textPreviewForm) {
+TextPreviewForm::TextPreviewForm(QWidget *parent) : QWidget(parent), ui(new Ui::TextPreviewForm) {
     ui->setupUi(this);
     available = true;
     this->setMinimumHeight(100);
@@ -12,11 +12,11 @@ textPreviewForm::textPreviewForm(QWidget *parent) : QWidget(parent), ui(new Ui::
     ui->labelText->setAlignment(Qt::AlignTop);
 }
 
-textPreviewForm::~textPreviewForm() {
+TextPreviewForm::~TextPreviewForm() {
     delete ui;
 }
 
-void textPreviewForm::setText(QString text, QString date, int id) {
+void TextPreviewForm::setText(QString text, QString date, int id) {
     this->id = id;
     ui->labelText->setText(text);
     ui->labelText->adjustSize();
@@ -29,7 +29,7 @@ void textPreviewForm::setText(QString text, QString date, int id) {
     available = false;
 }
 
-void textPreviewForm::hideElements() {
+void TextPreviewForm::hideElements() {
     ui->labelDate->hide();
     ui->labelText->hide();
     ui->labelText->adjustSize();
@@ -39,35 +39,35 @@ void textPreviewForm::hideElements() {
     available = true;
 }
 
-bool textPreviewForm::isAvailable() const {
+bool TextPreviewForm::isAvailable() const {
     return available;
 }
 
-bool textPreviewForm::isCheck() const {
+bool TextPreviewForm::isCheck() const {
     return ui->checkBox->isChecked();
 }
 
-void textPreviewForm::check() {
+void TextPreviewForm::check() {
     ui->checkBox->setChecked(true);
 }
 
-void textPreviewForm::uncheck() {
+void TextPreviewForm::uncheck() {
     ui->checkBox->setChecked(false);
 }
 
-int textPreviewForm::getId() const {
+int TextPreviewForm::getId() const {
     return id;
 }
 
-QString textPreviewForm::getDate() const {
+QString TextPreviewForm::getDate() const {
     return ui->labelDate->text();
 }
 
-int textPreviewForm::getHeight() const{
+int TextPreviewForm::getHeight() const{
     return ui->labelText->height();
 }
 
-void textPreviewForm::setOmit(bool omit) {
+void TextPreviewForm::setOmit(bool omit) {
     if(omit) {
         ui->labelOmit->show();
     } else {
@@ -75,12 +75,12 @@ void textPreviewForm::setOmit(bool omit) {
     }
 }
 
-void textPreviewForm::mouseDoubleClickEvent(QMouseEvent *event) {
+void TextPreviewForm::mouseDoubleClickEvent(QMouseEvent *event) {
     (void)event;
     emit isClicked(id);
 }
 
-void textPreviewForm::paintEvent(QPaintEvent *event) {
+void TextPreviewForm::paintEvent(QPaintEvent *event) {
     (void)event;
     if(available) {
         return QWidget::paintEvent(event);

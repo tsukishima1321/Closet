@@ -32,16 +32,16 @@ bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist) {
     return true;
 }
 
-labelCommit::labelCommit(QWidget *parent, QMap<QString, Item>* itemMap, QSqlDatabase &db, QString fromDir) :
+LabelCommit::LabelCommit(QWidget *parent, QMap<QString, Item>* itemMap, QSqlDatabase &db, QString fromDir) :
         QWidget(parent),
         db(db),
         fromDir(fromDir),
-        ui(new Ui::labelCommit), cmd(nullptr) {
+        ui(new Ui::LabelCommit), cmd(nullptr) {
     this->setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(this);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    connect(ui->pushButtonCommitAll, &QPushButton::clicked, this, &labelCommit::pushButtonCommitAll_clicked);
-    connect(ui->pushButtonDelete, &QPushButton::clicked, this, &labelCommit::pushButtonDelete_clicked);
+    connect(ui->pushButtonCommitAll, &QPushButton::clicked, this, &LabelCommit::pushButtonCommitAll_clicked);
+    connect(ui->pushButtonDelete, &QPushButton::clicked, this, &LabelCommit::pushButtonDelete_clicked);
     //qDebug() << QSqlDatabase::drivers();
     if (!db.isOpen()) {
         //qDebug()<<"Database Connect Failed";
@@ -64,7 +64,7 @@ labelCommit::labelCommit(QWidget *parent, QMap<QString, Item>* itemMap, QSqlData
     }
 }
 
-void labelCommit::updateTable() {
+void LabelCommit::updateTable() {
     int i = 0;
     ui->tableWidget->clearContents();
     ui->tableWidget->setRowCount(itemMap->count());
@@ -77,20 +77,20 @@ void labelCommit::updateTable() {
     }
 }
 
-void labelCommit::tabClicked(int i) {
+void LabelCommit::tabClicked(int i) {
     if (i == 2) {
         updateTable();
     }
 }
 
-labelCommit::~labelCommit() {
+LabelCommit::~LabelCommit() {
     if (cmd) {
         delete cmd;
     }
     delete ui;
 }
 
-void labelCommit::pushButtonCommitAll_clicked() {
+void LabelCommit::pushButtonCommitAll_clicked() {
     if (cmd) {
         cmd->close();
         cmd->waitForFinished();
@@ -133,7 +133,7 @@ void labelCommit::pushButtonCommitAll_clicked() {
     ui->tableWidget->clearContents();
 }
 
-void labelCommit::pushButtonDelete_clicked() {
+void LabelCommit::pushButtonDelete_clicked() {
     if (ui->tableWidget->rowCount() == 0) {
         return;
     }
@@ -142,7 +142,7 @@ void labelCommit::pushButtonDelete_clicked() {
     updateTable();
 }
 
-bool labelCommit::isRunning() const {
+bool LabelCommit::isRunning() const {
     if (cmd) {
         if (cmd->state() == QProcess::Running) {
             return true;

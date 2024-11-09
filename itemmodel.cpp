@@ -1,10 +1,10 @@
 #include "itemmodel.h"
 
-int itemModel::getPageSize() {
+int ItemModel::getPageSize() {
     return pageSizeTable;
 }
 
-itemModel::itemModel(QObject *parent, const QSqlDatabase &db) :
+ItemModel::ItemModel(QObject *parent, const QSqlDatabase &db) :
         QSqlTableModel{parent, db},
         offset(0),
         pageSize(0),
@@ -14,24 +14,24 @@ itemModel::itemModel(QObject *parent, const QSqlDatabase &db) :
     //setEditStrategy(EditStrategy::OnFieldChange);
 }
 
-void itemModel::setLimit(int offset, int pageSize) {
+void ItemModel::setLimit(int offset, int pageSize) {
     this->offset = offset;
     this->pageSize = pageSize;
 }
 
-void itemModel::setJoin(bool join) {
+void ItemModel::setJoin(bool join) {
     this->join = join;
 }
 
-void itemModel::setCountOnly(bool countOnly) {
+void ItemModel::setCountOnly(bool countOnly) {
     this->countOnly = countOnly;
 }
 
-QString itemModel::getSelectStatement() const {
+QString ItemModel::getSelectStatement() const {
     return selectStatement();
 }
 
-void itemModel::resetAllFilter() {
+void ItemModel::resetAllFilter() {
     this->offset = 0;
     this->pageSize = 0;
     this->countOnly = false;
@@ -39,14 +39,14 @@ void itemModel::resetAllFilter() {
     this->setFilter("1=1");
 }
 
-void itemModel::resetHeader() {
+void ItemModel::resetHeader() {
     setHeaderData(0, Qt::Horizontal, "文件名");
     setHeaderData(1, Qt::Horizontal, "描述");
     setHeaderData(2, Qt::Horizontal, "分类");
     setHeaderData(3, Qt::Horizontal, "日期");
 }
 
-QString itemModel::selectStatement() const {
+QString ItemModel::selectStatement() const {
     QString sql = QSqlTableModel::selectStatement();
     if (countOnly) {
         sql.replace("`href`, `description`, `type`, `date`", "count(*)");
@@ -65,30 +65,30 @@ QString itemModel::selectStatement() const {
     return sql;
 }
 
-void itemModel::check(int row) {
+void ItemModel::check(int row) {
     checkState[row] = (checkState[row] == Qt::Unchecked ? Qt::Checked : Qt::Unchecked);
     emit dataChanged(index(row, 0), index(row, 0));
 }
 
-bool itemModel::isChecked(int row) const {
+bool ItemModel::isChecked(int row) const {
     return checkState[row] == Qt::Checked;
 }
 
-void itemModel::checkAll() {
+void ItemModel::checkAll() {
     for (int r = 0; r < rowCount(); r++) {
         checkState[r] = Qt::Checked;
         emit dataChanged(index(0, 0), index(rowCount() - 1, 0));
     }
 }
 
-void itemModel::uncheckAll() {
+void ItemModel::uncheckAll() {
     for (int r = 0; r < rowCount(); r++) {
         checkState[r] = Qt::Unchecked;
         emit dataChanged(index(0, 0), index(rowCount() - 1, 0));
     }
 }
 
-QVariant itemModel::data(const QModelIndex &index, int role) const {
+QVariant ItemModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid())
         return QVariant();
 
@@ -114,7 +114,7 @@ QVariant itemModel::data(const QModelIndex &index, int role) const {
     return QSqlTableModel::data(index, role);
 }
 
-Qt::ItemFlags itemModel::flags(const QModelIndex &index) const {
+Qt::ItemFlags ItemModel::flags(const QModelIndex &index) const {
     if (!index.isValid())
         return Qt::NoItemFlags;
 

@@ -34,9 +34,9 @@ LabelWindow::LabelWindow(QWidget *parent) :
     ui->toolButtonLast->setIcon(IconResources::getIcons()["step-back"]);
     ui->dateEdit->setDate(QDate::currentDate());
     //链接来自gui的信号
-    connect(ui->zoomInButton, &QPushButton::clicked, ui->imageViewPort, &imageView::slot_zoomIn);
-    connect(ui->zoomOutButton, &QPushButton::clicked, ui->imageViewPort, &imageView::slot_zoomOut);
-    connect(ui->zoomResetButton, &QPushButton::clicked, ui->imageViewPort, &imageView::slot_reset);
+    connect(ui->zoomInButton, &QPushButton::clicked, ui->imageViewPort, &ImageView::slot_zoomIn);
+    connect(ui->zoomOutButton, &QPushButton::clicked, ui->imageViewPort, &ImageView::slot_zoomOut);
+    connect(ui->zoomResetButton, &QPushButton::clicked, ui->imageViewPort, &ImageView::slot_reset);
     connect(ui->pushButtonAdd, &QPushButton::clicked, this, &LabelWindow::pushButtonAdd_clicked);
     connect(ui->toolButtonNext, &QPushButton::clicked, this, &::LabelWindow::pushButtonNext_clicked);
     connect(ui->toolButtonLast, &QPushButton::clicked, this, &::LabelWindow::pushButtonLast_clicked);
@@ -47,8 +47,8 @@ LabelWindow::LabelWindow(QWidget *parent) :
     connect(ui->freshTypeButton, &QPushButton::clicked, this, &LabelWindow::freshButton_clicked);
     connect(ui->freshDateButton, &QPushButton::clicked, this, &LabelWindow::freshDateButton_clicked);
     connect(ui->pushButtonDelete, &QPushButton::clicked, this, &LabelWindow::pushButtonDelete_clicked);
-    connect(ui->radioButtonScale, &QRadioButton::clicked, this, [this]() { ui->imageViewPort->setWheelMode(imageView::WheelMode::Scale); });
-    connect(ui->radioButtonScroll, &QRadioButton::clicked, this, [this]() { ui->imageViewPort->setWheelMode(imageView::WheelMode::Scroll); });
+    connect(ui->radioButtonScale, &QRadioButton::clicked, this, [this]() { ui->imageViewPort->setWheelMode(ImageView::WheelMode::Scale); });
+    connect(ui->radioButtonScroll, &QRadioButton::clicked, this, [this]() { ui->imageViewPort->setWheelMode(ImageView::WheelMode::Scroll); });
     connect(ui->tabWidget, &QTabWidget::tabBarClicked, this, [this](int i) {
         if (i == 2) {
             pushButtonFinish_clicked();
@@ -179,24 +179,24 @@ void LabelWindow::pushButtonFinish_clicked() {
         ui->tabWidget->setCurrentIndex(2);
         return;
     }
-    std::optional<dbInstance *> instance = dbInstance::getInstanceByName("root");
+    std::optional<DBInstance *> instance = DBInstance::getInstanceByName("root");
     if (instance == std::nullopt) {
-        auto loginWindow = new login(this);
-        labelCommit *newWindow = nullptr;
-        connect(loginWindow, &login::loginRes, this, [&newWindow, this](QSqlDatabase &db) { newWindow = new labelCommit(nullptr, &itemMap, db, ui->lineEditPath->text()); });
+        auto loginWindow = new Login(this);
+        LabelCommit *newWindow = nullptr;
+        connect(loginWindow, &Login::loginRes, this, [&newWindow, this](QSqlDatabase &db) { newWindow = new LabelCommit(nullptr, &itemMap, db, ui->lineEditPath->text()); });
         auto res = loginWindow->exec();
         if (res == QDialog::Accepted) {
             isLogedIn = true;
-            connect(ui->tabWidget, &QTabWidget::tabBarClicked, newWindow, &labelCommit::tabClicked);
+            connect(ui->tabWidget, &QTabWidget::tabBarClicked, newWindow, &LabelCommit::tabClicked);
             ui->tabWidget->removeTab(2);
             ui->tabWidget->addTab(newWindow, "记录提交");
             ui->tabWidget->setCurrentIndex(2);
         }
     } else {
-        labelCommit *newWindow = nullptr;
+        LabelCommit *newWindow = nullptr;
         isLogedIn = true;
-        newWindow = new labelCommit(nullptr, &itemMap, (*instance)->db, ui->lineEditPath->text());
-        connect(ui->tabWidget, &QTabWidget::tabBarClicked, newWindow, &labelCommit::tabClicked);
+        newWindow = new LabelCommit(nullptr, &itemMap, (*instance)->db, ui->lineEditPath->text());
+        connect(ui->tabWidget, &QTabWidget::tabBarClicked, newWindow, &LabelCommit::tabClicked);
         ui->tabWidget->removeTab(2);
         ui->tabWidget->addTab(newWindow, "记录提交");
         ui->tabWidget->setCurrentIndex(2);
@@ -204,24 +204,24 @@ void LabelWindow::pushButtonFinish_clicked() {
 }
 
 void LabelWindow::pushButtonAddType_clicked() {
-    std::optional<dbInstance *> instance = dbInstance::getInstanceByName("root");
+    std::optional<DBInstance *> instance = DBInstance::getInstanceByName("root");
     if (instance == std::nullopt) {
-        auto loginWindow = new login(this);
-        typeEditMenu *newWindow = nullptr;
-        connect(loginWindow, &login::loginRes, this, [&newWindow](QSqlDatabase &db) { newWindow = new typeEditMenu(nullptr, db); });
+        auto loginWindow = new Login(this);
+        TypeEditMenu *newWindow = nullptr;
+        connect(loginWindow, &Login::loginRes, this, [&newWindow](QSqlDatabase &db) { newWindow = new TypeEditMenu(nullptr, db); });
         auto res = loginWindow->exec();
         if (res == QDialog::Accepted) {
             newWindow->show();
         }
     } else {
-        auto newWindow = new typeEditMenu(nullptr, (*instance)->db);
+        auto newWindow = new TypeEditMenu(nullptr, (*instance)->db);
         newWindow->show();
     }
 }
 
 void LabelWindow::closeEvent(QCloseEvent *event) {
     if (isLogedIn) {
-        if (dynamic_cast<labelCommit *>(ui->tabWidget->widget(2))->isRunning()) {
+        if (dynamic_cast<LabelCommit *>(ui->tabWidget->widget(2))->isRunning()) {
             event->ignore();
             QMessageBox::information(this, "提示", "OCR进程运行中，请勿关闭窗口");
             return;

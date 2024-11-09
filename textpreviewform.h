@@ -4,18 +4,18 @@
 #include <QWidget>
 
 namespace Ui {
-    class textPreviewForm;
+    class TextPreviewForm;
 }
 
-class textPreviewForm : public QWidget {
+class TextPreviewForm : public QWidget {
     Q_OBJECT
 
 signals:
     void isClicked(int id);
 
 public:
-    explicit textPreviewForm(QWidget *parent = nullptr);
-    virtual ~textPreviewForm() override;
+    explicit TextPreviewForm(QWidget *parent = nullptr);
+    virtual ~TextPreviewForm() override;
     void setText(QString text, QString date, int id);
     void hideElements();
     bool isAvailable() const;
@@ -28,7 +28,7 @@ public:
     void setOmit(bool omit);
 
 private:
-    Ui::textPreviewForm *ui;
+    Ui::TextPreviewForm *ui;
     bool available;
     int id;
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>imagePreviewForm</class>
- <widget class="QWidget" name="imagePreviewForm">
+ <class>ImgPreviewForm</class>
+ <widget class="QWidget" name="ImgPreviewForm">
   <property name="geometry">
    <rect>
     <x>0</x>

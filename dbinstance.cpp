@@ -1,9 +1,9 @@
 #include "dbinstance.h"
 #include <QMessageBox>
 
-dbInstance *dbInstance::instance = nullptr;
+DBInstance *DBInstance::instance = nullptr;
 
-dbInstance::dbInstance(QString name, QString password) {
+DBInstance::DBInstance(QString name, QString password) {
     db = QSqlDatabase::addDatabase("QMYSQL");
     db.setHostName("127.0.0.1");
     db.setDatabaseName("diary");
@@ -19,7 +19,7 @@ dbInstance::dbInstance(QString name, QString password) {
     }
 }
 
-std::optional<dbInstance *> dbInstance::getInstance() {
+std::optional<DBInstance *> DBInstance::getInstance() {
     if (instance == nullptr) {
         return std::nullopt;
     }
@@ -29,9 +29,9 @@ std::optional<dbInstance *> dbInstance::getInstance() {
     return std::nullopt;
 }
 
-std::optional<dbInstance *> dbInstance::getInstance(QString name, QString password) {
+std::optional<DBInstance *> DBInstance::getInstance(QString name, QString password) {
     if (instance == nullptr) {
-        instance = new dbInstance(name, password);
+        instance = new DBInstance(name, password);
     } else if (instance->db.userName() != name || (instance->db.userName() == name && !instance->open)) {
         instance->open = false;
         instance->db.close();
@@ -48,7 +48,7 @@ std::optional<dbInstance *> dbInstance::getInstance(QString name, QString passwo
     return instance;
 }
 
-std::optional<dbInstance *> dbInstance::getInstanceByName(QString name) {
+std::optional<DBInstance *> DBInstance::getInstanceByName(QString name) {
     if (instance == nullptr) {
         return std::nullopt;
     }
@@ -58,11 +58,11 @@ std::optional<dbInstance *> dbInstance::getInstanceByName(QString name) {
     return std::nullopt;
 }
 
-bool dbInstance::isOpen() const {
+bool DBInstance::isOpen() const {
     return open;
 }
 
-void dbInstance::close() {
+void DBInstance::close() {
     db.close();
     open = false;
 }

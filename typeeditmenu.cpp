@@ -5,20 +5,20 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-typeEditMenu::typeEditMenu(QWidget *parent, QSqlDatabase &db) :
+TypeEditMenu::TypeEditMenu(QWidget *parent, QSqlDatabase &db) :
         QWidget(parent),
-        ui(new Ui::typeEditMenu),
+        ui(new Ui::TypeEditMenu),
         db(db) {
     ui->setupUi(this);
     ui->pushButtonDelete->hide();
     this->setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(ui->pushButtonAdd, &QPushButton::clicked, this, &typeEditMenu::addType);
-    connect(ui->pushButtonDelete, &QPushButton::clicked, this, &typeEditMenu::deleteType);
-    connect(ui->listWidget, &QListWidget::itemClicked, this, &typeEditMenu::listWidget_itemClicked);
+    connect(ui->pushButtonAdd, &QPushButton::clicked, this, &TypeEditMenu::addType);
+    connect(ui->pushButtonDelete, &QPushButton::clicked, this, &TypeEditMenu::deleteType);
+    connect(ui->listWidget, &QListWidget::itemClicked, this, &TypeEditMenu::listWidget_itemClicked);
     updateTypes();
 }
 
-void typeEditMenu::addType() {
+void TypeEditMenu::addType() {
     bool qRed = false;
     QString newType = QInputDialog::getText(this, "新建分类", "新分类名称：", QLineEdit::Normal, "", &qRed);
     if (qRed && !newType.isEmpty()) {
@@ -37,7 +37,7 @@ void typeEditMenu::addType() {
     }
 }
 
-void typeEditMenu::deleteType() {
+void TypeEditMenu::deleteType() {
     QSqlQuery query(db);
     query.prepare("DELETE FROM types WHERE typename=:type");
     query.bindValue(":type", itemSelected);
@@ -53,7 +53,7 @@ void typeEditMenu::deleteType() {
     }
 }
 
-void typeEditMenu::updateTypes() {
+void TypeEditMenu::updateTypes() {
     emit typeUpdateEvent();
     ui->listWidget->clear();
     QString sql = "SELECT * FROM types";
@@ -66,11 +66,11 @@ void typeEditMenu::updateTypes() {
     }
 }
 
-typeEditMenu::~typeEditMenu() {
+TypeEditMenu::~TypeEditMenu() {
     delete ui;
 }
 
-void typeEditMenu::listWidget_itemClicked(QListWidgetItem *item) {
+void TypeEditMenu::listWidget_itemClicked(QListWidgetItem *item) {
     itemSelected = item->text();
     ui->pushButtonDelete->show();
 }

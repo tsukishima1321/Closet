@@ -5,28 +5,28 @@
 #include "window.h"
 
 namespace Ui {
-    class textDetailView;
+    class TextDetailView;
 }
 
-class textDetailView : public Window {
+class TextDetailView : public Window {
     Q_OBJECT
 
 signals:
     void edit();
 
 public:
-    explicit textDetailView(QWidget *parent, QSqlDatabase &db);
+    explicit TextDetailView(QWidget *parent, QSqlDatabase &db);
     void OpenText(int id);
     void setDate(QDate date);
     void setText(QString text);
-    ~textDetailView();
+    ~TextDetailView();
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
     virtual void closeEvent(QCloseEvent *event) override;
 
 private:
-    Ui::textDetailView *ui;
+    Ui::TextDetailView *ui;
     QSqlDatabase &db;
     int current;
     void commitChange();

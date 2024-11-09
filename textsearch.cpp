@@ -1,13 +1,13 @@
-#include "textview.h"
+#include "TextSearch.h"
 #include "iconresources.h"
 #include "textdetailview.h"
-#include "ui_textview.h"
+#include "ui_textsearch.h"
 #include <QMessageBox>
 #include <QSqlQuery>
 
-TextView::TextView(QWidget *parent, QSqlDatabase &db) :
+TextSearch::TextSearch(QWidget *parent, QSqlDatabase &db) :
         Window(parent),
-        ui(new Ui::TextView),
+        ui(new Ui::TextSearch),
         db(db),
         currentColumnCount(3),
         currentPage(1) {
@@ -29,10 +29,10 @@ TextView::TextView(QWidget *parent, QSqlDatabase &db) :
     ui->scrollAreaWidgetContents->setLayout(hBoxLayout);
 
     currentPage = ui->pageNavigate->getCurrentPage();
-    previewList = new textPreviewForm[TextViewConstants::pageSize];
-    previewListSpan = std::span<textPreviewForm>(previewList, TextViewConstants::pageSize);
+    previewList = new TextPreviewForm[textSearchConstants::pageSize];
+    previewListSpan = std::span<TextPreviewForm>(previewList, textSearchConstants::pageSize);
     for (auto &&form : previewListSpan) {
-        connect(&form, &textPreviewForm::isClicked, this, &TextView::openDetailMenu);
+        connect(&form, &TextPreviewForm::isClicked, this, &TextSearch::openDetailMenu);
     }
 
     connect(ui->selectButton, &QCheckBox::stateChanged, this, [this](int stat) {
@@ -81,19 +81,19 @@ TextView::TextView(QWidget *parent, QSqlDatabase &db) :
         updateSearch();
     });
 
-    connect(ui->searchButton, &QPushButton::clicked, this, &TextView::searchButton_clicked);
-    connect(ui->lineEdit, &QLineEdit::returnPressed, this, &TextView::searchButton_clicked);
-    connect(ui->deleteButton, &QPushButton::clicked, this, &TextView::deleteButton_clicked);
-    connect(ui->combineButton, &QPushButton::clicked, this, &TextView::combineButton_clicked);
+    connect(ui->searchButton, &QPushButton::clicked, this, &TextSearch::searchButton_clicked);
+    connect(ui->lineEdit, &QLineEdit::returnPressed, this, &TextSearch::searchButton_clicked);
+    connect(ui->deleteButton, &QPushButton::clicked, this, &TextSearch::deleteButton_clicked);
+    connect(ui->combineButton, &QPushButton::clicked, this, &TextSearch::combineButton_clicked);
     connect(ui->newTextButton, &QPushButton::clicked, this, [this]() {
-        textDetailView *detail = new textDetailView(this, this->db);
-        connect(detail, &textDetailView::edit, this, [this]() { updateSearch(); });
+        TextDetailView *detail = new TextDetailView(this, this->db);
+        connect(detail, &TextDetailView::edit, this, [this]() { updateSearch(); });
         detail->setDate(QDate::currentDate());
         detail->show();
     });
 }
 
-void TextView::searchButton_clicked() {
+void TextSearch::searchButton_clicked() {
     /*构造查询的条件，预先查询结果的总数来更新页码，最后调用updateSearch()*/
     QString sql = "1=1";
     QStringList conditions;
@@ -115,7 +115,7 @@ void TextView::searchButton_clicked() {
     query.prepare("select count(*) from texts where " + sql);
     query.exec();
     query.next();
-    ui->pageNavigate->setMaxPage(query.value(0).toInt() / TextViewConstants::pageSize + 1);
+    ui->pageNavigate->setMaxPage(query.value(0).toInt() / textSearchConstants::pageSize + 1);
     ui->pageNavigate->setCurrentPage(1, true);
     currentPage = 1;
 
@@ -123,7 +123,7 @@ void TextView::searchButton_clicked() {
     updateSearch();
 }
 
-void TextView::updateSearch() {
+void TextSearch::updateSearch() {
     /*接受查询条件，在此之上构造排序和分页条件，进行实际查询，根据radioButtn状态调用updateImgView()或updateTableView()
       除了被searchButtonClicked调用外，不改变查询条件，只改变排序和分类的操作最后也会调用此函数来显示结果*/
     QString sql = "select id,date,left(text,200) as preview,length(text) as length from texts where " + currentFilter;
@@ -154,19 +154,19 @@ void TextView::updateSearch() {
         break;
     }
     QSqlQuery query(db);
-    query.prepare(sql + " limit " + QString::number((currentPage - 1) * TextViewConstants::pageSize) + ", " + QString::number(TextViewConstants::pageSize));
+    query.prepare(sql + " limit " + QString::number((currentPage - 1) * textSearchConstants::pageSize) + ", " + QString::number(textSearchConstants::pageSize));
     query.exec();
-    updateTextView(std::move(query));
+    updatetextSearch(std::move(query));
 }
 
-void TextView::updateTextView(QSqlQuery &&query) {
+void TextSearch::updatetextSearch(QSqlQuery &&query) {
     for (auto &&form : previewListSpan) {
-        form.~textPreviewForm();
-        new (&form) textPreviewForm;
-        connect(&form, &textPreviewForm::isClicked, this, &TextView::openDetailMenu);
+        form.~TextPreviewForm();
+        new (&form) TextPreviewForm;
+        connect(&form, &TextPreviewForm::isClicked, this, &TextSearch::openDetailMenu);
         // form->hideElements();
     }
-    for (int i = 0; i < TextViewConstants::pageSize; i++) {
+    for (int i = 0; i < textSearchConstants::pageSize; i++) {
         if (query.next()) {
             auto item = addTextItem(query.value("preview").toString(), query.value("date").toString(), query.value("id").toInt());
             if (query.value("length").toInt() > 200) {
@@ -182,8 +182,8 @@ void TextView::updateTextView(QSqlQuery &&query) {
     locateText();
 }
 
-textPreviewForm *TextView::addTextItem(QString text, QString date, int id) {
-    textPreviewForm *formToAdd = nullptr;
+TextPreviewForm *TextSearch::addTextItem(QString text, QString date, int id) {
+    TextPreviewForm *formToAdd = nullptr;
     for (auto &&form : previewListSpan) {
         if (form.isAvailable()) {
             formToAdd = &form;
@@ -196,14 +196,14 @@ textPreviewForm *TextView::addTextItem(QString text, QString date, int id) {
     return formToAdd;
 }
 
-void TextView::locateText() {
+void TextSearch::locateText() {
     for (auto &&form : previewListSpan) {
         QVBoxLayout *columnMinHeight = nullptr;
         int minHeight = 999999;
         for (QVBoxLayout *column : vBoxLayouts) {
             int height = 0;
             for (int i = column->count() - 1; i >= 0; i--) {
-                height += dynamic_cast<textPreviewForm *>(column->itemAt(i)->widget())->getHeight();
+                height += dynamic_cast<TextPreviewForm *>(column->itemAt(i)->widget())->getHeight();
             }
             if (height < minHeight) {
                 // qDebug() << height;
@@ -217,7 +217,7 @@ void TextView::locateText() {
     }
 }
 
-void TextView::resizeEvent(QResizeEvent *event) {
+void TextSearch::resizeEvent(QResizeEvent *event) {
     (void)event;
     int width = ui->scrollArea->width();
     if (ui->scrollArea->width() == 100) {
@@ -246,14 +246,14 @@ void TextView::resizeEvent(QResizeEvent *event) {
     Window::resizeEvent(event);
 }
 
-void TextView::openDetailMenu(int id) {
-    auto newWindow = new textDetailView(nullptr, db);
+void TextSearch::openDetailMenu(int id) {
+    auto newWindow = new TextDetailView(nullptr, db);
     newWindow->OpenText(id);
     newWindow->show();
-    connect(newWindow, &textDetailView::edit, this, [this]() { updateSearch(); });
+    connect(newWindow, &TextDetailView::edit, this, [this]() { updateSearch(); });
 }
 
-void TextView::deleteButton_clicked() {
+void TextSearch::deleteButton_clicked() {
     QSqlQuery query(db);
     query.prepare("delete from texts where id=:id;");
     for (auto &&form : previewListSpan) {
@@ -271,7 +271,7 @@ void TextView::deleteButton_clicked() {
     updateSearch();
 }
 
-void TextView::combineButton_clicked() {
+void TextSearch::combineButton_clicked() {
     QList<int> ids;
     for (auto &&form : previewListSpan) {
         if (form.isCheck()) {
@@ -296,14 +296,14 @@ void TextView::combineButton_clicked() {
             date = query.value("date").toDate();
         }
     }
-    textDetailView *detail = new textDetailView(this, db);
-    connect(detail, &textDetailView::edit, this, [this]() { deleteButton_clicked();updateSearch(); });
+    TextDetailView *detail = new TextDetailView(this, db);
+    connect(detail, &TextDetailView::edit, this, [this]() { deleteButton_clicked();updateSearch(); });
     detail->setText(text);
     detail->setDate(date);
     detail->show();
 }
 
-TextView::~TextView() {
+TextSearch::~TextSearch() {
     delete[] previewList;
     if (hBoxLayout) {
         delete hBoxLayout;

@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QWidget>
 
-class imageView : public QGraphicsView {
+class ImageView : public QGraphicsView {
     Q_OBJECT
 
 public:
@@ -13,11 +13,11 @@ public:
         Scroll,
         Scale
     };
-    imageView(QWidget *parent = nullptr);
+    ImageView(QWidget *parent = nullptr);
     void loadImage(QString href);
     void setWheelMode(WheelMode mode);
     QString getImgHref();
-    ~imageView();
+    ~ImageView();
 
 public slots:
     void slot_zoomIn() { scale(1.2, 1.2); }

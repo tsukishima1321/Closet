@@ -6,27 +6,27 @@
 #include <QtSql/QSqlDatabase>
 #include <optional>
 
-class dbInstance {
+class DBInstance {
 public:
-    static std::optional<dbInstance *> getInstance(QString name, QString password);
-    static std::optional<dbInstance *> getInstanceByName(QString name);
-    static std::optional<dbInstance *> getInstance();
+    static std::optional<DBInstance *> getInstance(QString name, QString password);
+    static std::optional<DBInstance *> getInstanceByName(QString name);
+    static std::optional<DBInstance *> getInstance();
     QSqlDatabase db;
     void close();
     bool isOpen() const;
 
 protected:
-    static dbInstance *instance;
+    static DBInstance *instance;
     bool open;
-    explicit dbInstance(QString name, QString password);
-    ~dbInstance();
+    explicit DBInstance(QString name, QString password);
+    ~DBInstance();
 
     //ensure db connection is properly closed when the program exit
     class dbGarbo {
     public:
         ~dbGarbo() {
-            if (dbInstance::instance) {
-                delete dbInstance::instance;
+            if (DBInstance::instance) {
+                delete DBInstance::instance;
             }
         }
     };
