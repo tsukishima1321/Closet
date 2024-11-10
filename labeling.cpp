@@ -25,18 +25,17 @@ LabelWindow::LabelWindow(QWidget *parent) :
     ui->tabWidget->setTabText(0, "录入记录");
     ui->tabWidget->setTabText(1, "记录预览");
     ui->tabWidget->setTabText(2, "记录提交");
-    ui->zoomInButton->setIcon(IconResources::getIcons()["zoom-in"]);
-    ui->zoomOutButton->setIcon(IconResources::getIcons()["zoom-out"]);
-    ui->zoomResetButton->setIcon(IconResources::getIcons()["reset"]);
     ui->freshTypeButton->setIcon(IconResources::getIcons()["refresh"]);
     ui->freshDateButton->setIcon(IconResources::getIcons()["refresh"]);
     ui->toolButtonNext->setIcon(IconResources::getIcons()["step-forward"]);
     ui->toolButtonLast->setIcon(IconResources::getIcons()["step-back"]);
     ui->dateEdit->setDate(QDate::currentDate());
     //链接来自gui的信号
-    connect(ui->zoomInButton, &QPushButton::clicked, ui->imageViewPort, &ImageView::slot_zoomIn);
-    connect(ui->zoomOutButton, &QPushButton::clicked, ui->imageViewPort, &ImageView::slot_zoomOut);
-    connect(ui->zoomResetButton, &QPushButton::clicked, ui->imageViewPort, &ImageView::slot_reset);
+    connect(ui->imgToolBar, &ImgToolBar::zoomIn, ui->imageViewPort, &ImageView::slot_zoomIn);
+    connect(ui->imgToolBar, &ImgToolBar::zoomOut, ui->imageViewPort, &ImageView::slot_zoomOut);
+    connect(ui->imgToolBar, &ImgToolBar::reset, ui->imageViewPort, &ImageView::slot_reset);
+    connect(ui->imgToolBar, &ImgToolBar::rotateLeft, ui->imageViewPort, &ImageView::slot_rotateLeft);
+    connect(ui->imgToolBar, &ImgToolBar::rotateRight, ui->imageViewPort, &ImageView::slot_rotateRight);
     connect(ui->pushButtonAdd, &QPushButton::clicked, this, &LabelWindow::pushButtonAdd_clicked);
     connect(ui->toolButtonNext, &QPushButton::clicked, this, &::LabelWindow::pushButtonNext_clicked);
     connect(ui->toolButtonLast, &QPushButton::clicked, this, &::LabelWindow::pushButtonLast_clicked);
@@ -47,8 +46,8 @@ LabelWindow::LabelWindow(QWidget *parent) :
     connect(ui->freshTypeButton, &QPushButton::clicked, this, &LabelWindow::freshButton_clicked);
     connect(ui->freshDateButton, &QPushButton::clicked, this, &LabelWindow::freshDateButton_clicked);
     connect(ui->pushButtonDelete, &QPushButton::clicked, this, &LabelWindow::pushButtonDelete_clicked);
-    connect(ui->radioButtonScale, &QRadioButton::clicked, this, [this]() { ui->imageViewPort->setWheelMode(ImageView::WheelMode::Scale); });
-    connect(ui->radioButtonScroll, &QRadioButton::clicked, this, [this]() { ui->imageViewPort->setWheelMode(ImageView::WheelMode::Scroll); });
+    connect(ui->imgToolBar, &ImgToolBar::setScale, this, [this]() { ui->imageViewPort->setWheelMode(ImageView::WheelMode::Scale); });
+    connect(ui->imgToolBar, &ImgToolBar::setScroll, this, [this]() { ui->imageViewPort->setWheelMode(ImageView::WheelMode::Scroll); });
     connect(ui->tabWidget, &QTabWidget::tabBarClicked, this, [this](int i) {
         if (i == 2) {
             pushButtonFinish_clicked();

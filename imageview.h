@@ -23,6 +23,8 @@ public slots:
     void slot_zoomIn() { scale(1.2, 1.2); }
     void slot_zoomOut() { scale(1 / 1.2, 1 / 1.2); }
     void slot_reset();
+    void slot_rotateLeft();
+    void slot_rotateRight();
 
 private:
     QString imageHref;

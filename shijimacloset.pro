@@ -57,6 +57,7 @@ SOURCES += \
         textsearch.cpp \
         textpreviewform.cpp \
         textdetailview.cpp \
+        imgtoolbar.cpp \
 
 HEADERS += \
         dbinstance.h \
@@ -77,6 +78,7 @@ HEADERS += \
         textsearch.h \
         textpreviewform.h \
         textdetailview.h \
+        imgtoolbar.h \
 
 FORMS += \
         detailview.ui \
@@ -91,6 +93,7 @@ FORMS += \
         textsearch.ui \
         textpreviewform.ui \
         textdetailview.ui \
+        imgtoolbar.ui \
 
 RESOURCES += \
     resource.qrc

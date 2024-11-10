@@ -17,6 +17,8 @@ IconResources::IconResources() {
     icons["main-icon"] = QIcon(":/pic/icons/icon.ico");
     icons["new-file"] = QIcon(":/pic/icons/file-plus.png");
     icons["combine"] = QIcon(":/pic/icons/combine.png");
+    icons["rotate-left"] = QIcon(":/pic/icons/rotate-ccw.png");
+    icons["rotate-right"] = QIcon(":/pic/icons/rotate-cw.png");
 }
 
 const QMap<QString, QIcon> &IconResources::getIcons() {

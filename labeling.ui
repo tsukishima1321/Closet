@@ -479,7 +479,7 @@
                        </property>
                        <property name="dateTime">
                         <datetime>
-                         <hour>16</hour>
+                         <hour>8</hour>
                          <minute>0</minute>
                          <second>0</second>
                          <year>2023</year>
@@ -583,8 +583,8 @@
             </item>
             <item>
              <layout class="QGridLayout" name="gridLayoutImageView">
-              <item row="2" column="0">
-               <widget class="ImageView" name="imageViewPort"/>
+              <item row="1" column="0">
+               <widget class="ImgToolBar" name="imgToolBar" native="true"/>
               </item>
               <item row="3" column="0">
                <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -642,78 +642,8 @@
                 </item>
                </layout>
               </item>
-              <item row="1" column="0">
-               <layout class="QHBoxLayout" name="horizontalLayout_11">
-                <item>
-                 <widget class="QToolButton" name="zoomInButton">
-                  <property name="minimumSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>...</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QToolButton" name="zoomOutButton">
-                  <property name="minimumSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>...</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QToolButton" name="zoomResetButton">
-                  <property name="minimumSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>...</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_3">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QRadioButton" name="radioButtonScroll">
-                  <property name="text">
-                   <string>滚动</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QRadioButton" name="radioButtonScale">
-                  <property name="text">
-                   <string>缩放</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+              <item row="2" column="0">
+               <widget class="ImageView" name="imageViewPort"/>
               </item>
              </layout>
             </item>
@@ -868,6 +798,12 @@
    <class>ImageView</class>
    <extends>QGraphicsView</extends>
    <header>imageview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ImgToolBar</class>
+   <extends>QWidget</extends>
+   <header>imgtoolbar.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

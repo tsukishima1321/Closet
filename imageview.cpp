@@ -42,6 +42,14 @@ void ImageView::slot_reset() {
     }
 }
 
+void ImageView::slot_rotateLeft() {
+    rotate(-90);
+}
+
+void ImageView::slot_rotateRight() {
+    rotate(90);
+}
+
 void ImageView::wheelEvent(QWheelEvent *event) {
     if (wheelMode == WheelMode::Scale) {
         this->MyScale(event->angleDelta().y() / 2);

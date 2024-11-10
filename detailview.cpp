@@ -18,21 +18,20 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
         db(db) {
     ui->setupUi(this);
     this->setAttribute(Qt::WA_DeleteOnClose, true);
-    ui->zoomInButton->setIcon(IconResources::getIcons()["zoom-in"]);
-    ui->zoomOutButton->setIcon(IconResources::getIcons()["zoom-out"]);
-    ui->zoomResetButton->setIcon(IconResources::getIcons()["reset"]);
 
-    connect(ui->zoomInButton, &QPushButton::clicked, ui->graphicsView, &ImageView::slot_zoomIn);
-    connect(ui->zoomOutButton, &QPushButton::clicked, ui->graphicsView, &ImageView::slot_zoomOut);
-    connect(ui->zoomResetButton, &QPushButton::clicked, ui->graphicsView, &ImageView::slot_reset);
+    connect(ui->imgToolBar, &ImgToolBar::zoomIn, ui->graphicsView, &ImageView::slot_zoomIn);
+    connect(ui->imgToolBar, &ImgToolBar::zoomOut, ui->graphicsView, &ImageView::slot_zoomOut);
+    connect(ui->imgToolBar, &ImgToolBar::reset, ui->graphicsView, &ImageView::slot_reset);
+    connect(ui->imgToolBar, &ImgToolBar::rotateLeft, ui->graphicsView, &ImageView::slot_rotateLeft);
+    connect(ui->imgToolBar, &ImgToolBar::rotateRight, ui->graphicsView, &ImageView::slot_rotateRight);
+    connect(ui->imgToolBar, &ImgToolBar::setScroll, ui->graphicsView, [this]() { ui->graphicsView->setWheelMode(ImageView::WheelMode::Scroll); });
+    connect(ui->imgToolBar, &ImgToolBar::setScale, ui->graphicsView, [this]() { ui->graphicsView->setWheelMode(ImageView::WheelMode::Scale); });
     connect(ui->commitButton, &QPushButton::clicked, this, &DetailView::commitChange);
     connect(ui->cancelButton, &QPushButton::clicked, this, &DetailView::cancelChange);
     connect(ui->typeMenuButton, &QPushButton::clicked, this, &DetailView::typeMenuOpen);
     connect(ui->ocrMenuButton, &QPushButton::clicked, this, &DetailView::ocrMenuOpen);
     connect(ui->editEnableButton, &QPushButton::clicked, this, &DetailView::enableEdit);
     connect(ui->picSaveButton, &QPushButton::clicked, this, &DetailView::savePic);
-    connect(ui->radioButtonScale, &QRadioButton::clicked, this, [this]() { ui->graphicsView->setWheelMode(ImageView::WheelMode::Scale); });
-    connect(ui->radioButtonScroll, &QRadioButton::clicked, this, [this]() { ui->graphicsView->setWheelMode(ImageView::WheelMode::Scroll); });
 
     QAction *zoomInAction = new QAction("放大", ui->graphicsView);
     QAction *zoomOutAction = new QAction("缩小", ui->graphicsView);
@@ -58,8 +57,8 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
     connect(zoomInAction, &QAction::triggered, ui->graphicsView, &ImageView::slot_zoomIn);
     connect(zoomOutAction, &QAction::triggered, ui->graphicsView, &ImageView::slot_zoomOut);
     connect(zoomResetAction, &QAction::triggered, ui->graphicsView, &ImageView::slot_reset);
-    connect(setScrollAction, &QAction::triggered, ui->radioButtonScroll, &QRadioButton::click);
-    connect(setScaleAction, &QAction::triggered, ui->radioButtonScale, &QRadioButton::click);
+    connect(setScrollAction, &QAction::triggered, ui->graphicsView, [this]() { ui->graphicsView->setWheelMode(ImageView::WheelMode::Scroll); });
+    connect(setScaleAction, &QAction::triggered, ui->graphicsView, [this]() { ui->graphicsView->setWheelMode(ImageView::WheelMode::Scale); });
     connect(savePicAction, &QAction::triggered, this, &DetailView::savePic);
     connect(copyPicAction, &QAction::triggered, this, [this]() {
         if (ui->graphicsView->getImgHref() != "") {
