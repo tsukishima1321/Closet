@@ -2,6 +2,7 @@
 #define IMGTOOLBAR_H
 
 #include <QWidget>
+#include "enum.h"
 
 namespace Ui {
     class ImgToolBar;
@@ -20,8 +21,7 @@ signals:
     void reset();
     void rotateLeft();
     void rotateRight();
-    void setScroll();
-    void setScale();
+    void setWheelMode(WheelMode mode);
 
 private:
     Ui::ImgToolBar *ui;

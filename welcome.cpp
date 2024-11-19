@@ -116,6 +116,19 @@ void Welcome::closeEvent(QCloseEvent *event) {
     }
 }
 
+void Welcome::showEvent(QShowEvent *event) {
+    QMainWindow::showEvent(event);
+    //test database connection
+    std::optional<DBInstance *> instance = DBInstance::getInstanceByName("root");
+    if (instance == std::nullopt) {
+        return;
+    } else {
+        if (!(*instance)->db.isOpen()) {
+            QMessageBox::warning(this, "", "数据库连接超时，请重新登录");
+        }
+    }
+}
+
 Welcome::~Welcome() {
     delete ui;
 }

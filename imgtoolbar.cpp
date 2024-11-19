@@ -11,8 +11,8 @@ ImgToolBar::ImgToolBar(QWidget *parent) :
     connect(ui->zoomResetButton, &QToolButton::clicked, this, &ImgToolBar::reset);
     connect(ui->rotateLeftButton, &QToolButton::clicked, this, &ImgToolBar::rotateLeft);
     connect(ui->rotateRightButton, &QToolButton::clicked, this, &ImgToolBar::rotateRight);
-    connect(ui->radioButtonScroll, &QRadioButton::clicked, this, &ImgToolBar::setScroll);
-    connect(ui->radioButtonScale, &QRadioButton::clicked, this, &ImgToolBar::setScale);
+    connect(ui->radioButtonScroll, &QRadioButton::clicked, this, [this]() { emit setWheelMode(WheelMode::Scroll); });
+    connect(ui->radioButtonScale, &QRadioButton::clicked, this, [this]() { emit setWheelMode(WheelMode::Scale); });
     ui->zoomInButton->setIcon(IconResources::getIcons()["zoom-in"]);
     ui->zoomOutButton->setIcon(IconResources::getIcons()["zoom-out"]);
     ui->zoomResetButton->setIcon(IconResources::getIcons()["refresh"]);

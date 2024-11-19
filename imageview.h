@@ -4,15 +4,12 @@
 #include <QGraphicsView>
 #include <QObject>
 #include <QWidget>
+#include "enum.h"
 
 class ImageView : public QGraphicsView {
     Q_OBJECT
 
 public:
-    enum WheelMode {
-        Scroll,
-        Scale
-    };
     ImageView(QWidget *parent = nullptr);
     void loadImage(QString href);
     void setWheelMode(WheelMode mode);

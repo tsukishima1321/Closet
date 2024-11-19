@@ -46,8 +46,7 @@ LabelWindow::LabelWindow(QWidget *parent) :
     connect(ui->freshTypeButton, &QPushButton::clicked, this, &LabelWindow::freshButton_clicked);
     connect(ui->freshDateButton, &QPushButton::clicked, this, &LabelWindow::freshDateButton_clicked);
     connect(ui->pushButtonDelete, &QPushButton::clicked, this, &LabelWindow::pushButtonDelete_clicked);
-    connect(ui->imgToolBar, &ImgToolBar::setScale, this, [this]() { ui->imageViewPort->setWheelMode(ImageView::WheelMode::Scale); });
-    connect(ui->imgToolBar, &ImgToolBar::setScroll, this, [this]() { ui->imageViewPort->setWheelMode(ImageView::WheelMode::Scroll); });
+    connect(ui->imgToolBar, &ImgToolBar::setWheelMode, ui->imageViewPort, &ImageView::setWheelMode);
     connect(ui->tabWidget, &QTabWidget::tabBarClicked, this, [this](int i) {
         if (i == 2) {
             pushButtonFinish_clicked();
