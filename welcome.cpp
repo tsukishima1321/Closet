@@ -1,11 +1,11 @@
 #include "welcome.h"
+#include "ImgSearch.h"
+#include "TextSearch.h"
 #include "dbinstance.h"
 #include "iconresources.h"
 #include "labeling.h"
 #include "login.h"
-#include "ImgSearch.h"
 #include "textdetailview.h"
-#include "TextSearch.h"
 #include "typeeditmenu.h"
 #include "ui_welcome.h"
 #include <QFileDialog>
@@ -118,15 +118,24 @@ void Welcome::closeEvent(QCloseEvent *event) {
 
 void Welcome::showEvent(QShowEvent *event) {
     QMainWindow::showEvent(event);
-    //test database connection
-    std::optional<DBInstance *> instance = DBInstance::getInstanceByName("root");
+    // test database connection
+    std::optional<DBInstance *> instance = DBInstance::getInstance();
     if (instance == std::nullopt) {
         return;
     } else {
         if (!(*instance)->db.isOpen()) {
             QMessageBox::warning(this, "", "数据库连接超时，请重新登录");
+            return;
+        } else {
+            QSqlQuery query((*instance)->db);
+            query.exec("SELECT * FROM pictures LIMIT 1");
+            if (!query.next()) {
+                QMessageBox::warning(this, "", "数据库连接超时，请重新登录");
+                return;
+            }
         }
     }
+    // QMessageBox::information(this, "欢迎", "欢迎使用静寂的壁橱");
 }
 
 Welcome::~Welcome() {

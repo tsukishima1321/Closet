@@ -7,6 +7,7 @@
 #include <QProcess>
 #include <QSettings>
 #include <QSqlError>
+#include <QCryptographicHash>
 
 extern QString imgBase;
 
@@ -108,26 +109,34 @@ void LabelCommit::pushButtonCommitAll_clicked() {
     QStringList paras;
     paras << "doOcr.py"
           << db.userName() << db.password();
-    for (const Item &item : *(this->itemMap)) {
-        paras.append(fromDir + "/" + item.href);
-    }
-
-    cmd->start("python", paras);
-    qDebug() << cmd->state();
-    cmd->waitForStarted();
     QSqlQuery query(db);
     query.prepare("INSERT INTO pictures (date,href,description,type) VALUES (:date,:href,:description,:type)");
     for (const Item &item : *(this->itemMap)) {
+        QString source = fromDir + "/" + item.href;
+        QFile file(source);
+        if (!file.open(QIODevice::ReadOnly)) {
+            QMessageBox::warning(this, "错误", "文件打开失败\n" + source);
+            continue;
+        }
+        QByteArray ba = QCryptographicHash::hash(file.readAll(), QCryptographicHash::Md5);
+        QString md5 = ba.toHex();
+        QString target = imgBase + md5 + item.href.right(item.href.size() - item.href.lastIndexOf('.'));
         query.bindValue(":date", item.date);
-        query.bindValue(":href", item.href);
+        query.bindValue(":href", md5 + item.href.right(item.href.size() - item.href.lastIndexOf('.')));
         query.bindValue(":description", item.description);
         query.bindValue(":type", item.type);
         query.exec();
-        copyFileToPath(fromDir + "/" + item.href, imgBase + item.href, false);
+        auto res = copyFileToPath(source, target, false);
+        if (!res) {
+            QMessageBox::warning(this, "错误", "文件复制失败，可能图片已存在\n" + source + "\n" + target);
+        }
+        paras.append(target);
         done++;
         ui->progressBar->setValue(static_cast<int>(100.0 * done / n));
         this->update();
     }
+    cmd->start("python", paras);
+    cmd->waitForStarted();
     itemMap->clear();
     ui->progressBar->setValue(100);
     ui->tableWidget->clearContents();
