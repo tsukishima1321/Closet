@@ -8,6 +8,7 @@
 #include <QString>
 #include <QtSql/QSqlDatabase>
 #include <window.h>
+#include <tuple>
 
 namespace Ui {
     class LabelWindow;
@@ -26,7 +27,7 @@ private:
     int currentImgIndex;
     QString imagePath;
     //QList<Item> itemList;
-    QMap<QString, Item> itemMap;
+    QMap<QString, std::tuple<Item,bool>> itemMap;
     QSqlDatabase dbVisitor;
     void updateTypes();
     virtual void keyPressEvent(QKeyEvent *) override;

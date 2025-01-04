@@ -104,11 +104,14 @@ Welcome::Welcome(QWidget *parent) :
 void Welcome::closeEvent(QCloseEvent *event) {
     QMessageBox box(QMessageBox::Information, "关闭", "是否最小化到托盘");
     QAbstractButton *yesButton = box.addButton("最小化", QMessageBox::AcceptRole);
+    QAbstractButton *cancelButton = box.addButton("取消", QMessageBox::NoRole);
     box.addButton("退出", QMessageBox::RejectRole);
     box.exec();
     if (box.clickedButton() == yesButton) {
         this->hide();
         tray->showMessage("静寂的壁橱", "已最小化到托盘");
+        event->ignore();
+    } else if (box.clickedButton() == cancelButton) {
         event->ignore();
     } else {
         QApplication::instance()->quit();
@@ -125,12 +128,14 @@ void Welcome::showEvent(QShowEvent *event) {
     } else {
         if (!(*instance)->db.isOpen()) {
             QMessageBox::warning(this, "", "数据库连接超时，请重新登录");
+            logOutButton_clicked();
             return;
         } else {
             QSqlQuery query((*instance)->db);
             query.exec("SELECT * FROM pictures LIMIT 1");
             if (!query.next()) {
                 QMessageBox::warning(this, "", "数据库连接超时，请重新登录");
+                logOutButton_clicked();
                 return;
             }
         }

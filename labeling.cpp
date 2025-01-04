@@ -87,6 +87,7 @@ void LabelWindow::updateTypes() {
 LabelWindow::~LabelWindow() { delete ui; }
 
 void LabelWindow::pushButtonNext_clicked() {
+    ui->checkBoxOCR->setChecked(true);
     currentImgIndex++;
     if (currentImgIndex < ImageCount) {
         QString ImageName = imagePath + dir[currentImgIndex];
@@ -98,6 +99,7 @@ void LabelWindow::pushButtonNext_clicked() {
 }
 
 void LabelWindow::pushButtonLast_clicked() {
+    ui->checkBoxOCR->setChecked(true);
     currentImgIndex--;
     if (currentImgIndex >= 0) {
         QString ImageName = imagePath + dir[currentImgIndex];
@@ -133,7 +135,8 @@ void LabelWindow::updateTable() {
     ui->tableWidget->clearContents();
     ui->tableWidget->setRowCount(itemMap.count());
     int i = 0;
-    for (const Item &item : itemMap) {
+    for (const auto &itemTuple : (this->itemMap)) {
+        const Item &item = std::get<0>(itemTuple);
         ui->tableWidget->setItem(i, 0, new QTableWidgetItem(item.date));
         ui->tableWidget->setItem(i, 1, new QTableWidgetItem(item.href));
         ui->tableWidget->setItem(i, 2, new QTableWidgetItem(item.description));
@@ -143,10 +146,14 @@ void LabelWindow::updateTable() {
 }
 
 void LabelWindow::pushButtonAdd_clicked() {
+    if(ui->dateEdit->date() > QDate::currentDate()) {
+        QMessageBox::warning(this, "错误", "日期不可大于当前日期");
+        return;
+    }
     QString date = ui->dateEdit->text();
     QString name = ui->labelName->text();
     QString des = ui->plainTextEdit->toPlainText();
-    itemMap[name] = Item(date, name, des, ui->comboBoxType->currentText());
+    itemMap[name] = std::make_tuple(Item(date, name, des, ui->comboBoxType->currentText()),ui->checkBoxOCR->isChecked());
 }
 
 void LabelWindow::keyPressEvent(QKeyEvent *event) {

@@ -1,13 +1,13 @@
 #include "labelcommit.h"
 #include "ui_labelcommit.h"
 #include <QCloseEvent>
+#include <QCryptographicHash>
 #include <QDebug>
 #include <QFile>
 #include <QMessageBox>
 #include <QProcess>
 #include <QSettings>
 #include <QSqlError>
-#include <QCryptographicHash>
 
 extern QString imgBase;
 
@@ -25,7 +25,7 @@ bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist) {
         if (coverFileIfExist) {
             createfile->remove(toDir);
         }
-    } //end if
+    } // end if
 
     if (!QFile::copy(sourceDir, toDir)) {
         return false;
@@ -33,7 +33,7 @@ bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist) {
     return true;
 }
 
-LabelCommit::LabelCommit(QWidget *parent, QMap<QString, Item>* itemMap, QSqlDatabase &db, QString fromDir) :
+LabelCommit::LabelCommit(QWidget *parent, QMap<QString, std::tuple<Item, bool>> *itemMap, QSqlDatabase &db, QString fromDir) :
         QWidget(parent),
         db(db),
         fromDir(fromDir),
@@ -43,13 +43,13 @@ LabelCommit::LabelCommit(QWidget *parent, QMap<QString, Item>* itemMap, QSqlData
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     connect(ui->pushButtonCommitAll, &QPushButton::clicked, this, &LabelCommit::pushButtonCommitAll_clicked);
     connect(ui->pushButtonDelete, &QPushButton::clicked, this, &LabelCommit::pushButtonDelete_clicked);
-    //qDebug() << QSqlDatabase::drivers();
+    // qDebug() << QSqlDatabase::drivers();
     if (!db.isOpen()) {
-        //qDebug()<<"Database Connect Failed";
+        // qDebug()<<"Database Connect Failed";
         this->hide();
         delete this;
     } else {
-        //qDebug()<<"database connected";
+        // qDebug()<<"database connected";
         typeList.clear();
         this->itemMap = itemMap;
         updateTable();
@@ -69,7 +69,8 @@ void LabelCommit::updateTable() {
     int i = 0;
     ui->tableWidget->clearContents();
     ui->tableWidget->setRowCount(itemMap->count());
-    for (const Item &item : *(this->itemMap)) {
+    for (const auto &itemTuple : *(this->itemMap)) {
+        const Item &item = std::get<0>(itemTuple);
         ui->tableWidget->setItem(i, 0, new QTableWidgetItem(item.date));
         ui->tableWidget->setItem(i, 1, new QTableWidgetItem(item.href));
         ui->tableWidget->setItem(i, 2, new QTableWidgetItem(item.description));
@@ -111,7 +112,8 @@ void LabelCommit::pushButtonCommitAll_clicked() {
           << db.userName() << db.password();
     QSqlQuery query(db);
     query.prepare("INSERT INTO pictures (date,href,description,type) VALUES (:date,:href,:description,:type)");
-    for (const Item &item : *(this->itemMap)) {
+    for (const auto &itemTuple : *(this->itemMap)) {
+        const Item &item = std::get<0>(itemTuple);
         QString source = fromDir + "/" + item.href;
         QFile file(source);
         if (!file.open(QIODevice::ReadOnly)) {
@@ -130,7 +132,9 @@ void LabelCommit::pushButtonCommitAll_clicked() {
         if (!res) {
             QMessageBox::warning(this, "错误", "文件复制失败，可能图片已存在\n" + source + "\n" + target);
         }
-        paras.append(target);
+        if(std::get<1>(itemTuple)) {
+            paras.append(target);
+        }
         done++;
         ui->progressBar->setValue(static_cast<int>(100.0 * done / n));
         this->update();

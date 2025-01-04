@@ -11,6 +11,7 @@
 #include <QString>
 #include <QWidget>
 #include <QtSql/QSqlDatabase>
+#include <tuple>
 
 namespace Ui {
     class LabelCommit;
@@ -22,13 +23,13 @@ class LabelCommit : public QWidget {
     Q_OBJECT
 
 public:
-    LabelCommit(QWidget *parent, QMap<QString, Item>* itemMap, QSqlDatabase &db, QString fromDir);
+    LabelCommit(QWidget *parent, QMap<QString, std::tuple<Item,bool>>* itemMap, QSqlDatabase &db, QString fromDir);
     void tabClicked(int i);
     bool isRunning() const;
 
 private:
     //QList<Item> *itemList;
-    QMap<QString, Item>* itemMap;
+    QMap<QString, std::tuple<Item,bool>>* itemMap;
     QList<QString> typeList;
     QSqlDatabase &db;
     QString fromDir;
