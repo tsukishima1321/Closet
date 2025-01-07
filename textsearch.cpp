@@ -91,6 +91,8 @@ TextSearch::TextSearch(QWidget *parent, QSqlDatabase &db) :
         detail->setDate(QDate::currentDate());
         detail->show();
     });
+
+    searchButton_clicked();
 }
 
 void TextSearch::searchButton_clicked() {

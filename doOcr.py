@@ -1,10 +1,11 @@
 print("进程启动")
+import sys
+sys.stdout.flush()
 
 import easyocr
 import cv2
 import pymysql
 import numpy as np
-import sys
 import os
 
 print("环境导入完成")

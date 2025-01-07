@@ -134,6 +134,12 @@ void LabelCommit::pushButtonCommitAll_clicked() {
         }
         if(std::get<1>(itemTuple)) {
             paras.append(target);
+        } else{
+            QSqlQuery query_2(db);
+            query_2.prepare("INSERT INTO pictures_ocr (href,ocr_result) VALUES (:href,:res)");
+            query_2.bindValue(":href", md5 + item.href.right(item.href.size() - item.href.lastIndexOf('.')));
+            query_2.bindValue(":res", "");
+            query_2.exec();
         }
         done++;
         ui->progressBar->setValue(static_cast<int>(100.0 * done / n));
