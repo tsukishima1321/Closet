@@ -81,6 +81,18 @@ void LabelCommit::updateTable() {
 
 void LabelCommit::tabClicked(int i) {
     if (i == 2) {
+        typeList.clear();
+        this->itemMap = itemMap;
+        updateTable();
+        this->show();
+        QString sql = "SELECT * FROM types";
+        QSqlQuery query(db);
+        query.prepare(sql);
+        query.exec();
+        while (query.next()) {
+            QString type = query.value("typename").toString();
+            typeList.push_back(type);
+        }
         updateTable();
     }
 }
