@@ -154,12 +154,12 @@ void LabelWindow::pushButtonAdd_clicked() {
     QString name = ui->labelName->text();
     QString des = ui->plainTextEdit->toPlainText();
     itemMap[name] = std::make_tuple(Item(date, name, des, ui->comboBoxType->currentText()),ui->checkBoxOCR->isChecked());
+    this->pushButtonNext_clicked();
 }
 
 void LabelWindow::keyPressEvent(QKeyEvent *event) {
     if (event->matches(QKeySequence::Save)) {
         this->pushButtonAdd_clicked();
-        this->pushButtonNext_clicked();
     }
     Window::keyPressEvent(event);
 }
