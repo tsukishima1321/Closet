@@ -28,6 +28,7 @@ private slots:
     void exportHtm();
     void exportDB();
     void setBaseDir();
+    void setRemoteBase();
     //void lineEditUpdate();
     void logInButton_clicked();
     void logOutButton_clicked();

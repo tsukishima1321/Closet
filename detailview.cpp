@@ -3,14 +3,13 @@
 #include "ocrmenu.h"
 #include "typeeditmenu.h"
 #include "item.h"
+#include "config.h"
 #include "ui_detailview.h"
 #include <QClipboard>
 #include <QFileDialog>
 #include <QGraphicsItem>
 #include <QMessageBox>
 #include <QSqlError>
-
-extern QString imgBase;
 
 DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
         Window(parent),
@@ -71,7 +70,7 @@ DetailView::DetailView(QWidget *parent, QSqlDatabase &db) :
 
 void DetailView::OpenImg(QString href) {
     current = href;
-    ui->graphicsView->loadImage(imgBase + href);
+    ui->graphicsView->loadImage(Config::getInstance()->getImgBase() + href);
     QSqlQuery query(db);
     query.prepare("select * from pictures where href=:href");
     query.bindValue(":href", href);
@@ -180,7 +179,7 @@ void DetailView::savePic() {
         auto files = dialog.selectedFiles();
         if (files.size() >= 0) {
             QString targetDirPath = files.at(0) + "/";
-            if (QFile::copy(imgBase + current, targetDirPath + current)) {
+            if (QFile::copy(Config::getInstance()->getImgBase() + current, targetDirPath + current)) {
                 QMessageBox::information(this, "导出", targetDirPath + current + "导出完成");
             } else {
                 QMessageBox::warning(this, "导出", targetDirPath + current + "导出失败：文件已存在");

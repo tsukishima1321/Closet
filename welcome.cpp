@@ -8,15 +8,15 @@
 #include "textdetailview.h"
 #include "typeeditmenu.h"
 #include "ui_welcome.h"
+#include "config.h"
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QProcess>
 #include <QSettings>
 #include <QSqlQuery>
 #include <QString>
 #include <QSystemTrayIcon>
-
-QString imgBase = "D:/Z/Pictures/";
 
 Welcome::Welcome(QWidget *parent) :
         QMainWindow(parent),
@@ -31,22 +31,27 @@ Welcome::Welcome(QWidget *parent) :
         file.open(QIODevice::Append);
         file.close();
         QSettings setting("config.ini", QSettings::IniFormat);
-        setting.setValue("resource/imgBase", imgBase);
+        setting.setValue("resource/imgBase", Config::getInstance()->getImgBase());
+        setting.setValue("resource/remoteBase", Config::getInstance()->getRemoteBase());
     }
     QSettings setting("config.ini", QSettings::IniFormat);
-    imgBase = setting.value("resource/imgBase").toString();
+    Config::getInstance()->setImgBase(setting.value("resource/imgBase").toString());
+    Config::getInstance()->setRemoteBase(setting.value("resource/remoteBase").toString());
 
     // init menubar
     QAction *actionExportHtm = new QAction("导出图片信息为htm", this);
     QAction *actionExportDB = new QAction("导出数据库", this);
     QAction *actionSetBaseDir = new QAction("设置图片库地址", this);
+    QAction *actionSetRemoteBase = new QAction("设置远程服务器地址", this);
     QAction *actionEditTypes = new QAction("编辑分类", this);
     connect(actionExportHtm, &QAction::triggered, this, &Welcome::exportHtm);
     connect(actionExportDB, &QAction::triggered, this, &Welcome::exportDB);
     connect(actionSetBaseDir, &QAction::triggered, this, &Welcome::setBaseDir);
+    connect(actionSetRemoteBase, &QAction::triggered, this, &Welcome::setRemoteBase);
     connect(actionEditTypes, &QAction::triggered, this, &Welcome::typeEdit);
     QMenu *configMenu = new QMenu("设置", this);
     configMenu->addAction(actionSetBaseDir);
+    configMenu->addAction(actionSetRemoteBase);
     configMenu->addAction(actionEditTypes);
     QMenu *exportMenu = new QMenu("导出", this);
     exportMenu->addAction(actionExportHtm);
@@ -214,7 +219,7 @@ void Welcome::exportHtm() {
 }
 
 void Welcome::buildHtm(QSqlDatabase &db) {
-    QFile file(imgBase + "图片索引.htm");
+    QFile file(Config::getInstance()->getImgBase() + "图片索引.htm");
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QString text = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<head>\n<title>图片索引</title>\n<meta name=\"GENERATOR\" content=\"WinCHM\">\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=gb2312\">\n<style>\nhtml,body { \n	font-family: Arial, Helvetica, sans-serif;\n	font-size: 11pt;\n}\n</style>\n</head>\n<body>\n";
         file.write(text.toLocal8Bit().data());
@@ -286,10 +291,17 @@ void Welcome::sqlDump(QSqlDatabase &db) {
 }
 
 void Welcome::setBaseDir() {
-    imgBase = QFileDialog::getExistingDirectory(this, "选择图片库地址", imgBase) + "/";
+    Config::getInstance()->setImgBase(QFileDialog::getExistingDirectory(this, "选择图片库地址", Config::getInstance()->getImgBase()) + "/");
     QSettings setting("config.ini", QSettings::IniFormat);
-    setting.setValue("resource/imgBase", imgBase);
-    QMessageBox::information(this, "修改", "已将图片库地址修改为：" + imgBase);
+    setting.setValue("resource/imgBase", Config::getInstance()->getImgBase());
+    QMessageBox::information(this, "修改", "已将图片库地址修改为：" + Config::getInstance()->getImgBase());
+}
+
+void Welcome::setRemoteBase() {
+    Config::getInstance()->setRemoteBase(QInputDialog::getText(this, "设置远程服务器地址", "请输入远程服务器地址", QLineEdit::Normal, Config::getInstance()->getRemoteBase()));
+    QSettings setting("config.ini", QSettings::IniFormat);
+    setting.setValue("resource/remoteBase", Config::getInstance()->getRemoteBase());
+    QMessageBox::information(this, "修改", "已将远程服务器地址修改为：" + Config::getInstance()->getRemoteBase());
 }
 
 void Welcome::logInButton_clicked() {

@@ -58,6 +58,7 @@ SOURCES += \
         textpreviewform.cpp \
         textdetailview.cpp \
         imgtoolbar.cpp \
+        config.cpp \
 
 HEADERS += \
         dbinstance.h \
@@ -79,6 +80,7 @@ HEADERS += \
         textpreviewform.h \
         textdetailview.h \
         imgtoolbar.h \
+        config.h \
 
 FORMS += \
         detailview.ui \

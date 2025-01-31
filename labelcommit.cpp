@@ -1,4 +1,5 @@
 #include "labelcommit.h"
+#include "config.h"
 #include "ui_labelcommit.h"
 #include <QCloseEvent>
 #include <QCryptographicHash>
@@ -8,8 +9,6 @@
 #include <QProcess>
 #include <QSettings>
 #include <QSqlError>
-
-extern QString imgBase;
 
 bool copyFileToPath(QString sourceDir, QString toDir, bool coverFileIfExist) {
     toDir.replace("\\", "/");
@@ -134,7 +133,7 @@ void LabelCommit::pushButtonCommitAll_clicked() {
         }
         QByteArray ba = QCryptographicHash::hash(file.readAll(), QCryptographicHash::Md5);
         QString md5 = ba.toHex();
-        QString target = imgBase + md5 + item.href.right(item.href.size() - item.href.lastIndexOf('.'));
+        QString target = Config::getInstance()->getImgBase() + md5 + item.href.right(item.href.size() - item.href.lastIndexOf('.'));
         query.bindValue(":date", item.date);
         query.bindValue(":href", md5 + item.href.right(item.href.size() - item.href.lastIndexOf('.')));
         query.bindValue(":description", item.description);
@@ -144,9 +143,9 @@ void LabelCommit::pushButtonCommitAll_clicked() {
         if (!res) {
             QMessageBox::warning(this, "错误", "文件复制失败，可能图片已存在\n" + source + "\n" + target);
         }
-        if(std::get<1>(itemTuple)) {
+        if (std::get<1>(itemTuple)) {
             paras.append(target);
-        } else{
+        } else {
             QSqlQuery query_2(db);
             query_2.prepare("INSERT INTO pictures_ocr (href,ocr_result) VALUES (:href,:res)");
             query_2.bindValue(":href", md5 + item.href.right(item.href.size() - item.href.lastIndexOf('.')));

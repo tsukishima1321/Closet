@@ -8,13 +8,12 @@
 #include "qsqlerror.h"
 #include "qsqlquery.h"
 #include "qsqlrecord.h"
+#include "config.h"
 #include "ui_imgsearch.h"
 #include <QFile>
 #include <QMessageBox>
 #include <QRegularExpression>
 #include <QThreadPool>
-
-extern QString imgBase;
 
 ImgSearch::ImgSearch(QWidget *parent, QSqlDatabase &db) :
         Window(parent),
@@ -352,7 +351,7 @@ void ImgSearch::exportButton_clicked() {
     for (int i = 0; i < queryModel.rowCount(); i++) {
         if (queryModel.isChecked(i)) {
             QString current = queryModel.data(queryModel.index(i, queryModel.fieldIndex("href"))).toString().simplified();
-            if (QFile::copy(imgBase + current, targetDirPath + current)) {
+            if (QFile::copy(Config::getInstance()->getImgBase() + current, targetDirPath + current)) {
                 success++;
             } else {
                 fail++;
@@ -380,7 +379,7 @@ void imgLoader::run() {
 
 ImgPreviewForm *ImgSearch::addImgItem(QSqlRecord record, QModelIndex index) {
     /*根据图片信息设置寻找preViewList中可用的imagePreviewForm放入，大小和文字同步设置，实际图片读取放入Thread中*/
-    QString filename(imgBase + Item(record).href);
+    QString filename(Config::getInstance()->getImgBase() + Item(record).href);
     QImageReader *reader = new QImageReader(filename.simplified()); // 该指针由imgLoader::run释放内存
     reader->setDecideFormatFromContent(true);
     QSize size = reader->size();

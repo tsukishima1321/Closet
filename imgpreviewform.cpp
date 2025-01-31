@@ -1,9 +1,8 @@
 #include "imgpreviewform.h"
 #include "ui_imgpreviewform.h"
 #include "item.h"
+#include "config.h"
 #include <QPainter>
-
-extern QString imgBase;
 
 ImgPreviewForm::ImgPreviewForm(QWidget *parent) :
         QWidget(parent),
@@ -28,7 +27,7 @@ void ImgPreviewForm::setImg(QSqlRecord record, QImage *img, QModelIndex index) {
     }
     this->img = img;
     if (img->isNull()) {
-        ui->labelImg->setPixmap(QPixmap(imgBase + "href"));
+        ui->labelImg->setPixmap(QPixmap(Config::getInstance()->getImgBase() + "href"));
     } else {
         ui->labelText->setText(item.description);
         QPixmap pixmap = QPixmap::fromImage(*img);
