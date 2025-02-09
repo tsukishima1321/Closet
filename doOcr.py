@@ -46,6 +46,14 @@ except:
     print("数据库登录失败，请检查命令")
     sys.stdout.flush()
     exit()
+cursor.execute("select * from ocr_mission where status=waiting")
+missions = cursor.fetchall()
+for mission in missions:
+    cursor.execute("update ocr_mission set status='processing' where id="+str(mission[0]))
+    conn.commit()
+    files.append(mission[1])
+    print("列表中的任务：",mission[1])
+    sys.stdout.flush()
 try:
     for file in files:
         if file.endswith("jpg") or file.endswith("png") or file.endswith("jpeg") or file.endswith("bmp"):
@@ -62,6 +70,8 @@ try:
             print(os.path.basename(file),":\n",res)
             sys.stdout.flush()
             cursor.execute(sql)
+            conn.commit()
+            cursor.execute("update ocr_mission set status='finished' where href='"+os.path.basename(file)+"'")
             conn.commit()
 except Exception as e:
     print(e)

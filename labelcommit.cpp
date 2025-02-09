@@ -144,7 +144,10 @@ void LabelCommit::pushButtonCommitAll_clicked() {
             QMessageBox::warning(this, "错误", "文件复制失败，可能图片已存在\n" + source + "\n" + target);
         }
         if (std::get<1>(itemTuple)) {
-            paras.append(target);
+            QSqlQuery query_2(db);
+            query_2.prepare("INSERT INTO ocr_mission (href,status) VALUES (:href,'waiting')");
+            query_2.bindValue(":href", md5 + item.href.right(item.href.size() - item.href.lastIndexOf('.')));
+            query_2.exec();
         } else {
             QSqlQuery query_2(db);
             query_2.prepare("INSERT INTO pictures_ocr (href,ocr_result) VALUES (:href,:res)");
