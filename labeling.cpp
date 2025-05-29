@@ -119,7 +119,8 @@ void LabelWindow::pushButtonStart_clicked() {
     QStringList ImageList;
     ImageList << "*.bmp"
               << "*.jpg"
-              << "*.png";          //向字符串列表添加图片类型
+              << "*.png"
+              << "*.jpeg";          //向字符串列表添加图片类型
     dir.setNameFilters(ImageList); //获得文件夹下图片的名字
     ImageCount = dir.count();      //获得dir里名字的个数，也表示文件夹下图片的个数
     if (ImageCount > 0) {
